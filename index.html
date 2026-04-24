@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>GloBIT Arcade</title>
+
+    <link rel="icon" type="image/jpeg" href="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg">
+    <link rel="apple-touch-icon" sizes="152x152" href="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GloBIT Arcade">
+    <meta name="theme-color" content="#0a2e1a">
+
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+    <style>
+        :root {
+            --bg-deep: #0a1a2e;
+            --accent-green: #00e676;
+            --accent-blue: #2979ff;
+            --accent-red: #ff1744;
+            --text-primary: #ffffff;
+            --text-secondary: #8899bb;
+            --blur: blur(25px);
+            --radius-card: 24px;
+            --radius-btn: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(160deg, #0a2e1a 0%, #0a1a2e 40%, #1a0a2e 80%, #0d1a30 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        #particles-js {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .glass-card {
+            background: rgba(15, 25, 45, 0.8);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border-radius: var(--radius-card);
+            border: 1px solid rgba(0, 230, 118, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 230, 118, 0.1);
+            padding: 2.5rem 1.8rem;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent-green);
+            box-shadow: 0 0 25px rgba(0, 230, 118, 0.5), 0 0 50px rgba(41, 121, 255, 0.3);
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 25px rgba(0, 230, 118, 0.5), 0 0 50px rgba(41, 121, 255, 0.3); }
+            50% { box-shadow: 0 0 35px rgba(0, 230, 118, 0.8), 0 0 70px rgba(255, 23, 68, 0.3); }
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            background: linear-gradient(135deg, #00e676, #2979ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.3rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .input-group { margin-bottom: 1.3rem; }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #90caf9;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            color: #ffffff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+            -webkit-appearance: none;
+        }
+
+        input:focus {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 15px rgba(0, 230, 118, 0.2);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.9rem;
+            border: none;
+            border-radius: var(--radius-btn);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.25s;
+            letter-spacing: 0.5px;
+            margin-top: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00e676, #00c853);
+            color: #0a1a2e;
+            box-shadow: 0 8px 20px rgba(0, 230, 118, 0.3);
+            font-weight: 700;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(0, 230, 118, 0.5);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff1744, #d50000);
+            color: white;
+            box-shadow: 0 8px 20px rgba(255, 23, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(255, 23, 68, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ccc;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            margin-top: 0.8rem;
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            min-height: 1.5rem;
+        }
+
+        .error { color: #ff5252; }
+        .success { color: #69f0ae; }
+
+        .twofa-code {
+            display: flex;
+            gap: 0.6rem;
+            justify-content: center;
+            margin: 1.2rem 0;
+        }
+
+        .twofa-code input {
+            width: 50px;
+            height: 55px;
+            text-align: center;
+            font-size: 1.8rem;
+            padding: 0;
+            border-radius: 12px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin: 1rem 0;
+            color: #bbb;
+            font-size: 0.9rem;
+        }
+
+        .checkbox-group input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-green);
+        }
+
+        .role-card { text-align: center; }
+        .role-card h2 { font-size: 1.6rem; margin-bottom: 1.8rem; color: #f0f0ff; }
+
+        .role-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+        }
+
+        .btn-role {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(0, 230, 118, 0.3);
+            padding: 1rem;
+            border-radius: 18px;
+            font-size: 1.1rem;
+            color: white;
+            transition: 0.2s;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn-role:hover {
+            background: rgba(0, 230, 118, 0.15);
+            border-color: #00e676;
+            box-shadow: 0 0 20px rgba(0, 230, 118, 0.2);
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+
+    <div class="container">
+        <!-- Экран входа -->
+        <div id="loginScreen" class="glass-card">
+            <div class="logo-container">
+                <img src="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg" alt="GloBIT Arcade" class="logo">
+            </div>
+            <h1>GloBIT Arcade</h1>
+            <div class="subtitle">🎮 Войдите, чтобы начать играть</div>
+            <div class="input-group">
+                <label>Email или Global ID</label>
+                <input type="text" id="loginIdentifier" placeholder="email@example.com" autocomplete="email">
+            </div>
+            <div class="input-group">
+                <label>Пароль</label>
+                <input type="password" id="loginPassword" placeholder="········" autocomplete="current-password">
+            </div>
+            <button class="btn btn-primary" onclick="login()">🚀 Войти</button>
+            <div id="authMessage" class="message"></div>
+        </div>
+
+        <!-- Экран 2FA -->
+        <div id="twoFactorScreen" class="glass-card hidden">
+            <div class="logo-container">
+                <span style="font-size: 3rem;">🔐</span>
+            </div>
+            <h2 style="text-align:center; font-size:1.4rem;">Новое устройство</h2>
+            <p style="text-align:center; color:#8899bb; margin:0.8rem 0;">
+                Код подтверждения отправлен в <strong>Global ID</strong><br>
+                <span style="font-size:0.8rem; color:#ff5252;">⚠️ Код не показывается на этом экране</span>
+            </p>
+            <div class="twofa-code">
+                <input type="text" id="code1" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="moveNext(this, 'code2')">
+                <input type="text" id="code2" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="moveNext(this, 'code3')">
+                <input type="text" id="code3" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="moveNext(this, 'code4')">
+                <input type="text" id="code4" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="trustDevice">
+                <label for="trustDevice" style="text-transform:none; letter-spacing:0;">Запомнить устройство (автовход без 2FA)</label>
+            </div>
+            <button class="btn btn-primary" onclick="verify2FA()">✅ Подтвердить</button>
+            <button class="btn btn-danger" onclick="cancel2FA()">❌ Отмена</button>
+            <div id="twoFactorMessage" class="message"></div>
+        </div>
+
+        <!-- Экран выбора роли -->
+        <div id="roleScreen" class="glass-card role-card hidden">
+            <div class="logo-container">
+                <img src="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg" alt="Logo" class="logo" style="width:60px; height:60px;">
+            </div>
+            <h2 id="welcomeText">Привет!</h2>
+            <div class="role-buttons">
+                <button class="btn-role" id="btnGames" onclick="goToGames()">🎮 Игры</button>
+                <button class="btn-role hidden" id="btnAdmin" onclick="goToAdmin()">⚙️ Админ-панель</button>
+            </div>
+            <button class="btn btn-danger" onclick="logout()" style="margin-top:1.5rem;">🚪 Выйти</button>
+        </div>
+    </div>
+
+    <script>
+        // ВАША РЕАЛЬНАЯ КОНФИГУРАЦИЯ FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6GGJxAiao77U7_9mBUEjftmS_FnSWbIw",
+            authDomain: "glob-data.firebaseapp.com",
+            projectId: "glob-data",
+            storageBucket: "glob-data.firebasestorage.app",
+            messagingSenderId: "122757049174",
+            appId: "1:122757049174:web:ebb425edd0e1a8ea9a44f7"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Particles.js
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 60, density: { enable: true, value_area: 800 } },
+                color: { value: ['#00e676', '#2979ff', '#ff1744', '#ffffff'] },
+                shape: { type: 'circle' },
+                opacity: { value: 0.5, random: true },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: '#2979ff', opacity: 0.15, width: 1 },
+                move: { enable: true, speed: 1.5, direction: 'none', random: true, out_mode: 'out' }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: true, mode: 'grab' }, onclick: { enable: true, mode: 'push' } },
+                modes: { grab: { distance: 140, line_linked: { opacity: 0.5 } }, push: { particles_nb: 3 } }
+            },
+            retina_detect: true
+        });
+
+        let pendingUser = null;
+        let currentIP = 'unknown';
+        let deviceFingerprint = 'unknown';
+
+        async function getDeviceInfo() {
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                currentIP = data.ip;
+            } catch (e) { currentIP = '0.0.0.0'; }
+            const ua = navigator.userAgent;
+            const screenInfo = `${screen.width}x${screen.height}x${screen.colorDepth}`;
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            deviceFingerprint = btoa(ua + screenInfo + navigator.language + timezone).substring(0, 40);
+        }
+
+        function showMessage(elementId, text, isError = false) {
+            const el = document.getElementById(elementId);
+            el.textContent = text;
+            el.className = `message ${isError ? 'error' : 'success'}`;
+        }
+
+        function moveNext(current, nextId) {
+            if (current.value.length === 1) {
+                document.getElementById(nextId)?.focus();
+            }
+        }
+
+        async function ensureUserDocument(uid, email) {
+            const userRef = db.collection('users').doc(uid);
+            const userDoc = await userRef.get();
+            if (!userDoc.exists) {
+                await userRef.set({
+                    email: email,
+                    globalId: email.split('@')[0],
+                    displayName: email.split('@')[0],
+                    role: 'user',
+                    knownDevices: [],
+                    online: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    arcadeAccess: true,
+                    arcadeLastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log('✅ Создан новый документ пользователя:', email);
+            }
+            return userRef;
+        }
+
+        async function isDeviceKnown(uid) {
+            const doc = await db.collection('users').doc(uid).get();
+            const knownDevices = doc.data()?.knownDevices || [];
+            return knownDevices.some(d => d.fingerprint === deviceFingerprint);
+        }
+
+        async function addKnownDevice(uid) {
+            const docRef = db.collection('users').doc(uid);
+            const doc = await docRef.get();
+            const knownDevices = doc.data()?.knownDevices || [];
+            if (!knownDevices.some(d => d.fingerprint === deviceFingerprint)) {
+                knownDevices.push({
+                    fingerprint: deviceFingerprint,
+                    ip: currentIP,
+                    browser: navigator.userAgent.substring(0, 60),
+                    addedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                await docRef.update({ knownDevices });
+            }
+        }
+
+        window.login = async () => {
+            const identifier = document.getElementById('loginIdentifier').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            if (!identifier || !password) return showMessage('authMessage', 'Заполните все поля', true);
+
+            await getDeviceInfo();
+            const loginBtn = document.querySelector('#loginScreen .btn-primary');
+            loginBtn.disabled = true;
+            loginBtn.textContent = '⏳ Проверка...';
+
+            try {
+                let email = identifier;
+
+                if (!identifier.includes('@')) {
+                    const q = db.collection('users').where('globalId', '==', identifier);
+                    const snap = await q.get();
+                    if (snap.empty) {
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = '🚀 Войти';
+                        return showMessage('authMessage', 'Global ID не найден', true);
+                    }
+                    email = snap.docs[0].data().email;
+                }
+
+                const userCred = await auth.signInWithEmailAndPassword(email, password);
+                await ensureUserDocument(userCred.user.uid, email);
+
+                await db.collection('users').doc(userCred.user.uid).update({
+                    arcadeAccess: true,
+                    arcadeLastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                if (await isDeviceKnown(userCred.user.uid)) {
+                    await db.collection('users').doc(userCred.user.uid).update({
+                        online: true,
+                        lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                        currentIP,
+                        currentDevice: deviceFingerprint
+                    });
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = '🚀 Войти';
+                    await showRoleScreen(userCred.user);
+                } else {
+                    pendingUser = userCred.user;
+                    const code = Math.floor(1000 + Math.random() * 9000).toString();
+                    await db.collection('users').doc(userCred.user.uid).update({
+                        twoFactorCode: code,
+                        twoFactorCodeExpires: new Date(Date.now() + 5 * 60000)
+                    });
+                    console.log('🔑 2FA код (в Global ID):', code);
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    document.getElementById('twoFactorScreen').classList.remove('hidden');
+                    document.getElementById('code1').focus();
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = '🚀 Войти';
+                }
+            } catch (error) {
+                console.error('Ошибка входа:', error);
+                loginBtn.disabled = false;
+                loginBtn.textContent = '🚀 Войти';
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                    showMessage('authMessage', 'Неверный email или пароль', true);
+                } else if (error.code === 'auth/invalid-email') {
+                    showMessage('authMessage', 'Некорректный email', true);
+                } else {
+                    showMessage('authMessage', 'Ошибка: ' + error.message, true);
+                }
+            }
+        };
+
+        window.verify2FA = async () => {
+            const code = ['code1', 'code2', 'code3', 'code4'].map(id => document.getElementById(id).value).join('');
+            if (code.length !== 4) return showMessage('twoFactorMessage', 'Введите 4 цифры', true);
+            if (!pendingUser) return showMessage('twoFactorMessage', 'Ошибка сессии', true);
+
+            const userDoc = await db.collection('users').doc(pendingUser.uid).get();
+            const storedCode = userDoc.data()?.twoFactorCode;
+            const expires = userDoc.data()?.twoFactorCodeExpires?.toDate();
+
+            if (expires && new Date() > expires) {
+                await db.collection('users').doc(pendingUser.uid).update({
+                    twoFactorCode: null,
+                    twoFactorCodeExpires: null
+                });
+                return showMessage('twoFactorMessage', '❌ Код истёк. Войдите заново.', true);
+            }
+
+            if (code === storedCode) {
+                if (document.getElementById('trustDevice').checked) {
+                    await addKnownDevice(pendingUser.uid);
+                }
+                await db.collection('users').doc(pendingUser.uid).update({
+                    twoFactorCode: null,
+                    twoFactorCodeExpires: null,
+                    online: true,
+                    lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                    currentIP,
+                    currentDevice: deviceFingerprint
+                });
+                document.getElementById('twoFactorScreen').classList.add('hidden');
+                await showRoleScreen(pendingUser);
+                pendingUser = null;
+            } else {
+                showMessage('twoFactorMessage', '❌ Неверный код', true);
+            }
+        };
+
+        window.cancel2FA = () => {
+            if (pendingUser) {
+                auth.signOut();
+                db.collection('users').doc(pendingUser.uid).update({
+                    twoFactorCode: null,
+                    twoFactorCodeExpires: null
+                });
+            }
+            pendingUser = null;
+            document.getElementById('twoFactorScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            ['code1', 'code2', 'code3', 'code4'].forEach(id => document.getElementById(id).value = '');
+        };
+
+        async function showRoleScreen(user) {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            const userData = userDoc.data() || {};
+            const displayName = userData.displayName || user.email?.split('@')[0] || 'Игрок';
+            const role = userData.role || 'user';
+
+            document.getElementById('welcomeText').textContent = `Привет, ${displayName}!`;
+            const adminBtn = document.getElementById('btnAdmin');
+            if (role === 'admin' || role === 'employee') {
+                adminBtn.classList.remove('hidden');
+            } else {
+                adminBtn.classList.add('hidden');
+            }
+            document.getElementById('roleScreen').classList.remove('hidden');
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('twoFactorScreen').classList.add('hidden');
+        }
+
+        window.goToGames = () => { window.location.href = 'games.html'; };
+        window.goToAdmin = () => { window.location.href = 'admin.html'; };
+
+        window.logout = async () => {
+            if (auth.currentUser) {
+                await db.collection('users').doc(auth.currentUser.uid).update({ online: false });
+                await auth.signOut();
+            }
+            document.getElementById('roleScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('loginIdentifier').value = '';
+            document.getElementById('loginPassword').value = '';
+        };
+
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                const loginScreen = document.getElementById('loginScreen');
+                const twoFactorScreen = document.getElementById('twoFactorScreen');
+                const roleScreen = document.getElementById('roleScreen');
+                if (!loginScreen.classList.contains('hidden') && 
+                    twoFactorScreen.classList.contains('hidden') && 
+                    roleScreen.classList.contains('hidden')) {
+                    await showRoleScreen(user);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
