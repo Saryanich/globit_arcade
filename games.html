@@ -113,7 +113,38 @@
         }
         .badge.red { background: rgba(255,23,68,0.15); border-color: rgba(255,23,68,0.3); color: #ff5252; }
 
-        .rating { color: #ffd740; margin-bottom: 0.8rem; font-size: 0.85rem; }
+        .rating-section {
+            margin-bottom: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .stars-container {
+            display: flex;
+            gap: 0.2rem;
+            cursor: pointer;
+        }
+
+        .star {
+            font-size: 1.5rem;
+            color: #555;
+            transition: 0.2s;
+            user-select: none;
+        }
+
+        .star.active {
+            color: #ffd740;
+        }
+
+        .star:hover {
+            transform: scale(1.2);
+        }
+
+        .rating-info {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
 
         .btn-play {
             background: linear-gradient(135deg, #00e676, #00c853); border: none;
@@ -245,6 +276,7 @@
         let currentUser = null;
         let currentRole = 'user';
         let allGames = [];
+        let userRatings = {};
 
         auth.onAuthStateChanged(async (user) => {
             if (!user) { window.location.href = 'index.html'; return; }
@@ -260,9 +292,26 @@
             } catch (e) {
                 document.getElementById('userInfo').textContent = user.email?.split('@')[0] || 'Игрок';
             }
+            await loadUserRatings();
             loadGames();
             loadLeaderboard();
         });
+
+        async function loadUserRatings() {
+            if (!currentUser) return;
+            try {
+                const snap = await db.collection('arcade_games').get();
+                for (const doc of snap.docs) {
+                    const ratingsRef = db.collection('arcade_games').doc(doc.id).collection('ratings').doc(currentUser.uid);
+                    const ratingDoc = await ratingsRef.get();
+                    if (ratingDoc.exists) {
+                        userRatings[doc.id] = ratingDoc.data().rating;
+                    }
+                }
+            } catch (e) {
+                console.error('Ошибка загрузки оценок пользователя:', e);
+            }
+        }
 
         async function loadGames() {
             const grid = document.getElementById('gamesGrid');
@@ -301,7 +350,12 @@
                 return;
             }
 
-            grid.innerHTML = filtered.map(g => `
+            grid.innerHTML = filtered.map(g => {
+                const userRating = userRatings[g.id] || 0;
+                const avgRating = g.rating || 0;
+                const totalRatings = g.totalRatings || 0;
+                
+                return `
                 <div class="game-card">
                     <img src="${g.icon || 'https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg'}" 
                          alt="${g.name}" class="game-icon" 
@@ -312,11 +366,87 @@
                         <span class="badge">${g.genre || 'Аркада'}</span>
                         <span class="badge red">${g.ageRating || '3+'}</span>
                     </div>
-                    <div class="rating">${'⭐'.repeat(Math.round(g.rating || 0))} ${(g.rating || 0).toFixed(1)}</div>
+                    <div class="rating-section">
+                        <div class="stars-container" id="stars-${g.id}" data-game-id="${g.id}">
+                            ${[1,2,3,4,5].map(i => 
+                                `<span class="star ${i <= userRating ? 'active' : ''}" 
+                                      data-rating="${i}" 
+                                      onclick="rateGame('${g.id}', ${i})">★</span>`
+                            ).join('')}
+                        </div>
+                        <div class="rating-info">
+                            ⭐ ${avgRating.toFixed(1)} (${totalRatings} оценок)
+                            ${userRating > 0 ? ' • Ваша: ' + userRating + '★' : ''}
+                        </div>
+                    </div>
                     <button class="btn-play" onclick="playGame('${g.id}')">🎮 Играть</button>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
+
+        window.rateGame = async function(gameId, rating) {
+            if (!currentUser) {
+                alert('Необходимо войти в систему');
+                return;
+            }
+            
+            try {
+                const ratingRef = db.collection('arcade_games').doc(gameId).collection('ratings').doc(currentUser.uid);
+                const gameRef = db.collection('arcade_games').doc(gameId);
+                
+                const oldRatingDoc = await ratingRef.get();
+                const oldRating = oldRatingDoc.exists ? oldRatingDoc.data().rating : null;
+                
+                const batch = db.batch();
+                
+                // Сохраняем оценку пользователя
+                batch.set(ratingRef, { 
+                    rating: rating, 
+                    userId: currentUser.uid,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Обновляем общий рейтинг игры
+                const gameDoc = await gameRef.get();
+                const gameData = gameDoc.data();
+                let newTotalRatings = gameData.totalRatings || 0;
+                let newRatingSum = (gameData.rating || 0) * newTotalRatings;
+                
+                if (oldRating) {
+                    // Обновляем существующую оценку
+                    newRatingSum = newRatingSum - oldRating + rating;
+                } else {
+                    // Новая оценка
+                    newTotalRatings++;
+                    newRatingSum += rating;
+                }
+                
+                const newAvgRating = newRatingSum / newTotalRatings;
+                
+                batch.update(gameRef, {
+                    rating: Math.round(newAvgRating * 10) / 10,
+                    totalRatings: newTotalRatings
+                });
+
+                await batch.commit();
+                
+                // Обновляем локальные данные
+                userRatings[gameId] = rating;
+                const gameIndex = allGames.findIndex(g => g.id === gameId);
+                if (gameIndex !== -1) {
+                    allGames[gameIndex].rating = Math.round(newAvgRating * 10) / 10;
+                    allGames[gameIndex].totalRatings = newTotalRatings;
+                }
+                
+                // Перерисовываем только карточку этой игры
+                renderGames();
+                
+            } catch (e) {
+                console.error('Ошибка при оценке игры:', e);
+                alert('Ошибка при сохранении оценки');
+            }
+        };
 
         window.playGame = function(gameId) {
             const game = allGames.find(g => g.id === gameId);
