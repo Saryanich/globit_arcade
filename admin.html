@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>GloBIT Arcade • Админ</title>
+    <link rel="icon" type="image/jpeg" href="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg">
+    <link rel="apple-touch-icon" sizes="152x152" href="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GloBIT Arcade">
+    <meta name="theme-color" content="#0a2e1a">
+
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+    <style>
+        :root {
+            --bg-deep: #0a1a2e;
+            --accent-green: #00e676;
+            --accent-blue: #2979ff;
+            --accent-red: #ff1744;
+            --text-primary: #ffffff;
+            --text-secondary: #8899bb;
+            --blur: blur(20px);
+            --radius-card: 24px;
+            --radius-btn: 14px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(160deg, #0a2e1a 0%, #0a1a2e 40%, #1a0a2e 80%, #0d1a30 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        #particles-js {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .app {
+            position: relative;
+            z-index: 10;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.2rem;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: rgba(15, 25, 45, 0.7);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border-radius: 20px;
+            padding: 0.8rem 1.2rem;
+            border: 1px solid rgba(0, 230, 118, 0.2);
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .header-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-green);
+        }
+
+        .header-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex: 1;
+            background: linear-gradient(135deg, #00e676, #2979ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-icon {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 0.9rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            transition: 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: rgba(0, 230, 118, 0.15);
+            border-color: var(--accent-green);
+        }
+
+        .btn-danger {
+            background: rgba(255, 23, 68, 0.2);
+            border-color: #ff1744;
+            color: #ff5252;
+        }
+
+        .glass-card {
+            background: rgba(15, 25, 45, 0.6);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border-radius: var(--radius-card);
+            border: 1px solid rgba(0, 230, 118, 0.15);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            color: #69f0ae;
+            margin-bottom: 1rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+            -webkit-appearance: none;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--accent-green);
+        }
+
+        select option {
+            background: #1a1a3e;
+            color: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00e676, #00c853);
+            border: none;
+            color: #0a1a2e;
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--radius-btn);
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 1rem;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 8px 20px rgba(0, 230, 118, 0.4);
+        }
+
+        .btn-small {
+            padding: 0.3rem 0.7rem;
+            font-size: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            transition: 0.2s;
+            margin: 0 0.2rem;
+        }
+
+        .btn-hide {
+            background: rgba(41, 121, 255, 0.2);
+            color: #90caf9;
+            border: 1px solid rgba(41, 121, 255, 0.3);
+        }
+
+        .btn-hide:hover {
+            background: rgba(41, 121, 255, 0.3);
+        }
+
+        .btn-delete {
+            background: rgba(255, 23, 68, 0.2);
+            color: #ff5252;
+            border: 1px solid rgba(255, 23, 68, 0.3);
+        }
+
+        .btn-delete:hover {
+            background: rgba(255, 23, 68, 0.3);
+        }
+
+        .btn-reset {
+            background: rgba(255, 152, 0, 0.2);
+            color: #ffb74d;
+            border: 1px solid rgba(255, 152, 0, 0.3);
+            padding: 0.3rem 0.7rem;
+            font-size: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th,
+        td {
+            padding: 0.6rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        th {
+            color: #90caf9;
+        }
+
+        .game-icon-sm {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .message {
+            padding: 0.8rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .message-success {
+            background: rgba(0, 230, 118, 0.15);
+            color: #69f0ae;
+        }
+
+        .message-error {
+            background: rgba(255, 23, 68, 0.15);
+            color: #ff5252;
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+
+    <div class="app">
+        <div class="header">
+            <img src="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg" alt="Logo" class="header-logo">
+            <span class="header-title">GloBIT Arcade — Админ-панель</span>
+            <button class="btn-icon" onclick="window.location.href='games.html'">🎮 Игры</button>
+            <button class="btn-icon btn-danger" onclick="logout()">🚪 Выйти</button>
+        </div>
+
+        <!-- Форма добавления игры -->
+        <div class="glass-card">
+            <h2>➕ Добавить новую игру</h2>
+            <div class="form-grid">
+                <div>
+                    <label style="font-size:0.8rem; color:#90caf9;">Название игры</label>
+                    <input type="text" id="gameName" placeholder="Введите название">
+                </div>
+                <div>
+                    <label style="font-size:0.8rem; color:#90caf9;">Жанр</label>
+                    <select id="gameGenre">
+                        <option value="">Выберите жанр</option>
+                        <option>Экшн</option>
+                        <option>Гонки</option>
+                        <option>Головоломки</option>
+                        <option>Стратегии</option>
+                        <option>Аркады</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:0.8rem; color:#90caf9;">Возрастной рейтинг</label>
+                    <select id="gameAge">
+                        <option value="">Выберите возраст</option>
+                        <option>3+</option>
+                        <option>6+</option>
+                        <option>12+</option>
+                        <option>16+</option>
+                        <option>18+</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:0.8rem; color:#90caf9;">Ссылка на игру (GitHub Pages)</label>
+                    <input type="url" id="gameUrl" placeholder="https://...">
+                </div>
+                <div class="form-grid" style="grid-column: 1 / -1;">
+                    <div>
+                        <label style="font-size:0.8rem; color:#90caf9;">URL скриншота</label>
+                        <input type="url" id="gameScreenshot" placeholder="https://i.ibb.co/..." value="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg">
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; color:#90caf9;">URL иконки</label>
+                        <input type="url" id="gameIcon" placeholder="https://i.ibb.co/..." value="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg">
+                    </div>
+                </div>
+                <div style="grid-column: 1 / -1;">
+                    <label style="font-size:0.8rem; color:#90caf9;">Описание</label>
+                    <textarea id="gameDesc" placeholder="Опишите игру..."></textarea>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="addGame()">➕ Добавить игру</button>
+            <div id="addGameMessage"></div>
+        </div>
+
+        <!-- Список игр -->
+        <div class="glass-card">
+            <h2>📋 Список всех игр</h2>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Иконка</th>
+                            <th>Название</th>
+                            <th>Жанр</th>
+                            <th>Возраст</th>
+                            <th>⭐ Рейтинг</th>
+                            <th>🎮 Игр</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gamesTableBody">
+                        <tr><td colspan="7" style="text-align:center; color:#8899bb;">Загрузка...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Рейтинг игроков -->
+        <div class="glass-card">
+            <h2>🏆 Рейтинг игроков</h2>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Игрок</th>
+                            <th>Баллы</th>
+                            <th>Достижения</th>
+                            <th>Время (мин)</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody id="playersTableBody">
+                        <tr><td colspan="5" style="text-align:center; color:#8899bb;">Загрузка...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ВАША РЕАЛЬНАЯ КОНФИГУРАЦИЯ FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6GGJxAiao77U7_9mBUEjftmS_FnSWbIw",
+            authDomain: "glob-data.firebaseapp.com",
+            projectId: "glob-data",
+            storageBucket: "glob-data.firebasestorage.app",
+            messagingSenderId: "122757049174",
+            appId: "1:122757049174:web:ebb425edd0e1a8ea9a44f7"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 40, density: { enable: true, value_area: 800 } },
+                color: { value: ['#00e676', '#2979ff', '#ff1744'] },
+                shape: { type: 'circle' },
+                opacity: { value: 0.3, random: true },
+                size: { value: 2.5, random: true },
+                line_linked: { enable: true, distance: 150, color: '#2979ff', opacity: 0.1 },
+                move: { enable: true, speed: 1, direction: 'none', random: true }
+            },
+            retina_detect: true
+        });
+
+        let currentUser = null;
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            currentUser = user;
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            const role = userDoc.data()?.role || 'user';
+            if (role !== 'admin' && role !== 'employee') {
+                alert('Доступ запрещён');
+                window.location.href = 'games.html';
+                return;
+            }
+            loadAllGames();
+            loadPlayers();
+        });
+
+        window.addGame = async function() {
+            const name = document.getElementById('gameName').value.trim();
+            const genre = document.getElementById('gameGenre').value;
+            const age = document.getElementById('gameAge').value;
+            const url = document.getElementById('gameUrl').value.trim();
+            const screenshot = document.getElementById('gameScreenshot').value.trim();
+            const icon = document.getElementById('gameIcon').value.trim();
+            const desc = document.getElementById('gameDesc').value.trim();
+
+            if (!name || !genre || !age || !url) {
+                document.getElementById('addGameMessage').innerHTML = 
+                    '<div class="message message-error">Заполните все обязательные поля</div>';
+                return;
+            }
+
+            try {
+                await db.collection('arcade_games').add({
+                    name,
+                    description: desc,
+                    genre,
+                    ageRating: age,
+                    url,
+                    screenshot: screenshot || 'https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg',
+                    icon: icon || 'https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg',
+                    rating: 0,
+                    totalRatings: 0,
+                    plays: 0,
+                    hidden: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                document.getElementById('addGameMessage').innerHTML = 
+                    '<div class="message message-success">✅ Игра успешно добавлена!</div>';
+
+                // Очистка формы
+                document.getElementById('gameName').value = '';
+                document.getElementById('gameGenre').value = '';
+                document.getElementById('gameAge').value = '';
+                document.getElementById('gameUrl').value = '';
+                document.getElementById('gameDesc').value = '';
+
+                loadAllGames();
+            } catch (e) {
+                console.error('Ошибка добавления:', e);
+                document.getElementById('addGameMessage').innerHTML = 
+                    '<div class="message message-error">Ошибка: ' + e.message + '</div>';
+            }
+        };
+
+        async function loadAllGames() {
+            try {
+                const snap = await db.collection('arcade_games').orderBy('createdAt', 'desc').get();
+                const tbody = document.getElementById('gamesTableBody');
+                if (snap.empty) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#8899bb;">Нет игр</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = snap.docs.map(d => {
+                    const g = d.data();
+                    return `
+                        <tr>
+                            <td><img src="${g.icon || 'https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg'}" class="game-icon-sm" onerror="this.src='https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg'"></td>
+                            <td>${g.name || '—'}</td>
+                            <td>${g.genre || '—'}</td>
+                            <td>${g.ageRating || '—'}</td>
+                            <td>${'⭐'.repeat(Math.round(g.rating || 0))} ${(g.rating || 0).toFixed(1)}</td>
+                            <td>${g.plays || 0}</td>
+                            <td>
+                                <button class="btn-small btn-hide" onclick="toggleGame('${d.id}', ${g.hidden || false})">
+                                    ${g.hidden ? '👁 Показать' : '🙈 Скрыть'}
+                                </button>
+                                <button class="btn-small btn-delete" onclick="deleteGame('${d.id}')">🗑 Удалить</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error('Ошибка загрузки:', e);
+            }
+        }
+
+        window.toggleGame = async function(gameId, currentHidden) {
+            try {
+                await db.collection('arcade_games').doc(gameId).update({ hidden: !currentHidden });
+                loadAllGames();
+            } catch (e) {
+                alert('Ошибка: ' + e.message);
+            }
+        };
+
+        window.deleteGame = async function(gameId) {
+            if (!confirm('Удалить игру навсегда?')) return;
+            try {
+                await db.collection('arcade_games').doc(gameId).delete();
+                loadAllGames();
+            } catch (e) {
+                alert('Ошибка: ' + e.message);
+            }
+        };
+
+        async function loadPlayers() {
+            try {
+                const snap = await db.collection('arcade_players').orderBy('score', 'desc').get();
+                const tbody = document.getElementById('playersTableBody');
+                if (snap.empty) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#8899bb;">Нет данных</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = snap.docs.map(d => {
+                    const p = d.data();
+                    return `
+                        <tr>
+                            <td>${p.displayName || 'Игрок'}</td>
+                            <td>${p.score || 0}</td>
+                            <td>${(p.achievements || []).join(', ') || '—'}</td>
+                            <td>${p.playTime || 0}</td>
+                            <td><button class="btn-reset" onclick="resetScore('${d.id}')">Сбросить</button></td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error('Ошибка загрузки:', e);
+            }
+        }
+
+        window.resetScore = async function(playerId) {
+            if (!confirm('Сбросить баллы игроку?')) return;
+            try {
+                await db.collection('arcade_players').doc(playerId).update({
+                    score: 0,
+                    achievements: [],
+                    playTime: 0
+                });
+                loadPlayers();
+            } catch (e) {
+                alert('Ошибка: ' + e.message);
+            }
+        };
+
+        window.logout = async function() {
+            if (currentUser) {
+                await db.collection('users').doc(currentUser.uid).update({ online: false }).catch(() => {});
+                await auth.signOut();
+            }
+            window.location.href = 'index.html';
+        };
+    </script>
+</body>
+</html>
