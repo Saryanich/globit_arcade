@@ -195,14 +195,24 @@
             margin: 0 0.2rem;
         }
 
-        .btn-hide {
+        .btn-edit {
             background: rgba(41, 121, 255, 0.2);
             color: #90caf9;
             border: 1px solid rgba(41, 121, 255, 0.3);
         }
 
-        .btn-hide:hover {
+        .btn-edit:hover {
             background: rgba(41, 121, 255, 0.3);
+        }
+
+        .btn-hide {
+            background: rgba(255, 152, 0, 0.2);
+            color: #ffb74d;
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+
+        .btn-hide:hover {
+            background: rgba(255, 152, 0, 0.3);
         }
 
         .btn-delete {
@@ -265,6 +275,50 @@
         .message-error {
             background: rgba(255, 23, 68, 0.15);
             color: #ff5252;
+        }
+
+        .edit-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .edit-modal.active {
+            display: flex;
+        }
+
+        .edit-modal-content {
+            background: #12122a;
+            border-radius: 20px;
+            padding: 1.5rem;
+            width: 95%;
+            max-width: 600px;
+            border: 1px solid rgba(0, 230, 118, 0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            background: #ff1744;
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 23, 68, 0.4);
         }
     </style>
 </head>
@@ -377,8 +431,62 @@
         </div>
     </div>
 
+    <!-- Модальное окно редактирования -->
+    <div class="edit-modal" id="editModal">
+        <div class="edit-modal-content" style="position: relative;">
+            <button class="modal-close" onclick="closeEditModal()">✕</button>
+            <h2>✏️ Редактировать игру</h2>
+            <input type="hidden" id="editGameId">
+            <div class="form-grid">
+                <div>
+                    <label style="font-size:0.8rem; color:#90caf9;">Название игры</label>
+                    <input type="text" id="editGameName" placeholder="Введите название">
+                </div>
+                <div>
+                    <label style="font-size:0.8rem; color:#90caf9;">Жанр</label>
+                    <select id="editGameGenre">
+                        <option value="">Выберите жанр</option>
+                        <option>Экшн</option>
+                        <option>Гонки</option>
+                        <option>Головоломки</option>
+                        <option>Стратегии</option>
+                        <option>Аркады</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:0.8rem; color:#90caf9;">Возрастной рейтинг</label>
+                    <select id="editGameAge">
+                        <option value="">Выберите возраст</option>
+                        <option>3+</option>
+                        <option>6+</option>
+                        <option>12+</option>
+                        <option>16+</option>
+                        <option>18+</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:0.8rem; color:#90caf9;">Ссылка на игру</label>
+                    <input type="url" id="editGameUrl" placeholder="https://...">
+                </div>
+                <div>
+                    <label style="font-size:0.8rem; color:#90caf9;">URL скриншота</label>
+                    <input type="url" id="editGameScreenshot" placeholder="https://i.ibb.co/...">
+                </div>
+                <div>
+                    <label style="font-size:0.8rem; color:#90caf9;">URL иконки</label>
+                    <input type="url" id="editGameIcon" placeholder="https://i.ibb.co/...">
+                </div>
+                <div style="grid-column: 1 / -1;">
+                    <label style="font-size:0.8rem; color:#90caf9;">Описание</label>
+                    <textarea id="editGameDesc" placeholder="Опишите игру..."></textarea>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="saveEditGame()">💾 Сохранить изменения</button>
+            <div id="editGameMessage"></div>
+        </div>
+    </div>
+
     <script>
-        // ВАША РЕАЛЬНАЯ КОНФИГУРАЦИЯ FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyA6GGJxAiao77U7_9mBUEjftmS_FnSWbIw",
             authDomain: "glob-data.firebaseapp.com",
@@ -473,6 +581,79 @@
             }
         };
 
+        window.editGame = async function(gameId) {
+            try {
+                const doc = await db.collection('arcade_games').doc(gameId).get();
+                if (!doc.exists) {
+                    alert('Игра не найдена');
+                    return;
+                }
+                
+                const game = doc.data();
+                document.getElementById('editGameId').value = gameId;
+                document.getElementById('editGameName').value = game.name || '';
+                document.getElementById('editGameGenre').value = game.genre || '';
+                document.getElementById('editGameAge').value = game.ageRating || '';
+                document.getElementById('editGameUrl').value = game.url || '';
+                document.getElementById('editGameScreenshot').value = game.screenshot || '';
+                document.getElementById('editGameIcon').value = game.icon || '';
+                document.getElementById('editGameDesc').value = game.description || '';
+                document.getElementById('editGameMessage').innerHTML = '';
+                
+                document.getElementById('editModal').classList.add('active');
+            } catch (e) {
+                console.error('Ошибка загрузки игры для редактирования:', e);
+                alert('Ошибка загрузки данных игры');
+            }
+        };
+
+        window.saveEditGame = async function() {
+            const gameId = document.getElementById('editGameId').value;
+            const name = document.getElementById('editGameName').value.trim();
+            const genre = document.getElementById('editGameGenre').value;
+            const age = document.getElementById('editGameAge').value;
+            const url = document.getElementById('editGameUrl').value.trim();
+            const screenshot = document.getElementById('editGameScreenshot').value.trim();
+            const icon = document.getElementById('editGameIcon').value.trim();
+            const desc = document.getElementById('editGameDesc').value.trim();
+
+            if (!name || !genre || !age || !url) {
+                document.getElementById('editGameMessage').innerHTML = 
+                    '<div class="message message-error">Заполните все обязательные поля</div>';
+                return;
+            }
+
+            try {
+                await db.collection('arcade_games').doc(gameId).update({
+                    name,
+                    description: desc,
+                    genre,
+                    ageRating: age,
+                    url,
+                    screenshot: screenshot || 'https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg',
+                    icon: icon || 'https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg',
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                document.getElementById('editGameMessage').innerHTML = 
+                    '<div class="message message-success">✅ Изменения сохранены!</div>';
+                
+                setTimeout(() => {
+                    closeEditModal();
+                    loadAllGames();
+                }, 1000);
+                
+            } catch (e) {
+                console.error('Ошибка сохранения:', e);
+                document.getElementById('editGameMessage').innerHTML = 
+                    '<div class="message message-error">Ошибка: ' + e.message + '</div>';
+            }
+        };
+
+        window.closeEditModal = function() {
+            document.getElementById('editModal').classList.remove('active');
+        };
+
         async function loadAllGames() {
             try {
                 const snap = await db.collection('arcade_games').orderBy('createdAt', 'desc').get();
@@ -492,6 +673,7 @@
                             <td>${'⭐'.repeat(Math.round(g.rating || 0))} ${(g.rating || 0).toFixed(1)}</td>
                             <td>${g.plays || 0}</td>
                             <td>
+                                <button class="btn-small btn-edit" onclick="editGame('${d.id}')">✏️ Изменить</button>
                                 <button class="btn-small btn-hide" onclick="toggleGame('${d.id}', ${g.hidden || false})">
                                     ${g.hidden ? '👁 Показать' : '🙈 Скрыть'}
                                 </button>
