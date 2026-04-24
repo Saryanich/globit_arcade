@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>GloBIT Arcade • Игры</title>
+    <link rel="icon" type="image/jpeg" href="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg">
+    <link rel="apple-touch-icon" sizes="152x152" href="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GloBIT Arcade">
+    <meta name="theme-color" content="#0a2e1a">
+
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+    <style>
+        :root {
+            --accent-green: #00e676;
+            --accent-blue: #2979ff;
+            --accent-red: #ff1744;
+            --text-secondary: #8899bb;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(160deg, #0a2e1a 0%, #0a1a2e 40%, #1a0a2e 80%, #0d1a30 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            position: relative;
+        }
+
+        #particles-js {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
+        }
+
+        .app {
+            position: relative; z-index: 10; max-width: 1000px; margin: 0 auto; padding: 1.2rem;
+        }
+
+        .header {
+            display: flex; align-items: center; gap: 0.8rem;
+            background: rgba(15, 25, 45, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px; padding: 0.8rem 1.2rem;
+            border: 1px solid rgba(0, 230, 118, 0.2); flex-wrap: wrap; margin-bottom: 1.5rem;
+        }
+
+        .header-logo {
+            width: 44px; height: 44px; border-radius: 50%; object-fit: cover;
+            border: 2px solid var(--accent-green); box-shadow: 0 0 15px rgba(0, 230, 118, 0.4);
+        }
+
+        .header-title {
+            font-weight: 700; font-size: 1.3rem; flex: 1;
+            background: linear-gradient(135deg, #00e676, #2979ff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .header-user { color: #ccc; font-size: 0.85rem; }
+
+        .btn-icon {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);
+            color: white; padding: 0.5rem 0.9rem; border-radius: 12px; cursor: pointer;
+            font-size: 0.85rem; transition: 0.2s; white-space: nowrap;
+        }
+        .btn-icon:hover { background: rgba(0,230,118,0.15); border-color: var(--accent-green); }
+        .btn-danger { background: rgba(255,23,68,0.2); border-color: #ff1744; color: #ff5252; }
+        .btn-danger:hover { background: rgba(255,23,68,0.3); }
+
+        .filters {
+            display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.5rem; align-items: center;
+        }
+
+        .filters input, .filters select {
+            padding: 0.6rem 1rem; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;
+            color: white; font-size: 0.9rem; outline: none; -webkit-appearance: none;
+        }
+        .filters input:focus, .filters select:focus { border-color: var(--accent-green); }
+        .filters select option { background: #1a1a3e; color: white; }
+
+        .games-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem;
+        }
+
+        @media (max-width: 768px) { .games-grid { grid-template-columns: 1fr; } }
+
+        .game-card {
+            background: rgba(15, 25, 45, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px; border: 1px solid rgba(0, 230, 118, 0.1); padding: 1.3rem;
+            transition: 0.3s; display: flex; flex-direction: column;
+        }
+        .game-card:hover { border-color: var(--accent-green); box-shadow: 0 10px 30px rgba(0,230,118,0.15); }
+
+        .game-icon {
+            width: 80px; height: 80px; border-radius: 18px; object-fit: cover;
+            margin-bottom: 0.8rem; border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .game-title { font-weight: 700; font-size: 1.1rem; color: #69f0ae; margin-bottom: 0.3rem; }
+        .game-desc { color: var(--text-secondary); font-size: 0.8rem; flex: 1; margin-bottom: 0.6rem; }
+
+        .badges { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.8rem; }
+        .badge {
+            background: rgba(41,121,255,0.15); padding: 0.2rem 0.6rem; border-radius: 20px;
+            font-size: 0.7rem; color: #90caf9; border: 1px solid rgba(41,121,255,0.3);
+        }
+        .badge.red { background: rgba(255,23,68,0.15); border-color: rgba(255,23,68,0.3); color: #ff5252; }
+
+        .rating { color: #ffd740; margin-bottom: 0.8rem; font-size: 0.85rem; }
+
+        .btn-play {
+            background: linear-gradient(135deg, #00e676, #00c853); border: none;
+            color: #0a1a2e; padding: 0.7rem; border-radius: 14px; font-weight: 700;
+            cursor: pointer; transition: 0.2s; width: 100%; margin-top: auto;
+        }
+        .btn-play:hover { box-shadow: 0 8px 20px rgba(0,230,118,0.4); transform: translateY(-2px); }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; padding: 1rem;
+        }
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: #12122a; border-radius: 20px; padding: 1rem; width: 95%;
+            max-width: 800px; position: relative; border: 1px solid rgba(0,230,118,0.3);
+        }
+
+        .modal-close {
+            position: absolute; top: -15px; right: -15px; background: #ff1744;
+            border: none; color: white; width: 36px; height: 36px; border-radius: 50%;
+            font-size: 1.2rem; cursor: pointer; z-index: 10; box-shadow: 0 4px 15px rgba(255,23,68,0.4);
+        }
+
+        .modal-iframe { width: 100%; height: 500px; border-radius: 12px; border: none; }
+
+        .leaderboard {
+            margin-top: 2rem; background: rgba(15,25,45,0.6); backdrop-filter: blur(20px);
+            border-radius: 20px; padding: 1.5rem; border: 1px solid rgba(0,230,118,0.15);
+        }
+        .leaderboard h3 { margin-bottom: 1rem; color: #69f0ae; }
+        .leaderboard table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .leaderboard th, .leaderboard td { padding: 0.6rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .leaderboard th { color: #90caf9; font-weight: 500; }
+
+        .no-games { text-align: center; color: var(--text-secondary); padding: 3rem; font-size: 1.1rem; grid-column: 1 / -1; }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+
+    <div class="app">
+        <div class="header">
+            <img src="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg" alt="Logo" class="header-logo">
+            <span class="header-title">GloBIT Arcade</span>
+            <span class="header-user" id="userInfo">Загрузка...</span>
+            <button class="btn-icon hidden" id="btnAdminLink" onclick="window.location.href='admin.html'">⚙️ Админ-панель</button>
+            <button class="btn-icon btn-danger" onclick="logout()">🚪 Выйти</button>
+        </div>
+
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="🔍 Поиск игры...">
+            <select id="genreFilter">
+                <option value="">Все жанры</option>
+                <option>Экшн</option>
+                <option>Гонки</option>
+                <option>Головоломки</option>
+                <option>Стратегии</option>
+                <option>Аркады</option>
+            </select>
+            <select id="ratingFilter">
+                <option value="">Любая оценка</option>
+                <option value="4">⭐4+</option>
+                <option value="3">⭐3+</option>
+                <option value="2">⭐2+</option>
+                <option value="1">⭐1+</option>
+            </select>
+            <select id="ageFilter">
+                <option value="">Любой возраст</option>
+                <option>3+</option>
+                <option>6+</option>
+                <option>12+</option>
+                <option>16+</option>
+                <option>18+</option>
+            </select>
+        </div>
+
+        <div class="games-grid" id="gamesGrid">
+            <div class="no-games">Загрузка игр...</div>
+        </div>
+
+        <div class="modal" id="gameModal">
+            <div class="modal-content">
+                <button class="modal-close" onclick="closeModal()">✕</button>
+                <iframe class="modal-iframe" id="gameIframe" allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <div class="leaderboard">
+            <h3>🏆 Таблица лидеров</h3>
+            <table>
+                <thead><tr><th>Игрок</th><th>Баллы</th><th>Время (мин)</th></tr></thead>
+                <tbody id="leaderboardBody">
+                    <tr><td colspan="3" style="text-align:center; color:#8899bb;">Загрузка...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6GGJxAiao77U7_9mBUEjftmS_FnSWbIw",
+            authDomain: "glob-data.firebaseapp.com",
+            projectId: "glob-data",
+            storageBucket: "glob-data.firebasestorage.app",
+            messagingSenderId: "122757049174",
+            appId: "1:122757049174:web:ebb425edd0e1a8ea9a44f7"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 50, density: { enable: true, value_area: 800 } },
+                color: { value: ['#00e676', '#2979ff', '#ff1744', '#ffffff'] },
+                shape: { type: 'circle' },
+                opacity: { value: 0.3, random: true },
+                size: { value: 2.5, random: true },
+                line_linked: { enable: true, distance: 150, color: '#2979ff', opacity: 0.1, width: 1 },
+                move: { enable: true, speed: 1.2, direction: 'none', random: true }
+            },
+            interactivity: { detect_on: 'canvas', events: { onhover: { enable: true, mode: 'grab' } } },
+            retina_detect: true
+        });
+
+        let currentUser = null;
+        let currentRole = 'user';
+        let allGames = [];
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) { window.location.href = 'index.html'; return; }
+            currentUser = user;
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                const userData = userDoc.data() || {};
+                currentRole = userData.role || 'user';
+                document.getElementById('userInfo').textContent = userData.displayName || user.email?.split('@')[0] || 'Игрок';
+                if (currentRole === 'admin' || currentRole === 'employee') {
+                    document.getElementById('btnAdminLink').classList.remove('hidden');
+                }
+            } catch (e) {
+                document.getElementById('userInfo').textContent = user.email?.split('@')[0] || 'Игрок';
+            }
+            loadGames();
+            loadLeaderboard();
+        });
+
+        async function loadGames() {
+            const grid = document.getElementById('gamesGrid');
+            grid.innerHTML = '<div class="no-games">Загрузка игр...</div>';
+            try {
+                const snap = await db.collection('arcade_games').where('hidden', '==', false).get();
+                allGames = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                if (allGames.length === 0) {
+                    grid.innerHTML = '<div class="no-games">Нет доступных игр. Добавьте игры через админ-панель.</div>';
+                } else {
+                    renderGames();
+                }
+            } catch (e) {
+                console.error('Ошибка загрузки игр:', e);
+                grid.innerHTML = '<div class="no-games">Ошибка загрузки игр</div>';
+            }
+        }
+
+        function renderGames() {
+            const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
+            const genre = document.getElementById('genreFilter')?.value || '';
+            const rating = parseInt(document.getElementById('ratingFilter')?.value || '0');
+            const age = document.getElementById('ageFilter')?.value || '';
+
+            let filtered = allGames.filter(g => {
+                if (search && !(g.name || '').toLowerCase().includes(search)) return false;
+                if (genre && g.genre !== genre) return false;
+                if (rating && (g.rating || 0) < rating) return false;
+                if (age && g.ageRating !== age) return false;
+                return true;
+            });
+
+            const grid = document.getElementById('gamesGrid');
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div class="no-games">Игры не найдены</div>';
+                return;
+            }
+
+            grid.innerHTML = filtered.map(g => `
+                <div class="game-card">
+                    <img src="${g.icon || 'https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg'}" 
+                         alt="${g.name}" class="game-icon" 
+                         onerror="this.src='https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg'">
+                    <div class="game-title">${g.name || 'Без названия'}</div>
+                    <div class="game-desc">${(g.description || '').substring(0, 80)}...</div>
+                    <div class="badges">
+                        <span class="badge">${g.genre || 'Аркада'}</span>
+                        <span class="badge red">${g.ageRating || '3+'}</span>
+                    </div>
+                    <div class="rating">${'⭐'.repeat(Math.round(g.rating || 0))} ${(g.rating || 0).toFixed(1)}</div>
+                    <button class="btn-play" onclick="playGame('${g.id}')">🎮 Играть</button>
+                </div>
+            `).join('');
+        }
+
+        window.playGame = function(gameId) {
+            const game = allGames.find(g => g.id === gameId);
+            if (!game || !game.url) return alert('Ссылка на игру отсутствует');
+            document.getElementById('gameIframe').src = game.url;
+            document.getElementById('gameModal').classList.add('active');
+            db.collection('arcade_games').doc(gameId).update({
+                plays: firebase.firestore.FieldValue.increment(1)
+            }).catch(() => {});
+        };
+
+        window.closeModal = function() {
+            document.getElementById('gameModal').classList.remove('active');
+            document.getElementById('gameIframe').src = '';
+        };
+
+        async function loadLeaderboard() {
+            const tbody = document.getElementById('leaderboardBody');
+            try {
+                const snap = await db.collection('arcade_players').orderBy('score', 'desc').limit(10).get();
+                if (snap.empty) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#8899bb;">Нет данных</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = snap.docs.map((d, i) => {
+                    const p = d.data();
+                    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+                    return `<tr><td>${medal} ${p.displayName || 'Игрок'}</td><td>${p.score || 0}</td><td>${p.playTime || 0}</td></tr>`;
+                }).join('');
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#8899bb;">Ошибка загрузки</td></tr>';
+            }
+        }
+
+        document.getElementById('searchInput').addEventListener('input', renderGames);
+        document.getElementById('genreFilter').addEventListener('change', renderGames);
+        document.getElementById('ratingFilter').addEventListener('change', renderGames);
+        document.getElementById('ageFilter').addEventListener('change', renderGames);
+
+        window.logout = async function() {
+            if (currentUser) {
+                await db.collection('users').doc(currentUser.uid).update({ online: false }).catch(() => {});
+                await auth.signOut();
+            }
+            window.location.href = 'index.html';
+        };
+    </script>
+</body>
+</html>
