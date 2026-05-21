@@ -153,24 +153,88 @@
         }
         .btn-play:hover { box-shadow: 0 8px 20px rgba(0,230,118,0.4); transform: translateY(-2px); }
 
+        /* Увеличенное модальное окно */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; padding: 1rem;
+            background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; padding: 0.8rem;
         }
         .modal.active { display: flex; }
 
         .modal-content {
-            background: #12122a; border-radius: 20px; padding: 1rem; width: 95%;
-            max-width: 800px; position: relative; border: 1px solid rgba(0,230,118,0.3);
+            background: #0a0a1a; border-radius: 20px; width: 100%;
+            max-width: 1400px; height: 90vh; position: relative;
+            border: 2px solid rgba(0,230,118,0.4); box-shadow: 0 0 50px rgba(0,230,118,0.2);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 0.8rem 1rem;
+            background: rgba(0,0,0,0.6);
+            border-bottom: 1px solid rgba(0,230,118,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1rem;
+            color: #69f0ae;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .modal-close {
-            position: absolute; top: -15px; right: -15px; background: #ff1744;
-            border: none; color: white; width: 36px; height: 36px; border-radius: 50%;
-            font-size: 1.2rem; cursor: pointer; z-index: 10; box-shadow: 0 4px 15px rgba(255,23,68,0.4);
+            background: #ff1744; border: none; color: white;
+            width: 34px; height: 34px; border-radius: 50%;
+            font-size: 1.2rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.2s; flex-shrink: 0; margin-left: 0.5rem;
+        }
+        .modal-close:hover { transform: scale(1.05); background: #ff5252; }
+
+        .modal-iframe {
+            width: 100%; flex: 1; border: none; background: #000;
         }
 
-        .modal-iframe { width: 100%; height: 500px; border-radius: 12px; border: none; }
+        /* Кнопка полноэкранного режима */
+        .fullscreen-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(0,230,118,0.3);
+            color: #00e676;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(0,230,118,0.2);
+            border-color: var(--accent-green);
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                height: 100vh;
+                border-radius: 0;
+                max-width: 100%;
+            }
+            .modal {
+                padding: 0;
+            }
+            .modal-title {
+                font-size: 0.85rem;
+                max-width: 200px;
+            }
+            .fullscreen-btn span {
+                display: none;
+            }
+        }
 
         .leaderboard {
             margin-top: 2rem; background: rgba(15,25,45,0.6); backdrop-filter: blur(20px);
@@ -227,9 +291,18 @@
             <div class="no-games">Загрузка игр...</div>
         </div>
 
+        <!-- Увеличенное модальное окно -->
         <div class="modal" id="gameModal">
             <div class="modal-content">
-                <button class="modal-close" onclick="closeModal()">✕</button>
+                <div class="modal-header">
+                    <span class="modal-title" id="modalGameTitle">Игра</span>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="fullscreen-btn" id="fullscreenBtn" onclick="toggleFullscreen()">
+                            🖥️ <span>Полный экран</span>
+                        </button>
+                        <button class="modal-close" onclick="closeModal()">✕</button>
+                    </div>
+                </div>
                 <iframe class="modal-iframe" id="gameIframe" allowfullscreen></iframe>
             </div>
         </div>
@@ -277,6 +350,7 @@
         let currentRole = 'user';
         let allGames = [];
         let userRatings = {};
+        let currentGameName = '';
 
         auth.onAuthStateChanged(async (user) => {
             if (!user) { window.location.href = 'index.html'; return; }
@@ -360,11 +434,11 @@
                     <img src="${g.icon || 'https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg'}" 
                          alt="${g.name}" class="game-icon" 
                          onerror="this.src='https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg'">
-                    <div class="game-title">${g.name || 'Без названия'}</div>
-                    <div class="game-desc">${(g.description || '').substring(0, 80)}...</div>
+                    <div class="game-title">${escapeHtml(g.name) || 'Без названия'}</div>
+                    <div class="game-desc">${escapeHtml((g.description || '').substring(0, 80))}...</div>
                     <div class="badges">
-                        <span class="badge">${g.genre || 'Аркада'}</span>
-                        <span class="badge red">${g.ageRating || '3+'}</span>
+                        <span class="badge">${escapeHtml(g.genre || 'Аркада')}</span>
+                        <span class="badge red">${escapeHtml(g.ageRating || '3+')}</span>
                     </div>
                     <div class="rating-section">
                         <div class="stars-container" id="stars-${g.id}" data-game-id="${g.id}">
@@ -379,10 +453,20 @@
                             ${userRating > 0 ? ' • Ваша: ' + userRating + '★' : ''}
                         </div>
                     </div>
-                    <button class="btn-play" onclick="playGame('${g.id}')">🎮 Играть</button>
+                    <button class="btn-play" onclick="playGame('${g.id}', '${escapeHtml(g.name)}')">🎮 Играть</button>
                 </div>
                 `;
             }).join('');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
         }
 
         window.rateGame = async function(gameId, rating) {
@@ -400,24 +484,20 @@
                 
                 const batch = db.batch();
                 
-                // Сохраняем оценку пользователя
                 batch.set(ratingRef, { 
                     rating: rating, 
                     userId: currentUser.uid,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // Обновляем общий рейтинг игры
                 const gameDoc = await gameRef.get();
                 const gameData = gameDoc.data();
                 let newTotalRatings = gameData.totalRatings || 0;
                 let newRatingSum = (gameData.rating || 0) * newTotalRatings;
                 
                 if (oldRating) {
-                    // Обновляем существующую оценку
                     newRatingSum = newRatingSum - oldRating + rating;
                 } else {
-                    // Новая оценка
                     newTotalRatings++;
                     newRatingSum += rating;
                 }
@@ -431,7 +511,6 @@
 
                 await batch.commit();
                 
-                // Обновляем локальные данные
                 userRatings[gameId] = rating;
                 const gameIndex = allGames.findIndex(g => g.id === gameId);
                 if (gameIndex !== -1) {
@@ -439,7 +518,6 @@
                     allGames[gameIndex].totalRatings = newTotalRatings;
                 }
                 
-                // Перерисовываем только карточку этой игры
                 renderGames();
                 
             } catch (e) {
@@ -448,11 +526,18 @@
             }
         };
 
-        window.playGame = function(gameId) {
+        window.playGame = function(gameId, gameName) {
             const game = allGames.find(g => g.id === gameId);
             if (!game || !game.url) return alert('Ссылка на игру отсутствует');
+            
+            currentGameName = gameName || game.name || 'Игра';
+            document.getElementById('modalGameTitle').textContent = currentGameName;
             document.getElementById('gameIframe').src = game.url;
             document.getElementById('gameModal').classList.add('active');
+            
+            // Блокируем скролл страницы
+            document.body.style.overflow = 'hidden';
+            
             db.collection('arcade_games').doc(gameId).update({
                 plays: firebase.firestore.FieldValue.increment(1)
             }).catch(() => {});
@@ -461,7 +546,30 @@
         window.closeModal = function() {
             document.getElementById('gameModal').classList.remove('active');
             document.getElementById('gameIframe').src = '';
+            document.body.style.overflow = '';
         };
+
+        window.toggleFullscreen = function() {
+            const modalContent = document.querySelector('.modal-content');
+            if (!modalContent) return;
+            
+            if (!document.fullscreenElement) {
+                modalContent.requestFullscreen().catch(err => {
+                    console.log(`Ошибка перехода в полноэкранный режим: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        };
+
+        // Обработка Esc для закрытия модального окна
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (document.getElementById('gameModal').classList.contains('active')) {
+                    closeModal();
+                }
+            }
+        });
 
         async function loadLeaderboard() {
             const tbody = document.getElementById('leaderboardBody');
@@ -474,7 +582,7 @@
                 tbody.innerHTML = snap.docs.map((d, i) => {
                     const p = d.data();
                     const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
-                    return `<tr><td>${medal} ${p.displayName || 'Игрок'}</td><td>${p.score || 0}</td><td>${p.playTime || 0}</td></tr>`;
+                    return `<tr><td>${medal} ${escapeHtml(p.displayName || 'Игрок')}</td><td>${p.score || 0}</td><td>${p.playTime || 0}</td></tr>`;
                 }).join('');
             } catch (e) {
                 tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#8899bb;">Ошибка загрузки</td></tr>';
