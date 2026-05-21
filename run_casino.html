@@ -498,7 +498,7 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // ==================== ЗВУКОВАЯ СИСТЕМА (РАБОТАЕТ) ====================
+        // ==================== ЗВУКОВАЯ СИСТЕМА ====================
         let audioCtx = null;
         let audioEnabled = false;
 
@@ -514,27 +514,17 @@
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume().then(() => {
                     audioEnabled = true;
-                    console.log("AudioContext resumed, audio enabled");
                 }).catch(e => console.warn("Audio resume failed", e));
             } else if (audioCtx.state === 'running') {
                 audioEnabled = true;
             }
         }
 
-        function ensureAudioOnUserInteraction() {
-            if (!audioCtx || audioCtx.state !== 'running') {
-                initAudio();
-            }
-        }
-
         document.addEventListener('click', function enableAudioOnFirstClick() {
-            if (!audioCtx || audioCtx.state !== 'running') {
-                initAudio();
-            }
+            initAudio();
         }, { once: true });
 
         function playTone(frequency, duration, type = 'sine', volume = 0.3) {
-            ensureAudioOnUserInteraction();
             if (!audioCtx || audioCtx.state !== 'running') return;
             try {
                 const osc = audioCtx.createOscillator();
@@ -547,44 +537,18 @@
                 osc.start();
                 gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
                 osc.stop(audioCtx.currentTime + duration);
-            } catch(e) { /* silence */ }
+            } catch(e) {}
         }
 
-        function playSpinSound() { 
-            playTone(880, 0.05, 'sine', 0.15); 
-            setTimeout(() => playTone(1046.5, 0.08, 'triangle', 0.1), 20);
-        }
-        function playWinSound() { 
-            playTone(523.25, 0.2, 'sine', 0.25); 
-            setTimeout(() => playTone(659.25, 0.2, 'sine', 0.25), 150);
-            setTimeout(() => playTone(783.99, 0.3, 'sine', 0.3), 300);
-        }
-        function playBigWinSound() { 
-            [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => setTimeout(() => playTone(f, 0.3, 'sine', 0.4), i * 150));
-        }
-        function playSuperWinSound() {
-            [523.25, 659.25, 783.99, 1046.5, 1318.52].forEach((f, i) => setTimeout(() => playTone(f, 0.4, 'sine', 0.5), i * 200));
-            setTimeout(() => { for(let i=0;i<3;i++) playTone(880, 0.1, 'sawtooth', 0.3); }, 1000);
-        }
-        function playLoseSound() { 
-            playTone(440, 0.3, 'sawtooth', 0.2); 
-            setTimeout(() => playTone(349.23, 0.4, 'sawtooth', 0.2), 200);
-        }
-        function playRiskWinSound() { 
-            playTone(659.25, 0.15, 'square', 0.25); 
-            setTimeout(() => playTone(783.99, 0.15, 'square', 0.25), 150);
-            setTimeout(() => playTone(987.77, 0.25, 'square', 0.3), 300);
-        }
-        function playRiskLoseSound() { 
-            playTone(349.23, 0.2, 'triangle', 0.25); 
-            setTimeout(() => playTone(293.66, 0.3, 'triangle', 0.25), 200);
-        }
-        function playButtonClick() { 
-            playTone(698.46, 0.07, 'sine', 0.1);
-        }
-        function playSpinStart() { 
-            playTone(1318.52, 0.05, 'triangle', 0.2);
-        }
+        function playSpinSound() { playTone(880, 0.05, 'sine', 0.15); setTimeout(() => playTone(1046.5, 0.08, 'triangle', 0.1), 20); }
+        function playWinSound() { playTone(523.25, 0.2, 'sine', 0.25); setTimeout(() => playTone(659.25, 0.2, 'sine', 0.25), 150); setTimeout(() => playTone(783.99, 0.3, 'sine', 0.3), 300); }
+        function playBigWinSound() { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => setTimeout(() => playTone(f, 0.3, 'sine', 0.4), i * 150)); }
+        function playSuperWinSound() { [523.25, 659.25, 783.99, 1046.5, 1318.52].forEach((f, i) => setTimeout(() => playTone(f, 0.4, 'sine', 0.5), i * 200)); }
+        function playLoseSound() { playTone(440, 0.3, 'sawtooth', 0.2); setTimeout(() => playTone(349.23, 0.4, 'sawtooth', 0.2), 200); }
+        function playRiskWinSound() { playTone(659.25, 0.15, 'square', 0.25); setTimeout(() => playTone(783.99, 0.15, 'square', 0.25), 150); }
+        function playRiskLoseSound() { playTone(349.23, 0.2, 'triangle', 0.25); setTimeout(() => playTone(293.66, 0.3, 'triangle', 0.25), 200); }
+        function playButtonClick() { playTone(698.46, 0.07, 'sine', 0.1); }
+        function playSpinStart() { playTone(1318.52, 0.05, 'triangle', 0.2); }
 
         // ==================== PARTICLES ====================
         particlesJS('particles-js', {
@@ -605,7 +569,7 @@
             retina_detect: true
         });
 
-        // ==================== ПЕРЕМЕННЫЕ ====================
+        // ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
         let pendingUser = null, currentIP = 'unknown', deviceFingerprint = 'unknown';
         const SYMBOLS = ['6', '7', '💚', '💜', '🖤', '💀', '⭐'];
         const SYMBOL_WEIGHTS = [12, 10, 15, 14, 14, 5, 3];
@@ -624,45 +588,66 @@
         const SUPER_COOLDOWN = 3;
         const SUPER_MAX_SPINS = 5;
         const AUTO_SPIN_DELAY = 2000;
+        let currentGlobalId = null;
 
-        // ==================== ФУНКЦИИ ДЛЯ РЕКОРДОВ В FIRESTORE ====================
-        async function submitHighScore(score) {
-            if (!auth.currentUser) return;
-            
+        // ==================== ФУНКЦИИ ДЛЯ РАБОТЫ С БАЛАНСОМ В SCORE ====================
+        function getScoreDocRef(globalId) {
+            return db.collection('score').doc('runcasino').collection('records').doc(globalId);
+        }
+
+        async function getBalanceFromScore(globalId) {
             try {
-                // Получаем данные пользователя
-                const userDoc = await db.collection('users').doc(auth.currentUser.uid).get();
-                const userData = userDoc.data();
-                const globalId = userData?.globalId || auth.currentUser.email.split('@')[0];
-                
-                // Путь: score > runcasino > records > {globalId}
-                const scoreRef = db.collection('score').doc('runcasino').collection('records').doc(globalId);
+                const scoreRef = getScoreDocRef(globalId);
                 const scoreDoc = await scoreRef.get();
                 
-                if (!scoreDoc.exists) {
-                    // Создаем новый документ с рекордом
+                if (scoreDoc.exists) {
+                    const data = scoreDoc.data();
+                    const balance = data.score || 1000;
+                    console.log(`💰 Баланс загружен из score для ${globalId}: ${balance}`);
+                    return balance;
+                } else {
                     await scoreRef.set({
-                        score: score,
+                        score: 1000,
                         globalId: globalId,
-                        email: auth.currentUser.email,
-                        displayName: userData?.displayName || globalId,
+                        email: auth.currentUser?.email || '',
+                        displayName: globalId,
                         createdAt: new Date(),
                         updatedAt: new Date()
                     });
-                    console.log(`✅ Создан новый рекорд для ${globalId}: ${score}`);
-                } else {
-                    // Обновляем только если новый рекорд выше
-                    const currentBest = scoreDoc.data().score || 0;
-                    if (score > currentBest) {
-                        await scoreRef.update({
-                            score: score,
-                            updatedAt: new Date()
-                        });
-                        console.log(`🔄 Обновлен рекорд для ${globalId}: ${score} (было ${currentBest})`);
-                    }
+                    console.log(`✅ Создан новый счет для ${globalId}: 1000`);
+                    return 1000;
                 }
             } catch (e) {
-                console.error('❌ Ошибка сохранения рекорда:', e);
+                console.error('❌ Ошибка получения баланса из score:', e);
+                return 1000;
+            }
+        }
+
+        async function updateBalanceInScore(globalId, newBalance) {
+            if (!auth.currentUser || !globalId) return;
+            
+            try {
+                const scoreRef = getScoreDocRef(globalId);
+                const scoreDoc = await scoreRef.get();
+                
+                if (!scoreDoc.exists) {
+                    await scoreRef.set({
+                        score: newBalance,
+                        globalId: globalId,
+                        email: auth.currentUser.email,
+                        displayName: document.getElementById('displayName').textContent || globalId,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    });
+                } else {
+                    await scoreRef.update({
+                        score: newBalance,
+                        updatedAt: new Date()
+                    });
+                }
+                console.log(`💾 Баланс сохранен в score для ${globalId}: ${newBalance}`);
+            } catch (e) {
+                console.error('❌ Ошибка сохранения баланса в score:', e);
             }
         }
 
@@ -704,7 +689,6 @@
                 panel.style.display = 'block';
                 
                 try {
-                    // Загружаем рекорды из score > runcasino > records
                     const snapshot = await db.collection('score')
                         .doc('runcasino')
                         .collection('records')
@@ -747,7 +731,7 @@
             const ref = db.collection('users').doc(uid);
             if(!(await ref.get()).exists) await ref.set({
                 email, globalId: email.split('@')[0], displayName: email.split('@')[0],
-                role:'user', knownDevices:[], online:false, balance:1000,
+                role:'user', knownDevices:[], online:false,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             return ref;
@@ -769,10 +753,8 @@
         }
 
         async function updateBalanceDB() {
-            if(auth.currentUser) {
-                await db.collection('users').doc(auth.currentUser.uid).update({balance: gameBalance});
-                // Сохраняем баланс как рекорд
-                await submitHighScore(gameBalance);
+            if(currentGlobalId) {
+                await updateBalanceInScore(currentGlobalId, gameBalance);
             }
         }
 
@@ -847,9 +829,18 @@
         async function loadGame(user) {
             const doc = await db.collection('users').doc(user.uid).get();
             const data = doc.data()||{};
-            document.getElementById('displayName').textContent = data.displayName||user.email?.split('@')[0]||'Игрок';
-            document.getElementById('globalIdDisplay').textContent = data.globalId||'—';
-            gameBalance = data.balance||1000;
+            currentGlobalId = data.globalId || user.email?.split('@')[0] || 'player';
+            
+            document.getElementById('displayName').textContent = data.displayName || user.email?.split('@')[0] || 'Игрок';
+            document.getElementById('globalIdDisplay').textContent = currentGlobalId;
+            
+            gameBalance = await getBalanceFromScore(currentGlobalId);
+            
+            if (gameBalance < 10) {
+                gameBalance = 1000;
+                await updateBalanceInScore(currentGlobalId, gameBalance);
+            }
+            
             document.getElementById('balanceDisplay').textContent = gameBalance;
             showScreen('gameScreen');
             initGrid();
@@ -1108,6 +1099,7 @@
 
             if(!superGameActive && freespinsRemaining <= 0) {
                 gameBalance -= currentBet;
+                await updateBalanceDB();
             } else if(!superGameActive && freespinsRemaining > 0) {
                 freespinsRemaining--;
             }
@@ -1221,6 +1213,7 @@
             document.getElementById('superTimer').textContent = `⏱ ${SUPER_DURATION} сек | Спинов: 0/${SUPER_MAX_SPINS}`;
             document.getElementById('superBalanceAmount').textContent = superDeposit;
             stopAutoSpin();
+            updateBalanceDB();
             superGameTimer = setInterval(() => {
                 const elapsed = Math.floor((Date.now() - superGameStartTime) / 1000);
                 const remaining = SUPER_DURATION - elapsed;
@@ -1230,7 +1223,6 @@
                     document.getElementById('superTimer').textContent = `⏱ ${remaining} сек | Спинов: ${superGameSpins}/${SUPER_MAX_SPINS}`;
                 }
             }, 500);
-            updateBalanceDB();
             updateUI();
             document.getElementById('winMessage').textContent = '💥 СУПЕР-ИГРА АКТИВИРОВАНА! Депозит заморожен. Жми Крутить!';
         }
