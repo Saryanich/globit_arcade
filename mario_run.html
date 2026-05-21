@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Mario Run | 2D Платформер с телепортами</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+    body { background: #5c94fc; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; touch-action: manipulation; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    
+    #gameContainer {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      max-width: 900px;
+      max-height: 600px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #5c94fc 0%, #7ec8f8 40%, #c8e8f8 100%);
+    }
+    
+    canvas { display: block; width: 100%; height: 100%; }
+    
+    #authOverlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(180deg, #5c94fc 0%, #1a1a4e 50%, #0d0d35 100%);
+      z-index: 400; display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+    #authOverlay.hidden { display: none; }
+    .auth-container {
+      width: 90%; max-width: 420px; background: rgba(10,20,45,0.85);
+      backdrop-filter: blur(20px); border-radius: 40px; border: 1px solid rgba(229,37,33,0.3);
+      padding: 2rem; box-shadow: 0 25px 45px rgba(0,0,0,0.5);
+      color: white; text-align: center;
+    }
+    .auth-logo { 
+      width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1rem; 
+      border: 3px solid #e52521; box-shadow: 0 0 20px #e52521; 
+      background: white; font-size: 3rem; display: flex; align-items: center; justify-content: center;
+    }
+    .auth-title { 
+      font-size: 2rem; font-weight: 900; color: #e52521; 
+      text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(0,0,0,0.3); letter-spacing: 2px; 
+    }
+    .auth-sub { color: #fbd000; margin-bottom: 1.5rem; font-size: 0.9rem; }
+    .input-field { 
+      width: 100%; padding: 14px 18px; margin: 12px 0; 
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(229,37,33,0.3); 
+      border-radius: 60px; color: white; font-size: 1rem; outline: none; 
+    }
+    .input-field:focus { border-color: #e52521; box-shadow: 0 0 15px rgba(229,37,33,0.3); }
+    .btn-auth { 
+      width: 100%; padding: 14px; border-radius: 60px; font-weight: bold; 
+      font-size: 1.1rem; border: none; margin-top: 12px; cursor: pointer; transition: 0.2s; 
+    }
+    .btn-primary { background: #e52521; color: white; }
+    .btn-secondary { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; }
+    .btn-auth:active { transform: scale(0.97); }
+    .message { margin-top: 12px; font-size: 0.85rem; color: #fbd000; }
+    .hidden { display: none; }
+    
+    #menuScreen {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(180deg, #5c94fc 0%, #1a1a4e 50%, #0d0d35 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 300; gap: 12px; padding: 20px;
+    }
+    #menuScreen.hidden { display: none; }
+    .menu-title { 
+      font-size: clamp(28px, 6vw, 48px); font-weight: 900; color: #e52521; 
+      text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(0,0,0,0.3); letter-spacing: 3px; text-align: center; 
+    }
+    .menu-subtitle { font-size: clamp(12px, 2.5vw, 16px); color: #fbd000; text-align: center; }
+    .menu-section { 
+      background: rgba(255,255,255,0.05); border-radius: 20px; padding: 15px; 
+      width: 90%; max-width: 380px; backdrop-filter: blur(10px); 
+      border: 1px solid rgba(255,255,255,0.1); 
+    }
+    .section-label { 
+      color: #fbd000; font-size: clamp(11px, 2vw, 13px); 
+      text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; text-align: center; 
+    }
+    .char-selector, .difficulty-selector { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+    .char-option, .diff-option { 
+      padding: 10px 12px; border-radius: 15px; background: rgba(255,255,255,0.08); 
+      color: #ccc; cursor: pointer; transition: all 0.3s; text-align: center; 
+      font-weight: 600; border: 2px solid transparent; flex: 1; min-width: 70px; font-size: 0.85rem;
+    }
+    .char-option.selected, .diff-option.selected { 
+      border-color: #e52521; background: rgba(229,37,33,0.2); color: #fff; 
+      box-shadow: 0 0 15px rgba(229,37,33,0.3); 
+    }
+    .play-button, .menu-rating-btn { 
+      padding: 16px 40px; font-size: clamp(16px, 3.5vw, 22px); font-weight: 900; 
+      color: white; border: none; border-radius: 50px; 
+      cursor: pointer; letter-spacing: 2px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+      transition: all 0.3s; text-transform: uppercase; width: 90%; max-width: 380px;
+    }
+    .play-button { 
+      background: #e52521; border: 3px solid #fff; 
+      box-shadow: 0 10px 30px rgba(229,37,33,0.5);
+    }
+    .menu-rating-btn {
+      background: linear-gradient(135deg, #fbd000, #ffaa00);
+      border: 3px solid #fff; color: #4a2a15;
+      box-shadow: 0 10px 30px rgba(251,208,0,0.4);
+    }
+    .play-button:active, .menu-rating-btn:active { transform: scale(0.97); }
+    
+    #gameUI { 
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+      pointer-events: none; z-index: 50; 
+    }
+    #scoreDisplay, #coinsDisplay, #livesDisplay, #secretDisplay, #teleportHint { 
+      position: absolute; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); 
+      padding: 8px 14px; border-radius: 20px; font-weight: bold; font-size: 0.85rem;
+    }
+    #scoreDisplay { top: 10px; left: 10px; color: #fbd000; border: 1px solid rgba(251,208,0,0.3); }
+    #coinsDisplay { top: 10px; right: 10px; color: #fbd000; border: 1px solid rgba(251,208,0,0.3); }
+    #livesDisplay { top: 55px; left: 10px; font-size: 1rem; color: #e52521; border: 1px solid rgba(229,37,33,0.5); }
+    #secretDisplay { top: 95px; left: 10px; font-size: 0.8rem; color: #ff69b4; border: 1px solid rgba(255,105,180,0.5); display: none; }
+    #teleportHint {
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      color: #00ff88; border: 2px solid #00ff88; font-size: 1.1rem;
+      display: none; z-index: 70; pointer-events: none;
+      animation: hintPulse 0.8s infinite;
+    }
+    @keyframes hintPulse {
+      0%,100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.05); }
+    }
+    
+    #mobileControls { 
+      position: absolute; bottom: 15px; left: 0; right: 0; 
+      display: flex; justify-content: center; align-items: center; gap: 10px; 
+      padding: 0 10px; pointer-events: auto; 
+    }
+    .ctrl-btn { 
+      width: 55px; height: 55px; border-radius: 50%; 
+      background: rgba(255,255,255,0.25); backdrop-filter: blur(10px); 
+      border: 3px solid rgba(255,255,255,0.5); color: white; 
+      font-size: 1.3rem; display: flex; align-items: center; justify-content: center; 
+      cursor: pointer; transition: 0.1s; font-weight: bold; 
+    }
+    .ctrl-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.4); }
+    #jumpBtn { background: rgba(229,37,33,0.5); border-color: rgba(229,37,33,0.7); width: 65px; height: 65px; font-size: 1.6rem; }
+    #duckBtn { background: rgba(68,119,255,0.5); border-color: rgba(68,119,255,0.7); }
+    #forwardBtn { background: rgba(0,200,100,0.5); border-color: rgba(0,200,100,0.7); }
+    #backwardBtn { background: rgba(255,150,0,0.5); border-color: rgba(255,150,0,0.7); }
+    
+    #desktopHint { 
+      position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); 
+      background: rgba(0,0,0,0.5); padding: 5px 14px; border-radius: 15px; 
+      font-size: 11px; color: rgba(255,255,255,0.7); white-space: nowrap; 
+      pointer-events: none; text-align: center;
+    }
+    @media (max-width: 800px) { #desktopHint { display: none; } }
+    
+    #gameOverScreen {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8); display: none; flex-direction: column;
+      align-items: center; justify-content: center; z-index: 200;
+      backdrop-filter: blur(8px); gap: 12px; padding: 20px;
+    }
+    #gameOverScreen.visible { display: flex; }
+    .gameover-title { 
+      font-size: clamp(28px, 8vw, 42px); font-weight: 900; 
+      color: #e52521; text-shadow: 2px 2px 0 #fff; 
+    }
+    .gameover-score { font-size: clamp(16px, 4vw, 22px); color: #fbd000; }
+    .restart-btn, .menu-btn { 
+      padding: 12px 25px; font-size: clamp(14px, 3vw, 18px); font-weight: bold; 
+      border-radius: 50px; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; 
+    }
+    .restart-btn { background: #e52521; color: white; border: 2px solid #fff; }
+    .menu-btn { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); }
+    
+    .leaderboard-modal {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.95); backdrop-filter: blur(20px);
+      z-index: 500; display: flex; align-items: center; justify-content: center;
+    }
+    .leaderboard-modal.hidden { display: none; }
+    .leaderboard-card {
+      background: rgba(10,20,45,0.95); border-radius: 30px; width: 90%; max-width: 450px;
+      padding: 1.5rem; border: 1px solid #e52521;
+    }
+    .leaderboard-card h2 { text-align: center; color: #fbd000; margin-bottom: 1rem; font-size: 1.2rem; }
+    .leaderboard-list { max-height: 350px; overflow-y: auto; }
+    .rank-item { 
+      display: flex; justify-content: space-between; padding: 10px; 
+      margin: 4px 0; background: rgba(255,255,255,0.05); border-radius: 15px; 
+      color: white; font-size: 0.9rem; 
+    }
+    .rank-num { font-weight: bold; color: #fbd000; width: 40px; }
+    .rank-name { flex: 1; }
+    .rank-score { font-weight: bold; color: #88ff88; }
+    .close-leaderboard { 
+      width: 100%; padding: 10px; margin-top: 15px; background: #e52521; 
+      border: none; border-radius: 30px; color: white; font-weight: bold; cursor: pointer; 
+    }
+    
+    .secret-popup {
+      position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.9); color: #fbd000; padding: 15px 25px;
+      border-radius: 20px; font-weight: bold; font-size: 1.2rem;
+      border: 2px solid #fbd000; z-index: 100; pointer-events: none;
+      animation: popupFade 2s forwards;
+    }
+    @keyframes popupFade {
+      0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      80% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    }
+    
+    .teleport-flash {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,255,100,0.3); z-index: 60; pointer-events: none;
+      animation: flashFade 0.5s forwards;
+    }
+    @keyframes flashFade {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="menuScreen" class="hidden">
+      <div class="menu-title">🍄 MARIO RUN</div>
+      <div class="menu-subtitle">2D Платформер с телепортами</div>
+      
+      <div class="menu-section">
+        <div class="section-label">👤 Выберите персонажа</div>
+        <div class="char-selector" id="charSelector">
+          <div class="char-option selected" data-char="0">🔴 Марио</div>
+          <div class="char-option" data-char="1">🟢 Луиджи</div>
+          <div class="char-option" data-char="2">🟡 Тоад</div>
+        </div>
+      </div>
+      
+      <div class="menu-section">
+        <div class="section-label">⚡ Сложность</div>
+        <div class="difficulty-selector" id="difficultySelector">
+          <div class="diff-option" data-diff="0">Лёгкая</div>
+          <div class="diff-option selected" data-diff="1">Средняя</div>
+          <div class="diff-option" data-diff="2">Сложная</div>
+        </div>
+      </div>
+      
+      <button class="play-button" id="playButton">▶ ИГРАТЬ</button>
+      <button class="menu-rating-btn" id="menuRatingBtn">🏆 ТАБЛИЦА РЕКОРДОВ</button>
+    </div>
+
+    <div id="gameUI" class="hidden">
+      <div id="scoreDisplay">⭐ 0</div>
+      <div id="coinsDisplay">🪙 0</div>
+      <div id="livesDisplay">❤️❤️❤️</div>
+      <div id="secretDisplay">🎁 Секретов: 0</div>
+      <div id="teleportHint">🌀 ТРУБА-ТЕЛЕПОРТ!</div>
+      <div id="mobileControls">
+        <div class="ctrl-btn" id="backwardBtn">◀</div>
+        <div class="ctrl-btn" id="duckBtn">⬇</div>
+        <div class="ctrl-btn" id="jumpBtn">⬆</div>
+        <div class="ctrl-btn" id="forwardBtn">▶</div>
+      </div>
+      <div id="desktopHint">← → движение | ПРОБЕЛ/↑ супер-прыжок | ↓ присесть | 🟢 трубы = телепорт!</div>
+    </div>
+
+    <div id="gameOverScreen">
+      <div class="gameover-title">GAME OVER!</div>
+      <div class="gameover-score">Очки: <span id="finalScore">0</span></div>
+      <div class="gameover-score">Монеты: <span id="finalCoins">0</span></div>
+      <div class="gameover-score">🔮 Секретов: <span id="finalSecrets">0</span></div>
+      <button class="restart-btn" id="restartFromOver">🔄 Заново</button>
+      <button class="menu-btn" id="menuFromOver">🏠 В меню</button>
+    </div>
+  </div>
+
+  <div id="authOverlay">
+    <div class="auth-container">
+      <div class="auth-logo">🍄</div>
+      <div class="auth-title">MARIO RUN</div>
+      <div class="auth-sub">⭐ Войдите или играйте как гость</div>
+      <input type="text" id="loginEmail" class="input-field" placeholder="Email или Global ID">
+      <input type="password" id="loginPass" class="input-field" placeholder="Пароль">
+      <button class="btn-auth btn-primary" id="doLoginBtn">🚀 Войти</button>
+      <button class="btn-auth btn-secondary" id="guestBtn">🎮 Играть как гость</button>
+      <div id="authMsg" class="message"></div>
+    </div>
+  </div>
+
+  <div id="leaderboardModal" class="leaderboard-modal hidden">
+    <div class="leaderboard-card">
+      <h2>🏆 ТАБЛИЦА РЕКОРДОВ MARIO</h2>
+      <div id="leaderboardList" class="leaderboard-list">Загрузка...</div>
+      <button class="close-leaderboard" id="closeLeaderboardBtn">Закрыть</button>
+    </div>
+  </div>
+
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyA6GGJxAiao77U7_9mBUEjftmS_FnSWbIw",
+      authDomain: "glob-data.firebaseapp.com",
+      projectId: "glob-data",
+      storageBucket: "glob-data.firebasestorage.app",
+      messagingSenderId: "122757049174",
+      appId: "1:122757049174:web:ebb425edd0e1a8ea9a44f7"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    let currentUser = null;
+    let isGuest = false;
+    
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('gameContainer');
+    
+    let gameWidth, gameHeight;
+    
+    function resizeCanvas() {
+      const rect = container.getBoundingClientRect();
+      gameWidth = rect.width;
+      gameHeight = rect.height;
+      canvas.width = gameWidth;
+      canvas.height = gameHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    
+    let selectedChar = 0, selectedDifficulty = 1;
+    
+    const DIFFICULTY_SETTINGS = [
+      { baseSpeed: 3, spawnRate: 90, gravity: 0.5, maxSpeed: 7, jumpPower: 12 },
+      { baseSpeed: 4, spawnRate: 65, gravity: 0.55, maxSpeed: 9, jumpPower: 11 },
+      { baseSpeed: 5, spawnRate: 48, gravity: 0.6, maxSpeed: 11, jumpPower: 10 }
+    ];
+    let difficulty = DIFFICULTY_SETTINGS[1];
+    
+    const state = {
+      gameActive: false,
+      score: 0,
+      coins: 0,
+      secrets: 0,
+      lives: 3,
+      speed: 4,
+      baseSpeed: 4,
+      
+      cameraX: 0,
+      
+      playerX: 100,
+      playerY: 0,
+      playerWidth: 40,
+      playerHeight: 50,
+      playerVelocityY: 0,
+      playerVelocityX: 0,
+      isJumping: false,
+      isDucking: false,
+      jumpCount: 0,
+      maxJumps: 2,
+      grounded: true,
+      moveDirection: 0,
+      canTeleport: true,
+      teleportCooldown: 0,
+      
+      worldLeftBound: 60,
+      worldRightBound: 8000,
+      
+      groundY: 0,
+      
+      obstacles: [],
+      coinItems: [],
+      secretBoxes: [],
+      teleportPipes: [],
+      
+      clouds: [],
+      mountains: [],
+      bushes: [],
+      
+      isInvincible: false,
+      invincibleTimer: 0,
+      particles: [],
+      
+      frameCount: 0,
+      runFrame: 0,
+      
+      spawnObstacleCounter: 0,
+      spawnCoinCounter: 0,
+      spawnBoxCounter: 0,
+      spawnPipeCounter: 0
+    };
+    
+    function worldToScreen(worldX) { return worldX - state.cameraX; }
+    
+    const CHAR_STYLES = [
+      { hat: '#e52521', shirt: '#e52521', overalls: '#1a47b8', skin: '#ffcc99', shoes: '#6b3a1f', name: 'Mario', emblem: 'M' },
+      { hat: '#43b047', shirt: '#43b047', overalls: '#1a47b8', skin: '#ffcc99', shoes: '#5c3a1f', name: 'Luigi', emblem: 'L' },
+      { hat: '#fbd000', shirt: '#1a47b8', overalls: '#fbd000', skin: '#ffe0bd', shoes: '#8b4513', name: 'Toad', emblem: '⭐' }
+    ];
+    
+    async function ensureUserDoc(uid, email) {
+      const ref = db.collection("users").doc(uid);
+      const snap = await ref.get();
+      if(!snap.exists){
+        await ref.set({ email, globalId: email.split('@')[0], displayName: email.split('@')[0], role: "user", createdAt: new Date() });
+      }
+      return ref;
+    }
+    
+    async function submitHighScore(score, coins, secrets){ 
+      if(!currentUser || isGuest) return;
+      try {
+        const userDoc = await db.collection('users').doc(currentUser.uid).get();
+        const userData = userDoc.data();
+        const globalId = userData?.globalId || currentUser.email.split('@')[0];
+        const scoreRef = db.collection('score').doc('mario').collection('records').doc(globalId);
+        const scoreDoc = await scoreRef.get();
+        const totalScore = score + (coins * 5) + (secrets * 50);
+        if (!scoreDoc.exists) {
+          await scoreRef.set({
+            score: totalScore, details: { runScore: score, coins: coins, secrets: secrets },
+            globalId: globalId, email: currentUser.email,
+            displayName: userData?.displayName || globalId,
+            createdAt: new Date(), updatedAt: new Date()
+          });
+        } else {
+          const currentBest = scoreDoc.data().score || 0;
+          if (totalScore > currentBest) {
+            await scoreRef.update({
+              score: totalScore, details: { runScore: score, coins: coins, secrets: secrets },
+              updatedAt: new Date()
+            });
+          }
+        }
+      } catch (e) { console.error('Ошибка сохранения рекорда:', e); }
+    }
+    
+    async function showLeaderboard(){
+      document.getElementById('leaderboardList').innerHTML = 'Загрузка...';
+      document.getElementById('leaderboardModal').classList.remove('hidden');
+      try{
+        const snapshot = await db.collection('score').doc('mario').collection('records').orderBy('score', 'desc').limit(20).get();
+        const listDiv = document.getElementById('leaderboardList');
+        if(snapshot.empty){ listDiv.innerHTML = '<div style="color: #aaa; text-align: center; padding: 20px;">Нет рекордов</div>'; return; }
+        let html = ''; let rank = 1;
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const name = data.displayName || data.globalId || 'Аноним';
+          const score = data.score || 0;
+          const isCurrentUser = currentUser && !isGuest && data.globalId === (currentUser.email?.split('@')[0]);
+          html += `<div class="rank-item" style="${isCurrentUser ? 'background: rgba(251,208,0,0.2); border: 1px solid #fbd000;' : ''}">
+            <span class="rank-num">${rank}</span><span class="rank-name">${name}${isCurrentUser ? ' 👈' : ''}</span><span class="rank-score">${score}</span></div>`;
+          rank++;
+        });
+        listDiv.innerHTML = html;
+      } catch(e){ document.getElementById('leaderboardList').innerHTML = '<div style="color: #e52521; text-align: center; padding: 20px;">Ошибка загрузки</div>'; }
+    }
+    
+    const SoundEngine = {
+      ctx: null, enabled: false,
+      init() { try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} },
+      unlock() { if(this.ctx && this.ctx.state !== 'running'){ this.ctx.resume(); this.enabled = true; } },
+      play(freq, type, duration, vol=0.15) {
+        if(!this.enabled || !this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        gain.gain.value = vol; osc.frequency.value = freq; osc.type = type;
+        gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime+duration);
+        osc.start(); osc.stop(this.ctx.currentTime+duration+0.05);
+      },
+      jump() { this.play(500, 'square', 0.2, 0.2); },
+      coin() { this.play(1200, 'square', 0.15, 0.15); },
+      secret() { this.play(800, 'square', 0.1, 0.3); setTimeout(() => this.play(1000, 'square', 0.1, 0.3), 100); setTimeout(() => this.play(1400, 'square', 0.1, 0.3), 200); },
+      teleport() { this.play(200, 'sine', 0.2, 0.5); setTimeout(() => this.play(400, 'sine', 0.2, 0.5), 150); setTimeout(() => this.play(800, 'sine', 0.2, 0.5), 300); },
+      hit() { this.play(150, 'sawtooth', 0.3, 0.2); },
+      gameOver() { this.play(100, 'square', 0.5, 0.2); }
+    };
+    SoundEngine.init();
+    window.addEventListener('touchstart', ()=>{ SoundEngine.unlock(); }, { once: true });
+    window.addEventListener('click', ()=>{ SoundEngine.unlock(); });
+    
+    // Drawing functions
+    function drawCharacter(screenX, y, style, isDucking, runFrame) {
+      const s = style;
+      const scale = isDucking ? 0.7 : 1;
+      const dy = isDucking ? 15 : 0;
+      
+      ctx.save();
+      ctx.translate(screenX, y + dy);
+      ctx.scale(scale, scale);
+      
+      const legSwing = Math.sin(runFrame * 0.3) * (state.grounded ? 8 : 3);
+      
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      ctx.beginPath();
+      ctx.ellipse(0, 27, 14, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.fillStyle = s.shoes;
+      ctx.fillRect(-14, 18, 10, 8);
+      ctx.fillRect(4, 18, 10, 8);
+      if(state.grounded) {
+        ctx.fillRect(-14 + legSwing * 0.3, 18, 10, 8);
+        ctx.fillRect(4 - legSwing * 0.3, 18, 10, 8);
+      }
+      
+      ctx.fillStyle = s.overalls;
+      ctx.fillRect(-12, 10, 10, 12);
+      ctx.fillRect(2, 10, 10, 12);
+      
+      ctx.fillStyle = s.shirt;
+      ctx.beginPath();
+      ctx.roundRect(-13, -8, 26, 22, 6);
+      ctx.fill();
+      
+      ctx.fillStyle = s.overalls;
+      ctx.beginPath();
+      ctx.roundRect(-8, 2, 16, 14, 4);
+      ctx.fill();
+      ctx.fillRect(-10, -4, 4, 10);
+      ctx.fillRect(6, -4, 4, 10);
+      
+      ctx.fillStyle = '#fbd000';
+      ctx.fillRect(-9, 8, 18, 2);
+      ctx.fillRect(-2, 7, 4, 4);
+      
+      ctx.fillStyle = s.skin;
+      const armSwing = Math.cos(runFrame * 0.3) * (state.grounded ? 6 : 2);
+      ctx.beginPath();
+      ctx.roundRect(-17, -6 + armSwing, 6, 14, 3);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.roundRect(11, -6 - armSwing, 6, 14, 3);
+      ctx.fill();
+      
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(-14, 10 + armSwing, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(14, 10 - armSwing, 5, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.fillStyle = s.skin;
+      ctx.beginPath();
+      ctx.arc(0, -16, 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(-12, -16, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(12, -16, 4, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.fillStyle = s.hat;
+      ctx.beginPath();
+      ctx.arc(0, -20, 13, Math.PI, 0);
+      ctx.fill();
+      ctx.fillRect(-13, -22, 26, 8);
+      ctx.beginPath();
+      ctx.roundRect(-15, -14, 30, 5, 3);
+      ctx.fill();
+      
+      if(s.emblem) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 10px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(s.emblem, 0, -17);
+      }
+      
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(-4, -18, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(5, -18, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.arc(-3, -17, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(6, -17, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(-4, -19, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(5, -19, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.fillStyle = '#e8a870';
+      ctx.beginPath();
+      ctx.arc(0.5, -13, 3, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.fillStyle = '#8b4513';
+      ctx.beginPath();
+      ctx.ellipse(-3, -11, 5, 2.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(4, -11, 5, 2.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.strokeStyle = '#8b4513';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(0.5, -9, 4, 0.1, Math.PI - 0.1);
+      ctx.stroke();
+      
+      ctx.restore();
+    }
+    
+    function drawGoomba(screenX, y) {
+      ctx.save();
+      ctx.translate(screenX, y);
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      ctx.beginPath();
+      ctx.ellipse(0, 18, 13, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillRect(-13, 8, 8, 10);
+      ctx.fillRect(5, 8, 8, 10);
+      ctx.fillStyle = '#8b4513';
+      ctx.beginPath();
+      ctx.roundRect(-12, -8, 24, 20, 8);
+      ctx.fill();
+      ctx.fillStyle = '#a0522d';
+      ctx.beginPath();
+      ctx.roundRect(-9, -4, 18, 12, 6);
+      ctx.fill();
+      ctx.fillStyle = '#a0522d';
+      ctx.beginPath();
+      ctx.arc(0, -10, 13, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#1a1a1a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-9, -16);
+      ctx.lineTo(-3, -13);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(9, -16);
+      ctx.lineTo(3, -13);
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(-5, -12, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(5, -12, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.arc(-4, -11, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(6, -11, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#1a1a1a';
+      ctx.beginPath();
+      ctx.arc(0, -5, 4, 0, Math.PI);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(-2, -5, 2, 2);
+      ctx.fillRect(1, -5, 2, 2);
+      ctx.restore();
+    }
+    
+    function drawTeleportPipe(screenX, y, height, isEntry) {
+      ctx.save();
+      ctx.translate(screenX, y);
+      
+      // Glow effect
+      const glowGradient = ctx.createRadialGradient(0, height/2, 5, 0, height/2, 35);
+      glowGradient.addColorStop(0, 'rgba(0,255,100,0.4)');
+      glowGradient.addColorStop(1, 'rgba(0,255,100,0)');
+      ctx.fillStyle = glowGradient;
+      ctx.beginPath();
+      ctx.arc(0, height/2, 35, 0, Math.PI * 2);
+      ctx.fill();
+      
+      const gradient = ctx.createLinearGradient(-15, 0, 15, 0);
+      if(isEntry) {
+        gradient.addColorStop(0, '#1a6b1a');
+        gradient.addColorStop(0.3, '#2daf2d');
+        gradient.addColorStop(0.5, '#40e040');
+        gradient.addColorStop(0.7, '#2daf2d');
+        gradient.addColorStop(1, '#1a6b1a');
+      } else {
+        gradient.addColorStop(0, '#6b1a6b');
+        gradient.addColorStop(0.3, '#af2daf');
+        gradient.addColorStop(0.5, '#e040e0');
+        gradient.addColorStop(0.7, '#af2daf');
+        gradient.addColorStop(1, '#6b1a6b');
+      }
+      ctx.fillStyle = gradient;
+      ctx.fillRect(-14, 0, 28, height);
+      
+      ctx.fillStyle = isEntry ? '#2daf2d' : '#af2daf';
+      ctx.fillRect(-17, -5, 34, 10);
+      ctx.fillStyle = isEntry ? '#40e040' : '#e040e0';
+      ctx.fillRect(-17, -5, 34, 4);
+      
+      // Arrow or star on pipe
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 16px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(isEntry ? '↓' : '⭐', 0, height/2 + 5);
+      
+      ctx.restore();
+    }
+    
+    function drawSecretBox(screenX, y, opened) {
+      ctx.save();
+      ctx.translate(screenX, y);
+      if(opened) {
+        ctx.fillStyle = '#8b7355';
+        ctx.fillRect(-16, 5, 32, 12);
+        ctx.strokeStyle = '#6b5335';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-16, 5, 32, 12);
+      } else {
+        const gradient = ctx.createLinearGradient(-16, -12, 16, 12);
+        gradient.addColorStop(0, '#ffb833');
+        gradient.addColorStop(0.3, '#ffcc00');
+        gradient.addColorStop(0.7, '#f5a623');
+        gradient.addColorStop(1, '#d4891a');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(-16, -12, 32, 24);
+        ctx.strokeStyle = '#c17d11';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(-16, -12, 32, 24);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 18px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('?', 0, 0);
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.fillRect(-14, -10, 12, 6);
+      }
+      ctx.restore();
+    }
+    
+    function drawCoin(screenX, y, rotation) {
+      ctx.save();
+      ctx.translate(screenX, y);
+      ctx.scale(Math.abs(Math.cos(rotation)), 1);
+      ctx.fillStyle = 'rgba(251,208,0,0.3)';
+      ctx.beginPath();
+      ctx.arc(0, 0, 14, 0, Math.PI * 2);
+      ctx.fill();
+      const gradient = ctx.createRadialGradient(-2, -2, 2, 0, 0, 12);
+      gradient.addColorStop(0, '#fff8a0');
+      gradient.addColorStop(0.5, '#fbd000');
+      gradient.addColorStop(1, '#b8960f');
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(0, 0, 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#b8960f';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, 0, 12, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = '#b8960f';
+      ctx.font = 'bold 12px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('⭐', 0, 1);
+      ctx.restore();
+    }
+    
+    function drawCloud(screenX, y, size) {
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(screenX, y, size, 0, Math.PI * 2);
+      ctx.arc(screenX + size * 0.8, y - size * 0.2, size * 0.7, 0, Math.PI * 2);
+      ctx.arc(screenX + size * 1.4, y, size * 0.6, 0, Math.PI * 2);
+      ctx.arc(screenX - size * 0.7, y - size * 0.1, size * 0.65, 0, Math.PI * 2);
+      ctx.arc(screenX + size * 0.4, y - size * 0.4, size * 0.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    function drawMountain(screenX, y, width, height) {
+      ctx.fillStyle = '#7ab648';
+      ctx.beginPath();
+      ctx.moveTo(screenX - width/2, y);
+      ctx.lineTo(screenX, y - height);
+      ctx.lineTo(screenX + width/2, y);
+      ctx.closePath();
+      ctx.fill();
+      if(height > 60) {
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(screenX, y - height);
+        ctx.lineTo(screenX - 8, y - height + 15);
+        ctx.lineTo(screenX + 8, y - height + 15);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+    
+    function drawBush(screenX, y, size) {
+      ctx.fillStyle = '#43a047';
+      ctx.beginPath();
+      ctx.arc(screenX, y, size, 0, Math.PI * 2);
+      ctx.arc(screenX + size * 0.6, y - size * 0.2, size * 0.7, 0, Math.PI * 2);
+      ctx.arc(screenX + size * 1.1, y, size * 0.55, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#66bb6a';
+      ctx.beginPath();
+      ctx.arc(screenX + size * 0.3, y - size * 0.3, size * 0.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    function drawParticle(screenX, y, color, size) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(screenX, y, size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    function drawGround() {
+      const groundGradient = ctx.createLinearGradient(0, state.groundY, 0, state.groundY + 80);
+      groundGradient.addColorStop(0, '#8b5e3c');
+      groundGradient.addColorStop(0.15, '#a0724a');
+      groundGradient.addColorStop(0.5, '#6b4226');
+      groundGradient.addColorStop(1, '#4a2a15');
+      ctx.fillStyle = groundGradient;
+      ctx.fillRect(0, state.groundY, gameWidth, gameHeight - state.groundY);
+      ctx.fillStyle = '#43b047';
+      ctx.fillRect(0, state.groundY - 3, gameWidth, 8);
+      ctx.fillStyle = '#66bb6a';
+      for(let i=0; i<gameWidth; i+=8) {
+        const h = 3 + Math.sin((i + state.cameraX) * 0.3 + state.frameCount * 0.02) * 2;
+        ctx.fillRect(i, state.groundY - h, 4, h);
+      }
+    }
+    
+    function showPopup(text, className) {
+      const popup = document.createElement('div');
+      popup.className = className;
+      popup.textContent = text;
+      container.appendChild(popup);
+      setTimeout(() => popup.remove(), 2000);
+    }
+    
+    function showTeleportFlash() {
+      const flash = document.createElement('div');
+      flash.className = 'teleport-flash';
+      container.appendChild(flash);
+      setTimeout(() => flash.remove(), 500);
+    }
+    
+    function getSpawnX() {
+      return Math.max(state.playerX + gameWidth + 100, state.cameraX + gameWidth + 150) + Math.random() * 200;
+    }
+    
+    function spawnObstacle() {
+      const type = Math.random();
+      let obs = { worldX: getSpawnX(), type: '', width: 0, height: 0, passed: false };
+      
+      if(type < 0.5) {
+        obs.type = 'goomba';
+        obs.width = 32;
+        obs.height = 32;
+        obs.y = state.groundY - 32;
+      } else {
+        obs.type = 'block';
+        obs.width = 32;
+        obs.height = 32;
+        obs.y = state.groundY - 60 - Math.random() * 20;
+      }
+      
+      state.obstacles.push(obs);
+    }
+    
+    function spawnCoin() {
+      state.coinItems.push({
+        worldX: getSpawnX(),
+        y: state.groundY - 40 - Math.random() * 60,
+        width: 24, height: 24,
+        collected: false, rotation: 0
+      });
+    }
+    
+    function spawnSecretBox() {
+      state.secretBoxes.push({
+        worldX: getSpawnX(),
+        y: state.groundY - 50 - Math.random() * 30,
+        width: 32, height: 24,
+        opened: false
+      });
+    }
+    
+    function spawnTeleportPipe() {
+      const entryX = getSpawnX();
+      const exitX = entryX + 400 + Math.random() * 600;
+      
+      state.teleportPipes.push({
+        worldX: entryX,
+        y: state.groundY - 70,
+        width: 34,
+        height: 70,
+        isEntry: true,
+        linkedExitX: exitX,
+        used: false
+      });
+      
+      state.teleportPipes.push({
+        worldX: exitX,
+        y: state.groundY - 50,
+        width: 34,
+        height: 50,
+        isEntry: false,
+        linkedEntryX: entryX,
+        used: false
+      });
+    }
+    
+    function spawnParticles(worldX, y, color, count) {
+      for(let i=0; i<count; i++) {
+        state.particles.push({
+          worldX: worldX,
+          y: y,
+          vx: (Math.random() - 0.5) * 4,
+          vy: (Math.random() - 1) * 6 - 2,
+          color: color,
+          size: 2 + Math.random() * 3,
+          life: 30 + Math.random() * 20
+        });
+      }
+    }
+    
+    function openSecretBox(box) {
+      if(box.opened) return;
+      box.opened = true;
+      SoundEngine.secret();
+      
+      const rewards = [
+        { type: 'coins', amount: 5, text: '🪙 +5 монет!' },
+        { type: 'coins', amount: 10, text: '🪙 +10 монет!' },
+        { type: 'score', amount: 50, text: '⭐ +50 очков!' },
+        { type: 'lives', amount: 1, text: '❤️ +1 жизнь!' },
+        { type: 'secrets', amount: 1, text: '🔮 Секрет найден!' },
+        { type: 'invincible', amount: 0, text: '✨ Неуязвимость!' }
+      ];
+      
+      const reward = rewards[Math.floor(Math.random() * rewards.length)];
+      
+      switch(reward.type) {
+        case 'coins': state.coins += reward.amount; break;
+        case 'score': state.score += reward.amount; break;
+        case 'lives': state.lives = Math.min(5, state.lives + reward.amount); break;
+        case 'secrets':
+          state.secrets += reward.amount;
+          document.getElementById('secretDisplay').style.display = 'block';
+          break;
+        case 'invincible':
+          state.isInvincible = true;
+          state.invincibleTimer = 180;
+          break;
+      }
+      
+      showPopup(reward.text, 'secret-popup');
+      spawnParticles(box.worldX + 16, box.y, '#ff69b4', 15);
+      updateUI();
+    }
+    
+    function teleportPlayer(pipe) {
+      if(!state.canTeleport || pipe.used) return;
+      
+      // Find the exit pipe
+      const exitPipe = state.teleportPipes.find(p => p.isEntry === false && p.worldX === pipe.linkedExitX);
+      if(!exitPipe) return;
+      
+      pipe.used = true;
+      exitPipe.used = true;
+      state.canTeleport = false;
+      state.teleportCooldown = 60;
+      
+      SoundEngine.teleport();
+      showTeleportFlash();
+      document.getElementById('teleportHint').style.display = 'block';
+      setTimeout(() => { document.getElementById('teleportHint').style.display = 'none'; }, 1500);
+      
+      spawnParticles(state.playerX + 20, state.playerY + 25, '#00ff88', 20);
+      
+      // Move player to exit pipe
+      state.playerX = exitPipe.worldX + exitPipe.width/2;
+      state.playerY = exitPipe.y - state.playerHeight - 20;
+      state.playerVelocityY = -3;
+      state.isJumping = true;
+      state.jumpCount = 1;
+      state.grounded = false;
+      
+      // Score bonus for teleporting
+      state.score += 25;
+      
+      spawnParticles(state.playerX + 20, state.playerY + 25, '#ff00ff', 20);
+      updateUI();
+    }
+    
+    function jump() {
+      if(!state.gameActive) return;
+      if(state.isDucking) return;
+      
+      if(state.jumpCount < state.maxJumps) {
+        state.playerVelocityY = -(difficulty.jumpPower + (state.jumpCount * 2));
+        state.isJumping = true;
+        state.jumpCount++;
+        state.grounded = false;
+        SoundEngine.jump();
+        spawnParticles(state.playerX + 20, state.playerY + 45, '#ffffff', 8);
+        
+        // Check secret boxes from below
+        state.secretBoxes.forEach(box => {
+          if(!box.opened) {
+            const px = state.playerX + 10;
+            const py = state.playerY + state.playerHeight;
+            if(px + 30 > box.worldX && px < box.worldX + box.width &&
+               Math.abs((py - 10) - (box.y + box.height)) < 30) {
+              openSecretBox(box);
+            }
+          }
+        });
+      }
+    }
+    
+    function duck(isDucking) {
+      if(!state.gameActive) return;
+      if(state.isJumping) return;
+      state.isDucking = isDucking;
+      if(isDucking) {
+        state.playerHeight = 35;
+        state.playerWidth = 45;
+      } else {
+        state.playerHeight = 50;
+        state.playerWidth = 40;
+      }
+    }
+    
+    function moveForward() { state.moveDirection = 1; }
+    function moveBackward() { state.moveDirection = -1; }
+    function stopMoving() { state.moveDirection = 0; }
+    
+    function hitPlayer() {
+      if(state.isInvincible) return;
+      state.lives--;
+      SoundEngine.hit();
+      spawnParticles(state.playerX + 20, state.playerY + 25, '#e52521', 15);
+      updateUI();
+      if(state.lives <= 0) { gameOver(); }
+      else { state.isInvincible = true; state.invincibleTimer = 120; }
+    }
+    
+    function gameOver() {
+      if(!state.gameActive) return;
+      state.gameActive = false;
+      SoundEngine.gameOver();
+      submitHighScore(state.score, state.coins, state.secrets);
+      document.getElementById('finalScore').textContent = state.score;
+      document.getElementById('finalCoins').textContent = state.coins;
+      document.getElementById('finalSecrets').textContent = state.secrets;
+      document.getElementById('gameOverScreen').classList.add('visible');
+    }
+    
+    function updateUI() {
+      document.getElementById('scoreDisplay').innerHTML = `⭐ ${state.score}`;
+      document.getElementById('coinsDisplay').innerHTML = `🪙 ${state.coins}`;
+      document.getElementById('secretDisplay').innerHTML = `🎁 Секретов: ${state.secrets}`;
+      if(state.secrets > 0) document.getElementById('secretDisplay').style.display = 'block';
+      let hearts = '';
+      for(let i=0; i<Math.min(state.lives, 5); i++) hearts += '❤️';
+      document.getElementById('livesDisplay').innerHTML = hearts;
+    }
+    
+    function startGame() {
+      state.gameActive = true;
+      state.score = 0;
+      state.coins = 0;
+      state.secrets = 0;
+      state.lives = 3;
+      state.speed = DIFFICULTY_SETTINGS[selectedDifficulty].baseSpeed;
+      state.baseSpeed = state.speed;
+      state.playerX = 150;
+      state.playerY = 0;
+      state.playerVelocityY = 0;
+      state.playerVelocityX = 0;
+      state.isJumping = false;
+      state.isDucking = false;
+      state.jumpCount = 0;
+      state.grounded = true;
+      state.moveDirection = 0;
+      state.canTeleport = true;
+      state.teleportCooldown = 0;
+      state.obstacles = [];
+      state.coinItems = [];
+      state.secretBoxes = [];
+      state.teleportPipes = [];
+      state.particles = [];
+      state.isInvincible = false;
+      state.invincibleTimer = 0;
+      state.spawnObstacleCounter = 0;
+      state.spawnCoinCounter = 0;
+      state.spawnBoxCounter = 0;
+      state.spawnPipeCounter = 0;
+      state.playerHeight = 50;
+      state.playerWidth = 40;
+      state.frameCount = 0;
+      state.cameraX = 0;
+      state.playerY = state.groundY - 50;
+      
+      state.clouds = [];
+      state.mountains = [];
+      state.bushes = [];
+      
+      for(let i=0; i<15; i++) {
+        state.clouds.push({ worldX: Math.random() * 3000, y: 30 + Math.random() * 80, size: 20 + Math.random() * 30, speed: 0.3 + Math.random() * 0.5 });
+      }
+      for(let i=0; i<10; i++) {
+        state.mountains.push({ worldX: i * 400 + Math.random() * 100, y: state.groundY, width: 100 + Math.random() * 150, height: 40 + Math.random() * 80 });
+      }
+      for(let i=0; i<30; i++) {
+        state.bushes.push({ worldX: i * 200 + Math.random() * 150, y: state.groundY - 5, size: 12 + Math.random() * 15 });
+      }
+      
+      difficulty = DIFFICULTY_SETTINGS[selectedDifficulty];
+      document.getElementById('secretDisplay').style.display = 'none';
+      document.getElementById('teleportHint').style.display = 'none';
+      
+      updateUI();
+      document.getElementById('menuScreen').classList.add('hidden');
+      document.getElementById('gameUI').classList.remove('hidden');
+      document.getElementById('gameOverScreen').classList.remove('visible');
+      
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      document.getElementById('desktopHint').style.display = isMobile ? 'none' : 'block';
+      document.getElementById('mobileControls').style.display = isMobile ? 'flex' : 'none';
+    }
+    
+    function showMenu() {
+      if(state.gameActive) {
+        state.gameActive = false;
+        submitHighScore(state.score, state.coins, state.secrets);
+      }
+      document.getElementById('menuScreen').classList.remove('hidden');
+      document.getElementById('gameUI').classList.add('hidden');
+      document.getElementById('gameOverScreen').classList.remove('visible');
+    }
+    
+    function gameLoop() {
+      ctx.clearRect(0, 0, gameWidth, gameHeight);
+      state.groundY = gameHeight * 0.78;
+      
+      const skyGradient = ctx.createLinearGradient(0, 0, 0, state.groundY);
+      skyGradient.addColorStop(0, '#5c94fc');
+      skyGradient.addColorStop(0.6, '#7ec8f8');
+      skyGradient.addColorStop(1, '#c8e8f8');
+      ctx.fillStyle = skyGradient;
+      ctx.fillRect(0, 0, gameWidth, state.groundY);
+      
+      if(state.gameActive) {
+        state.frameCount++;
+        
+        // Движение только по кнопкам
+        const moveSpeed = state.moveDirection !== 0 ? state.speed * (state.moveDirection === 1 ? 2.5 : 2.0) : 0;
+        state.playerX += moveSpeed * (state.moveDirection === -1 ? -1 : 1);
+        
+        if(state.moveDirection !== 0) {
+          state.runFrame += state.speed * 0.5 * Math.sign(state.moveDirection);
+        }
+        
+        // Границы
+        state.playerX = Math.max(state.worldLeftBound, Math.min(state.playerX, state.worldRightBound));
+        
+        // Камера следует за игроком
+        const targetCameraX = state.playerX - gameWidth * 0.35;
+        state.cameraX += (targetCameraX - state.cameraX) * 0.1;
+        if(state.cameraX < 0) state.cameraX = 0;
+        
+        // Телепорт кулдаун
+        if(!state.canTeleport) {
+          state.teleportCooldown--;
+          if(state.teleportCooldown <= 0) state.canTeleport = true;
+        }
+        
+        // Физика
+        state.playerVelocityY += difficulty.gravity;
+        state.playerY += state.playerVelocityY;
+        
+        const groundCheck = state.isDucking ? state.groundY - 35 : state.groundY - 50;
+        if(state.playerY >= groundCheck) {
+          state.playerY = groundCheck;
+          state.playerVelocityY = 0;
+          state.isJumping = false;
+          state.jumpCount = 0;
+          state.grounded = true;
+        }
+        
+        // Неуязвимость
+        if(state.isInvincible) {
+          state.invincibleTimer--;
+          if(state.invincibleTimer <= 0) state.isInvincible = false;
+        }
+        
+        // Коллизии с препятствиями
+        state.obstacles.forEach(o => {
+          const px = state.playerX;
+          const py = state.playerY;
+          const pw = state.isDucking ? 45 : 40;
+          const ph = state.isDucking ? 35 : 50;
+          let ox = o.worldX, oy = o.y, ow = o.width, oh = o.height;
+          if(o.type === 'goomba') { ox += 2; oy += 2; ow -= 4; oh -= 4; }
+          
+          if(px + pw > ox && px < ox + ow && py + ph > oy && py < oy + oh) {
+            if(!o.passed && !state.isInvincible) hitPlayer();
+          }
+          if(!o.passed && o.worldX + o.width < state.playerX) {
+            o.passed = true;
+            state.score += 10;
+            updateUI();
+          }
+        });
+        
+        // Телепорт-трубы
+        state.teleportPipes.forEach(pipe => {
+          if(pipe.isEntry && !pipe.used && state.canTeleport) {
+            const px = state.playerX;
+            const py = state.playerY;
+            const pw = state.isDucking ? 45 : 40;
+            const ph = state.isDucking ? 35 : 50;
+            
+            if(px + pw > pipe.worldX && px < pipe.worldX + pipe.width &&
+               py + ph > pipe.y && py < pipe.y + pipe.height) {
+              teleportPlayer(pipe);
+            }
+          }
+        });
+        
+        // Монеты
+        state.coinItems.forEach(c => {
+          c.rotation += 0.08;
+          const px = state.playerX;
+          const py = state.playerY;
+          const pw = state.isDucking ? 45 : 40;
+          const ph = state.isDucking ? 35 : 50;
+          if(!c.collected && px + pw > c.worldX - c.width/2 && px < c.worldX + c.width/2 &&
+             py + ph > c.y - c.height/2 && py < c.y + c.height/2) {
+            c.collected = true;
+            state.coins++;
+            state.score += 5;
+            SoundEngine.coin();
+            spawnParticles(c.worldX, c.y, '#fbd000', 8);
+            updateUI();
+          }
+        });
+        
+        // Секретные ящики
+        state.secretBoxes.forEach(box => {
+          if(!box.opened) {
+            const px = state.playerX;
+            const py = state.playerY;
+            const pw = state.isDucking ? 45 : 40;
+            const ph = state.isDucking ? 35 : 50;
+            if(px + pw > box.worldX + 5 && px < box.worldX + box.width - 5 &&
+               py + ph > box.y + 5 && py < box.y + box.height - 5) {
+              openSecretBox(box);
+            }
+          }
+        });
+        
+        // Частицы
+        state.particles.forEach(p => {
+          p.worldX += p.vx;
+          p.y += p.vy;
+          p.vy += 0.2;
+          p.life--;
+        });
+        
+        // Очистка
+        const cleanupThreshold = state.playerX - gameWidth * 2;
+        state.obstacles = state.obstacles.filter(o => o.worldX > cleanupThreshold);
+        state.coinItems = state.coinItems.filter(c => c.worldX > cleanupThreshold && !c.collected);
+        state.secretBoxes = state.secretBoxes.filter(b => b.worldX > cleanupThreshold);
+        state.teleportPipes = state.teleportPipes.filter(p => p.worldX > cleanupThreshold);
+        state.particles = state.particles.filter(p => p.life > 0);
+        
+        // Спавн
+        const rightmostObject = Math.max(
+          state.playerX + gameWidth,
+          ...state.obstacles.map(o => o.worldX),
+          ...state.coinItems.map(c => c.worldX),
+          ...state.secretBoxes.map(b => b.worldX),
+          ...state.teleportPipes.map(p => p.worldX),
+          0
+        );
+        
+        if(rightmostObject < state.playerX + gameWidth * 1.5) {
+          state.spawnObstacleCounter++;
+          if(state.spawnObstacleCounter > difficulty.spawnRate) { spawnObstacle(); state.spawnObstacleCounter = 0; }
+          state.spawnCoinCounter++;
+          if(state.spawnCoinCounter > 50) { spawnCoin(); state.spawnCoinCounter = 0; }
+          state.spawnBoxCounter++;
+          if(state.spawnBoxCounter > 110) { spawnSecretBox(); state.spawnBoxCounter = 0; }
+          state.spawnPipeCounter++;
+          if(state.spawnPipeCounter > 180) { spawnTeleportPipe(); state.spawnPipeCounter = 0; }
+        }
+        
+        updateUI();
+      }
+      
+      // Отрисовка
+      drawGround();
+      
+      state.mountains.forEach(m => {
+        const sx = worldToScreen(m.worldX * 0.3 + state.cameraX * 0.7);
+        if(sx > -200 && sx < gameWidth + 200) drawMountain(sx, m.y, m.width, m.height);
+      });
+      
+      state.clouds.forEach(c => {
+        c.worldX -= c.speed;
+        if(c.worldX < state.cameraX - 100) c.worldX = state.playerX + gameWidth + 100 + Math.random() * 300;
+        const sx = worldToScreen(c.worldX);
+        if(sx > -80 && sx < gameWidth + 80) drawCloud(sx, c.y, c.size);
+      });
+      
+      state.bushes.forEach(b => {
+        const sx = worldToScreen(b.worldX);
+        if(sx > -40 && sx < gameWidth + 40) drawBush(sx, b.y, b.size);
+        if(b.worldX < state.cameraX - 200) b.worldX = state.playerX + gameWidth + 100 + Math.random() * 200;
+      });
+      
+      state.secretBoxes.forEach(box => {
+        const sx = worldToScreen(box.worldX);
+        if(sx > -40 && sx < gameWidth + 40) drawSecretBox(sx, box.y, box.opened);
+      });
+      
+      state.teleportPipes.forEach(pipe => {
+        const sx = worldToScreen(pipe.worldX);
+        if(sx > -50 && sx < gameWidth + 50) drawTeleportPipe(sx, pipe.y, pipe.height, pipe.isEntry);
+      });
+      
+      state.obstacles.forEach(o => {
+        const sx = worldToScreen(o.worldX);
+        if(sx > -40 && sx < gameWidth + 40) {
+          if(o.type === 'goomba') {
+            drawGoomba(sx + o.width/2, o.y + o.height);
+          } else if(o.type === 'block') {
+            ctx.fillStyle = '#f5a623';
+            ctx.fillRect(sx, o.y, o.width, o.height);
+            ctx.strokeStyle = '#c17d11';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(sx, o.y, o.width, o.height);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('?', sx + o.width/2, o.y + o.height/2 + 6);
+          }
+        }
+      });
+      
+      state.coinItems.forEach(c => {
+        const sx = worldToScreen(c.worldX);
+        if(sx > -30 && sx < gameWidth + 30) drawCoin(sx, c.y, c.rotation);
+      });
+      
+      state.particles.forEach(p => {
+        const sx = worldToScreen(p.worldX);
+        if(sx > -10 && sx < gameWidth + 10) drawParticle(sx, p.y, p.color, p.size * (p.life / 50));
+      });
+      
+      const playerScreenX = worldToScreen(state.playerX);
+      const style = CHAR_STYLES[selectedChar];
+      const blinking = state.isInvincible && Math.floor(state.invincibleTimer / 4) % 2 === 0;
+      
+      if(!blinking && playerScreenX > -60 && playerScreenX < gameWidth + 60) {
+        drawCharacter(playerScreenX, state.playerY + state.playerHeight, style, state.isDucking, state.runFrame);
+      }
+      
+      requestAnimationFrame(gameLoop);
+    }
+    
+    // Event listeners
+    resizeCanvas();
+    
+    document.querySelectorAll('#charSelector .char-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('#charSelector .char-option').forEach(o=>o.classList.remove('selected'));
+        opt.classList.add('selected');
+        selectedChar = parseInt(opt.dataset.char);
+      });
+    });
+    
+    document.querySelectorAll('#difficultySelector .diff-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('#difficultySelector .diff-option').forEach(o=>o.classList.remove('selected'));
+        opt.classList.add('selected');
+        selectedDifficulty = parseInt(opt.dataset.diff);
+      });
+    });
+    
+    document.getElementById('doLoginBtn').onclick = async () => {
+      const ident = document.getElementById('loginEmail').value.trim();
+      const pwd = document.getElementById('loginPass').value;
+      if(!ident || !pwd){ document.getElementById('authMsg').innerText='Введите данные'; return; }
+      let email = ident;
+      if(!ident.includes('@')){
+        try{ 
+          const q = await db.collection('users').where('globalId','==',ident).get(); 
+          if(q.empty){ document.getElementById('authMsg').innerText='Global ID не найден'; return; } 
+          email = q.docs[0].data().email; 
+        } catch(e){ document.getElementById('authMsg').innerText='Ошибка поиска'; return; }
+      }
+      try{
+        const cred = await auth.signInWithEmailAndPassword(email, pwd);
+        await ensureUserDoc(cred.user.uid, email);
+        currentUser = cred.user; isGuest = false;
+        document.getElementById('authOverlay').classList.add('hidden');
+        document.getElementById('menuScreen').classList.remove('hidden');
+        document.getElementById('authMsg').innerText = '';
+        document.getElementById('loginEmail').value = '';
+        document.getElementById('loginPass').value = '';
+      } catch(e){ document.getElementById('authMsg').innerHTML = 'Ошибка: ' + e.message; }
+    };
+    
+    document.getElementById('guestBtn').onclick = () => {
+      isGuest = true; currentUser = null;
+      document.getElementById('authOverlay').classList.add('hidden');
+      document.getElementById('menuScreen').classList.remove('hidden');
+      document.getElementById('authMsg').innerText = '';
+    };
+    
+    document.getElementById('playButton').onclick = startGame;
+    document.getElementById('menuRatingBtn').onclick = showLeaderboard;
+    document.getElementById('restartFromOver').onclick = startGame;
+    document.getElementById('menuFromOver').onclick = showMenu;
+    document.getElementById('closeLeaderboardBtn').onclick = () => document.getElementById('leaderboardModal').classList.add('hidden');
+    
+    // Mobile controls
+    document.getElementById('jumpBtn').addEventListener('pointerdown', (e) => { e.preventDefault(); jump(); });
+    document.getElementById('duckBtn').addEventListener('pointerdown', (e) => { e.preventDefault(); duck(true); });
+    document.getElementById('duckBtn').addEventListener('pointerup', (e) => { e.preventDefault(); duck(false); });
+    document.getElementById('duckBtn').addEventListener('pointerleave', (e) => { e.preventDefault(); duck(false); });
+    document.getElementById('forwardBtn').addEventListener('pointerdown', (e) => { e.preventDefault(); moveForward(); });
+    document.getElementById('forwardBtn').addEventListener('pointerup', (e) => { e.preventDefault(); stopMoving(); });
+    document.getElementById('forwardBtn').addEventListener('pointerleave', (e) => { e.preventDefault(); stopMoving(); });
+    document.getElementById('backwardBtn').addEventListener('pointerdown', (e) => { e.preventDefault(); moveBackward(); });
+    document.getElementById('backwardBtn').addEventListener('pointerup', (e) => { e.preventDefault(); stopMoving(); });
+    document.getElementById('backwardBtn').addEventListener('pointerleave', (e) => { e.preventDefault(); stopMoving(); });
+    
+    // Keyboard
+    window.addEventListener('keydown', (e) => {
+      if(!state.gameActive) return;
+      switch(e.key) {
+        case 'ArrowUp': case 'w': case ' ': jump(); e.preventDefault(); break;
+        case 'ArrowDown': case 's': duck(true); e.preventDefault(); break;
+        case 'ArrowRight': case 'd': moveForward(); e.preventDefault(); break;
+        case 'ArrowLeft': case 'a': moveBackward(); e.preventDefault(); break;
+      }
+    });
+    
+    window.addEventListener('keyup', (e) => {
+      switch(e.key) {
+        case 'ArrowDown': case 's': duck(false); break;
+        case 'ArrowRight': case 'd': case 'ArrowLeft': case 'a': stopMoving(); break;
+      }
+    });
+    
+    auth.onAuthStateChanged(async(user) => {
+      if(user && !currentUser && !isGuest){
+        currentUser = user; isGuest = false;
+        await ensureUserDoc(user.uid, user.email);
+        document.getElementById('authOverlay').classList.add('hidden');
+        document.getElementById('menuScreen').classList.remove('hidden');
+      }
+    });
+    
+    state.groundY = gameHeight * 0.78;
+    gameLoop();
+    
+    console.log('Mario 2D Run - Телепорты, супер-прыжки, ручное управление');
+  </script>
+</body>
+</html>
