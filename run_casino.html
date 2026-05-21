@@ -131,6 +131,17 @@
         .btn-super:hover { transform: scale(1.05); }
         .btn-super:disabled { opacity: 0.5; animation: none; }
 
+        .btn-auto {
+            background: linear-gradient(135deg, #2979ff, #00e676);
+            color: white; font-weight: 700;
+        }
+        .btn-auto:hover { transform: translateY(-2px); }
+        .btn-auto.active { animation: autoPulse 0.8s ease-in-out infinite; }
+        @keyframes autoPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(41,121,255,0.5); }
+            50% { box-shadow: 0 0 25px rgba(41,121,255,0.9), 0 0 40px rgba(0,230,118,0.5); }
+        }
+
         .btn-secondary { background: rgba(255,255,255,0.05); color: #ccc; border: 1px solid rgba(255,255,255,0.15); }
 
         .message { text-align: center; margin-top: 0.6rem; font-size: 0.8rem; min-height: 1rem; }
@@ -141,7 +152,6 @@
         .twofa-code input { width: 40px; height: 45px; text-align: center; font-size: 1.4rem; padding: 0; }
         .checkbox-group { display: flex; align-items: center; gap: 0.4rem; margin: 0.6rem 0; color: #bbb; font-size: 0.8rem; }
 
-        /* ИГРА */
         .game-title {
             font-size: 2.2rem; font-weight: 900; text-align: center;
             background: linear-gradient(135deg, #ffd700, #ff6b35, #ffd700);
@@ -181,6 +191,14 @@
         }
         .balance-label { color: #ccc; font-size: 0.8rem; text-transform: uppercase; }
         .balance-amount { color: var(--accent-gold); font-size: 1.4rem; font-weight: 800; }
+
+        .super-balance-display {
+            background: rgba(255,109,0,0.15); border-radius: 18px; padding: 0.5rem 1rem;
+            margin: 0.3rem 0; border: 2px solid var(--accent-orange);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .super-balance-label { color: #ffab40; font-size: 0.8rem; text-transform: uppercase; }
+        .super-balance-amount { color: var(--accent-orange); font-size: 1.4rem; font-weight: 800; }
 
         .bet-selector { display: flex; gap: 6px; justify-content: center; margin: 0.6rem 0; flex-wrap: wrap; }
         .bet-option {
@@ -292,7 +310,6 @@
             50% { opacity: 0.6; }
         }
 
-        /* Взрывной эффект */
         .explosion-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 100;
@@ -372,13 +389,20 @@
                 <span class="balance-amount" id="balanceDisplay">1000</span>
             </div>
 
+            <!-- Отображение супер-баланса (депозит) -->
+            <div class="super-balance-display" id="superBalanceDisplay" style="display:none;">
+                <span class="super-balance-label">💥 Супер-депозит</span>
+                <span class="super-balance-amount" id="superBalanceAmount">150000</span>
+            </div>
+
             <div class="bet-selector" id="betSelector">
                 <div class="bet-option selected" data-bet="10">10</div>
-                <div class="bet-option" data-bet="25">25</div>
                 <div class="bet-option" data-bet="50">50</div>
                 <div class="bet-option" data-bet="100">100</div>
-                <div class="bet-option" data-bet="250">250</div>
+                <div class="bet-option" data-bet="200">200</div>
                 <div class="bet-option" data-bet="500">500</div>
+                <div class="bet-option" data-bet="1000">1K</div>
+                <div class="bet-option" data-bet="50000">50K</div>
             </div>
 
             <div class="paytable-toggle" onclick="togglePaytable()">📋 Таблица выплат ▼</div>
@@ -410,6 +434,7 @@
 
             <div class="controls">
                 <button class="btn btn-gold" id="spinBtn" onclick="spin()">🎲 Крутить</button>
+                <button class="btn btn-auto" id="autoBtn" onclick="toggleAutoSpin()">🔄 АВТО</button>
                 <button class="btn btn-super" id="superBtn" onclick="startSuperGame()" style="display:none;">💥 СУПЕР-ИГРА 💥</button>
                 <button class="btn btn-danger" id="riskBtn" onclick="startRiskGame()" disabled>🔥 Риск</button>
             </div>
@@ -466,12 +491,17 @@
         let riskActive = false, freespinsRemaining = 0;
         let superGameActive = false, superGameSpins = 0, superGameTimer = null;
         let superGameStartTime = 0;
+        let superDeposit = 0; // Депозит супер-игры (150000)
+        let superTotalWon = 0; // Суммарный выигрыш в супер-игре
+        let autoSpinActive = false;
+        let autoSpinInterval = null;
         const MAX_PRIZE = 5000;
         const SUPER_PRIZE = 500000;
         const SUPER_COST = 150000;
         const SUPER_DURATION = 15;
         const SUPER_COOLDOWN = 3;
         const SUPER_MAX_SPINS = 5;
+        const AUTO_SPIN_DELAY = 2000;
 
         // ==================== НАВИГАЦИЯ ====================
         function showScreen(id) {
@@ -589,6 +619,8 @@
         };
 
         window.logout = async () => {
+            stopAutoSpin();
+            if(superGameTimer) clearInterval(superGameTimer);
             if(auth.currentUser) { await db.collection('users').doc(auth.currentUser.uid).update({online:false}); await auth.signOut(); }
             resetGame(); document.getElementById('loginIdentifier').value=''; document.getElementById('loginPassword').value='';
             showScreen('loginScreen');
@@ -629,11 +661,23 @@
             }
         }
 
+        function updateSuperBalanceDisplay() {
+            const display = document.getElementById('superBalanceDisplay');
+            if(superGameActive) {
+                display.style.display = 'flex';
+                document.getElementById('superBalanceAmount').textContent = superDeposit;
+            } else {
+                display.style.display = 'none';
+            }
+        }
+
         function updateUI() {
             document.getElementById('balanceDisplay').textContent = gameBalance;
+            updateSuperBalanceDisplay();
             const sb = document.getElementById('spinBtn');
             const rb = document.getElementById('riskBtn');
             const superBtn = document.getElementById('superBtn');
+            const autoBtn = document.getElementById('autoBtn');
             const superInd = document.getElementById('superIndicator');
 
             // Показываем кнопку супер-игры если баланс >= 150000 и не активна супер-игра
@@ -646,18 +690,74 @@
             if(superGameActive) {
                 superInd.classList.add('active');
                 sb.style.display = 'block';
-                sb.textContent = `💥 СУПЕР-СПИН (${superGameSpins}/5)`;
+                sb.textContent = `💥 СУПЕР-СПИН (${superGameSpins}/${SUPER_MAX_SPINS})`;
                 sb.disabled = false;
                 superBtn.style.display = 'none';
+                autoBtn.style.display = 'none'; // Скрываем авто в супер-игре
             } else {
                 superInd.classList.remove('active');
                 sb.style.display = 'block';
+                autoBtn.style.display = 'block';
                 sb.textContent = freespinsRemaining>0 ? `🎰 ФРИСПИН (${freespinsRemaining})` : `🎲 Крутить (${currentBet})`;
-                sb.disabled = (gameBalance < currentBet && freespinsRemaining<=0) || riskActive;
+                sb.disabled = (gameBalance < currentBet && freespinsRemaining<=0) || riskActive || autoSpinActive;
+                // Обновляем кнопку авто
+                autoBtn.textContent = autoSpinActive ? '⏹ СТОП' : '🔄 АВТО';
+                autoBtn.className = autoSpinActive ? 'btn btn-auto active' : 'btn btn-auto';
             }
 
-            rb.disabled = lastWinAmount<=0 || riskActive;
+            rb.disabled = lastWinAmount<=0 || riskActive || superGameActive;
             document.getElementById('freespinIndicator').innerHTML = freespinsRemaining>0 ? `<span class="freespin-badge">🔥 ${freespinsRemaining} ФРИСПИНОВ</span>` : '';
+        }
+
+        // ==================== АВТОИГРА ====================
+        function toggleAutoSpin() {
+            if(superGameActive) return;
+            if(autoSpinActive) {
+                stopAutoSpin();
+            } else {
+                startAutoSpin();
+            }
+        }
+
+        function startAutoSpin() {
+            if(autoSpinActive || superGameActive) return;
+            if(gameBalance < currentBet && freespinsRemaining <= 0) {
+                document.getElementById('winMessage').textContent = '❌ Недостаточно средств для автоигры';
+                return;
+            }
+            autoSpinActive = true;
+            updateUI();
+            document.getElementById('winMessage').textContent = '🔄 Автоигра запущена...';
+            autoSpinLoop();
+        }
+
+        function stopAutoSpin() {
+            autoSpinActive = false;
+            if(autoSpinInterval) clearTimeout(autoSpinInterval);
+            autoSpinInterval = null;
+            updateUI();
+            if(!superGameActive) document.getElementById('winMessage').textContent = '⏹ Автоигра остановлена';
+        }
+
+        function autoSpinLoop() {
+            if(!autoSpinActive) return;
+            if(superGameActive) { stopAutoSpin(); return; }
+            if(gameBalance < currentBet && freespinsRemaining <= 0) {
+                stopAutoSpin();
+                document.getElementById('winMessage').textContent = '❌ Средства закончились. Автоигра остановлена.';
+                return;
+            }
+            if(riskActive) {
+                // Ждём завершения риск-игры
+                autoSpinInterval = setTimeout(autoSpinLoop, 1000);
+                return;
+            }
+            // Выполняем спин
+            performSpin().then(() => {
+                if(autoSpinActive) {
+                    autoSpinInterval = setTimeout(autoSpinLoop, AUTO_SPIN_DELAY);
+                }
+            });
         }
 
         // ==================== ПРОВЕРКА ВЫИГРЫША ====================
@@ -673,10 +773,9 @@
                 details.push(desc);
             }
 
-            // Проверка треугольников (соседние ячейки)
+            // Проверка треугольников ТОЛЬКО в супер-игре
             function checkTriangles() {
                 const triangles = [];
-                // Треугольник вершиной вверх: (r,c), (r+1,c-1), (r+1,c+1)
                 for(let r=0;r<2;r++) {
                     for(let c=1;c<3;c++) {
                         const sym = grid[r][c]==='💀' ? (grid[r+1][c-1]==='💀'?grid[r+1][c+1]:grid[r+1][c-1]) : grid[r][c];
@@ -691,7 +790,6 @@
                         }
                     }
                 }
-                // Треугольник вершиной вниз: (r,c), (r-1,c-1), (r-1,c+1)
                 for(let r=1;r<3;r++) {
                     for(let c=1;c<3;c++) {
                         const sym = grid[r][c]==='💀' ? (grid[r-1][c-1]==='💀'?grid[r-1][c+1]:grid[r-1][c-1]) : grid[r][c];
@@ -776,24 +874,29 @@
                 }
             }
 
-            // Проверка треугольников
-            const triangles = checkTriangles();
-            triangles.forEach(tri => {
-                const already = tri.cells.some(c=>cells.some(x=>x.row===c.row&&x.col===c.col));
-                if(!already) {
-                    const mult = isSuper ? 50 : 3;
-                    const amount = isSuper ? currentBet*50 : currentBet*3;
-                    addWin(amount, tri.cells, `🔺 Треугольник ${tri.sym}: +${amount}`);
-                }
-            });
+            // Проверка треугольников ТОЛЬКО в супер-игре
+            if(isSuper) {
+                const triangles = checkTriangles();
+                triangles.forEach(tri => {
+                    const already = tri.cells.some(c=>cells.some(x=>x.row===c.row&&x.col===c.col));
+                    if(!already) {
+                        const mult = 50;
+                        const amount = currentBet * mult;
+                        addWin(amount, tri.cells, `🔺 Треугольник ${tri.sym}: +${amount}`);
+                    }
+                });
+            }
 
             return {win: isSuper ? total : Math.min(total, MAX_PRIZE), cells, details};
         }
 
         // ==================== СПИН ====================
-        async function spin() {
+        async function performSpin() {
             if(riskActive) return;
-            if(!superGameActive && gameBalance < currentBet && freespinsRemaining <= 0) return;
+            if(!superGameActive && gameBalance < currentBet && freespinsRemaining <= 0) {
+                stopAutoSpin();
+                return;
+            }
 
             // Списание ставки
             if(!superGameActive && freespinsRemaining <= 0) {
@@ -844,13 +947,18 @@
 
             if(result.win > 0) {
                 gameBalance += result.win;
+
+                // Если супер-игра, добавляем к супер-выигрышу
+                if(superGameActive) {
+                    superTotalWon += result.win;
+                }
+
                 document.getElementById('winMessage').innerHTML = `${superGameActive?'💥':'🎉'} +${result.win}!<br><small>${result.details.join(' | ')}</small>`;
                 result.cells.forEach(({row,col})=>document.getElementById(`cell-${row}-${col}`).classList.add('win'));
 
                 // Эффект взрыва в супер-игре
                 if(superGameActive && result.win >= SUPER_PRIZE) {
                     result.cells.forEach(({row,col})=>document.getElementById(`cell-${row}-${col}`).classList.add('explosion'));
-                    // Оверлей взрыва
                     const overlay = document.createElement('div');
                     overlay.className = 'explosion-overlay';
                     document.body.appendChild(overlay);
@@ -880,15 +988,30 @@
             updateUI();
         }
 
+        async function spin() {
+            if(autoSpinActive) {
+                stopAutoSpin();
+                return;
+            }
+            await performSpin();
+        }
+
         // ==================== СУПЕР-ИГРА ====================
         function startSuperGame() {
             if(gameBalance < SUPER_COST || superGameActive) return;
 
-            gameBalance -= SUPER_COST;
+            // НЕ списываем 150000 сразу! Замораживаем их как депозит
+            superDeposit = SUPER_COST;
+            gameBalance -= SUPER_COST; // Временно вычитаем из баланса
             superGameActive = true;
             superGameSpins = 0;
+            superTotalWon = 0;
             superGameStartTime = Date.now();
             document.getElementById('superTimer').textContent = `⏱ ${SUPER_DURATION} сек | Спинов: 0/${SUPER_MAX_SPINS}`;
+            document.getElementById('superBalanceAmount').textContent = superDeposit;
+
+            // Останавливаем автоигру
+            stopAutoSpin();
 
             // Запускаем таймер
             superGameTimer = setInterval(() => {
@@ -903,22 +1026,34 @@
 
             updateBalanceDB();
             updateUI();
-            document.getElementById('winMessage').textContent = '💥 СУПЕР-ИГРА АКТИВИРОВАНА! Жми Крутить!';
+            document.getElementById('winMessage').textContent = '💥 СУПЕР-ИГРА АКТИВИРОВАНА! Депозит заморожен. Жми Крутить!';
         }
 
         function endSuperGame() {
             superGameActive = false;
             if(superGameTimer) clearInterval(superGameTimer);
             superGameTimer = null;
-            document.getElementById('superTimer').textContent = '';
-            document.getElementById('superIndicator').classList.remove('active');
+
+            // Возвращаем незадействованную часть депозита
+            // Если игрок выиграл больше или равно 150000 — депозит не возвращается (он окупился)
+            // Если выиграл меньше — возвращаем разницу
+            const refund = Math.max(0, superDeposit - superTotalWon);
+            if(refund > 0) {
+                gameBalance += refund;
+                document.getElementById('winMessage').textContent = `🏁 Супер-игра завершена! Возврат: +${refund}. Выигрыш: ${superTotalWon}`;
+            } else {
+                document.getElementById('winMessage').textContent = `🏁 Супер-игра завершена! Выигрыш: ${superTotalWon}. Депозит окупился!`;
+            }
 
             if(gameBalance < 10) {
                 gameBalance = 10;
-                document.getElementById('winMessage').textContent = '😢 Супер-игра окончена. Остаток: 10';
-            } else {
-                document.getElementById('winMessage').textContent = '🏁 Супер-игра завершена!';
             }
+
+            superDeposit = 0;
+            superTotalWon = 0;
+            document.getElementById('superTimer').textContent = '';
+            document.getElementById('superIndicator').classList.remove('active');
+            document.getElementById('superBalanceDisplay').style.display = 'none';
 
             updateBalanceDB();
             updateUI();
@@ -928,6 +1063,7 @@
         function startRiskGame() {
             if(lastWinAmount<=0||riskActive||superGameActive) return;
             riskActive=true;
+            stopAutoSpin();
             document.getElementById('riskGameArea').classList.add('active');
             document.getElementById('riskAmount').textContent = lastWinAmount;
             const div = document.getElementById('riskCards'); div.innerHTML='';
@@ -964,12 +1100,15 @@
         }
 
         function resetGame() {
+            stopAutoSpin();
             riskActive=false; freespinsRemaining=0; lastWinAmount=0;
             if(superGameTimer) clearInterval(superGameTimer);
             superGameActive=false; superGameSpins=0; superGameTimer=null;
+            superDeposit=0; superTotalWon=0;
             document.getElementById('riskGameArea').classList.remove('active');
             document.getElementById('superTimer').textContent='';
             document.getElementById('superIndicator').classList.remove('active');
+            document.getElementById('superBalanceDisplay').style.display='none';
             document.getElementById('winMessage').textContent='';
         }
 
