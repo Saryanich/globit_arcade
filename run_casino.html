@@ -521,14 +521,12 @@
             }
         }
 
-        // Автоматическая инициализация аудио при любом клике пользователя
         function ensureAudioOnUserInteraction() {
             if (!audioCtx || audioCtx.state !== 'running') {
                 initAudio();
             }
         }
 
-        // Вешаем глобальный обработчик на весь документ для активации аудио
         document.addEventListener('click', function enableAudioOnFirstClick() {
             if (!audioCtx || audioCtx.state !== 'running') {
                 initAudio();
@@ -627,6 +625,47 @@
         const SUPER_MAX_SPINS = 5;
         const AUTO_SPIN_DELAY = 2000;
 
+        // ==================== ФУНКЦИИ ДЛЯ РЕКОРДОВ В FIRESTORE ====================
+        async function submitHighScore(score) {
+            if (!auth.currentUser) return;
+            
+            try {
+                // Получаем данные пользователя
+                const userDoc = await db.collection('users').doc(auth.currentUser.uid).get();
+                const userData = userDoc.data();
+                const globalId = userData?.globalId || auth.currentUser.email.split('@')[0];
+                
+                // Путь: score > runcasino > records > {globalId}
+                const scoreRef = db.collection('score').doc('runcasino').collection('records').doc(globalId);
+                const scoreDoc = await scoreRef.get();
+                
+                if (!scoreDoc.exists) {
+                    // Создаем новый документ с рекордом
+                    await scoreRef.set({
+                        score: score,
+                        globalId: globalId,
+                        email: auth.currentUser.email,
+                        displayName: userData?.displayName || globalId,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    });
+                    console.log(`✅ Создан новый рекорд для ${globalId}: ${score}`);
+                } else {
+                    // Обновляем только если новый рекорд выше
+                    const currentBest = scoreDoc.data().score || 0;
+                    if (score > currentBest) {
+                        await scoreRef.update({
+                            score: score,
+                            updatedAt: new Date()
+                        });
+                        console.log(`🔄 Обновлен рекорд для ${globalId}: ${score} (было ${currentBest})`);
+                    }
+                }
+            } catch (e) {
+                console.error('❌ Ошибка сохранения рекорда:', e);
+            }
+        }
+
         // ==================== НАВИГАЦИЯ ====================
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -663,20 +702,41 @@
             if(panel.style.display === 'none') {
                 playButtonClick();
                 panel.style.display = 'block';
-                const usersSnap = await db.collection('users').orderBy('balance', 'desc').limit(10).get();
-                const listDiv = document.getElementById('leaderboardList');
-                if(usersSnap.empty) { listDiv.innerHTML = 'Нет данных'; return; }
-                let html = '';
-                let rank = 1;
-                usersSnap.forEach(doc => {
-                    const data = doc.data();
-                    html += `<div class="leaderboard-item">
-                        <span class="leaderboard-rank">#${rank++}</span>
-                        <span class="leaderboard-name">${data.globalId || data.email?.split('@')[0] || 'Игрок'}</span>
-                        <span class="leaderboard-score">💰 ${data.balance || 0}</span>
-                    </div>`;
-                });
-                listDiv.innerHTML = html;
+                
+                try {
+                    // Загружаем рекорды из score > runcasino > records
+                    const snapshot = await db.collection('score')
+                        .doc('runcasino')
+                        .collection('records')
+                        .orderBy('score', 'desc')
+                        .limit(10)
+                        .get();
+                    
+                    const listDiv = document.getElementById('leaderboardList');
+                    
+                    if(snapshot.empty) {
+                        listDiv.innerHTML = '<div style="color:#aaa;text-align:center;padding:10px;">Нет рекордов</div>';
+                        return;
+                    }
+                    
+                    let html = '';
+                    let rank = 1;
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const name = data.displayName || data.globalId || 'Игрок';
+                        const score = data.score || 0;
+                        
+                        html += `<div class="leaderboard-item">
+                            <span class="leaderboard-rank">#${rank++}</span>
+                            <span class="leaderboard-name">${name}</span>
+                            <span class="leaderboard-score">💰 ${score}</span>
+                        </div>`;
+                    });
+                    listDiv.innerHTML = html;
+                } catch(e) {
+                    console.error('Ошибка загрузки рекордов:', e);
+                    document.getElementById('leaderboardList').innerHTML = '<div style="color:#ff5252;">Ошибка загрузки</div>';
+                }
             } else {
                 panel.style.display = 'none';
             }
@@ -709,7 +769,11 @@
         }
 
         async function updateBalanceDB() {
-            if(auth.currentUser) await db.collection('users').doc(auth.currentUser.uid).update({balance:gameBalance});
+            if(auth.currentUser) {
+                await db.collection('users').doc(auth.currentUser.uid).update({balance: gameBalance});
+                // Сохраняем баланс как рекорд
+                await submitHighScore(gameBalance);
+            }
         }
 
         // ==================== АВТОРИЗАЦИЯ ====================
@@ -770,7 +834,11 @@
         window.logout = async () => {
             stopAutoSpin();
             if(superGameTimer) clearInterval(superGameTimer);
-            if(auth.currentUser) { await db.collection('users').doc(auth.currentUser.uid).update({online:false}); await auth.signOut(); }
+            if(auth.currentUser) { 
+                await updateBalanceDB();
+                await db.collection('users').doc(auth.currentUser.uid).update({online:false}); 
+                await auth.signOut(); 
+            }
             resetGame(); document.getElementById('loginIdentifier').value=''; document.getElementById('loginPassword').value='';
             showScreen('loginScreen');
         };
@@ -1247,8 +1315,6 @@
         document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('loginScreen').classList.contains('active'))login();});
         auth.onAuthStateChanged(async u=>{if(u&&document.getElementById('gameScreen').classList.contains('active')===false&&document.getElementById('twoFactorScreen').classList.contains('active')===false&&document.getElementById('loginScreen').classList.contains('active'))await loadGame(u);});
         
-        // Принудительная инициализация аудио при загрузке (но браузер может заблокировать)
-        // Поэтому дополнительно активируем при первом клике в любое место
         document.body.addEventListener('click', function firstClick() {
             initAudio();
             document.body.removeEventListener('click', firstClick);
