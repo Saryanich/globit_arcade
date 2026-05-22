@@ -11,10 +11,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0a2e1a">
 
-    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js">
+    </script>
 
     <style>
         :root {
@@ -29,7 +33,11 @@
             --blur: blur(25px);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -80,87 +88,267 @@
         }
 
         @keyframes fadeSlideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .logo-container { display: flex; justify-content: center; margin-bottom: 1rem; }
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
         .logo {
-            width: 65px; height: 65px; border-radius: 50%; object-fit: cover;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            object-fit: cover;
             border: 3px solid var(--accent-green);
             box-shadow: 0 0 25px rgba(0, 230, 118, 0.5);
             animation: glow 3s ease-in-out infinite;
         }
 
         @keyframes glow {
-            0%, 100% { box-shadow: 0 0 25px rgba(0, 230, 118, 0.5); }
-            50% { box-shadow: 0 0 40px rgba(0, 230, 118, 0.9), 0 0 70px rgba(255, 23, 68, 0.3); }
+            0%,
+            100% {
+                box-shadow: 0 0 25px rgba(0, 230, 118, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(0, 230, 118, 0.9), 0 0 70px rgba(255, 23, 68, 0.3);
+            }
         }
 
-        h1 { font-size: 1.8rem; font-weight: 700; text-align: center; background: linear-gradient(135deg, #00e676, #2979ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.3rem; }
-        .subtitle { text-align: center; color: var(--text-secondary); margin-bottom: 1.2rem; font-size: 0.85rem; }
-        .input-group { margin-bottom: 0.8rem; }
-        label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #90caf9; margin-bottom: 0.2rem; font-weight: 500; }
-        input { width: 100%; padding: 0.7rem 0.9rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: #fff; font-size: 0.95rem; outline: none; }
-        input:focus { border-color: var(--accent-green); box-shadow: 0 0 15px rgba(0,230,118,0.2); }
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+            background: linear-gradient(135deg, #00e676, #2979ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.3rem;
+        }
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 1.2rem;
+            font-size: 0.85rem;
+        }
+        .input-group {
+            margin-bottom: 0.8rem;
+        }
+        label {
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #90caf9;
+            margin-bottom: 0.2rem;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+        }
+        input:focus {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 15px rgba(0, 230, 118, 0.2);
+        }
 
         .btn {
-            width: 100%; padding: 0.7rem; border: none; border-radius: 14px;
-            font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
-            letter-spacing: 0.3px; margin-top: 0.4rem; text-transform: uppercase;
+            width: 100%;
+            padding: 0.7rem;
+            border: none;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.3px;
+            margin-top: 0.4rem;
+            text-transform: uppercase;
         }
-        .btn-primary { background: linear-gradient(135deg, #00e676, #00c853); color: #0a1a2e; font-weight: 700; }
-        .btn-primary:hover { transform: translateY(-2px); }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .btn-danger { background: linear-gradient(135deg, #ff1744, #d50000); color: white; }
-        .btn-danger:hover { transform: translateY(-2px); }
-        .btn-gold { background: linear-gradient(135deg, #ffd700, #ffaa00); color: #1a0a2e; font-weight: 700; }
-        .btn-gold:hover { transform: translateY(-2px); }
-        .btn-gold:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-primary {
+            background: linear-gradient(135deg, #00e676, #00c853);
+            color: #0a1a2e;
+            font-weight: 700;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #ff1744, #d50000);
+            color: white;
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #1a0a2e;
+            font-weight: 700;
+        }
+        .btn-gold:hover {
+            transform: translateY(-2px);
+        }
+        .btn-gold:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
         .btn-super {
             background: linear-gradient(135deg, #ff6d00, #ff1744, #d500f9);
-            color: white; font-weight: 900; font-size: 1.1rem;
+            color: white;
+            font-weight: 900;
+            font-size: 1.1rem;
             animation: superBtnGlow 1s ease-in-out infinite;
-            box-shadow: 0 0 30px rgba(255,109,0,0.7), 0 0 60px rgba(213,0,249,0.5);
+            box-shadow: 0 0 30px rgba(255, 109, 0, 0.7), 0 0 60px rgba(213, 0, 249, 0.5);
             letter-spacing: 2px;
         }
         @keyframes superBtnGlow {
-            0%, 100% { box-shadow: 0 0 30px rgba(255,109,0,0.7), 0 0 60px rgba(213,0,249,0.5); }
-            50% { box-shadow: 0 0 50px rgba(255,109,0,1), 0 0 90px rgba(213,0,249,0.8); }
+            0%,
+            100% {
+                box-shadow: 0 0 30px rgba(255, 109, 0, 0.7), 0 0 60px rgba(213, 0, 249, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 50px rgba(255, 109, 0, 1), 0 0 90px rgba(213, 0, 249, 0.8);
+            }
         }
-        .btn-super:hover { transform: scale(1.05); }
-        .btn-super:disabled { opacity: 0.5; animation: none; }
+        .btn-super:hover {
+            transform: scale(1.05);
+        }
+        .btn-super:disabled {
+            opacity: 0.5;
+            animation: none;
+        }
+
+        .btn-mega {
+            background: linear-gradient(135deg, #ffd700, #ff6d00, #ff1744, #d500f9, #2979ff);
+            color: white;
+            font-weight: 900;
+            font-size: 1.1rem;
+            animation: megaBtnGlow 0.8s ease-in-out infinite;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.8), 0 0 80px rgba(255, 23, 68, 0.6), 0 0 120px rgba(41, 121, 255, 0.4);
+            letter-spacing: 3px;
+            border: 3px solid rgba(255, 215, 0, 0.8);
+        }
+        @keyframes megaBtnGlow {
+            0%,
+            100% {
+                box-shadow: 0 0 40px rgba(255, 215, 0, 0.8), 0 0 80px rgba(255, 23, 68, 0.6);
+            }
+            25% {
+                box-shadow: 0 0 60px rgba(213, 0, 249, 1), 0 0 100px rgba(41, 121, 255, 0.8);
+            }
+            50% {
+                box-shadow: 0 0 80px rgba(255, 109, 0, 1), 0 0 120px rgba(255, 23, 68, 0.9);
+            }
+            75% {
+                box-shadow: 0 0 60px rgba(41, 121, 255, 1), 0 0 100px rgba(213, 0, 249, 0.8);
+            }
+        }
+        .btn-mega:hover {
+            transform: scale(1.08);
+        }
+        .btn-mega:disabled {
+            opacity: 0.5;
+            animation: none;
+        }
 
         .btn-auto {
             background: linear-gradient(135deg, #2979ff, #00e676);
-            color: white; font-weight: 700;
+            color: white;
+            font-weight: 700;
         }
-        .btn-auto:hover { transform: translateY(-2px); }
-        .btn-auto.active { animation: autoPulse 0.8s ease-in-out infinite; }
+        .btn-auto:hover {
+            transform: translateY(-2px);
+        }
+        .btn-auto.active {
+            animation: autoPulse 0.8s ease-in-out infinite;
+        }
         @keyframes autoPulse {
-            0%, 100% { box-shadow: 0 0 10px rgba(41,121,255,0.5); }
-            50% { box-shadow: 0 0 25px rgba(41,121,255,0.9), 0 0 40px rgba(0,230,118,0.5); }
+            0%,
+            100% {
+                box-shadow: 0 0 10px rgba(41, 121, 255, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 25px rgba(41, 121, 255, 0.9), 0 0 40px rgba(0, 230, 118, 0.5);
+            }
         }
 
-        .btn-secondary { background: rgba(255,255,255,0.05); color: #ccc; border: 1px solid rgba(255,255,255,0.15); }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ccc;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
 
-        .message { text-align: center; margin-top: 0.6rem; font-size: 0.8rem; min-height: 1rem; }
-        .error { color: #ff5252; }
-        .success { color: #69f0ae; }
+        .message {
+            text-align: center;
+            margin-top: 0.6rem;
+            font-size: 0.8rem;
+            min-height: 1rem;
+        }
+        .error {
+            color: #ff5252;
+        }
+        .success {
+            color: #69f0ae;
+        }
 
-        .twofa-code { display: flex; gap: 0.4rem; justify-content: center; margin: 0.8rem 0; }
-        .twofa-code input { width: 40px; height: 45px; text-align: center; font-size: 1.4rem; padding: 0; }
-        .checkbox-group { display: flex; align-items: center; gap: 0.4rem; margin: 0.6rem 0; color: #bbb; font-size: 0.8rem; }
+        .twofa-code {
+            display: flex;
+            gap: 0.4rem;
+            justify-content: center;
+            margin: 0.8rem 0;
+        }
+        .twofa-code input {
+            width: 40px;
+            height: 45px;
+            text-align: center;
+            font-size: 1.4rem;
+            padding: 0;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin: 0.6rem 0;
+            color: #bbb;
+            font-size: 0.8rem;
+        }
 
         .game-title {
-            font-size: 2.2rem; font-weight: 900; text-align: center;
+            font-size: 2.2rem;
+            font-weight: 900;
+            text-align: center;
             background: linear-gradient(135deg, #ffd700, #ff6b35, #ffd700);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            letter-spacing: 2px; animation: titleShine 2s ease-in-out infinite;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            animation: titleShine 2s ease-in-out infinite;
         }
         @keyframes titleShine {
-            0%, 100% { filter: brightness(1); }
-            50% { filter: brightness(1.3); }
+            0%,
+            100% {
+                filter: brightness(1);
+            }
+            50% {
+                filter: brightness(1.3);
+            }
         }
 
         .super-mode-indicator {
@@ -175,74 +363,265 @@
             margin: 0.5rem 0;
             display: none;
         }
-        .super-mode-indicator.active { display: block; }
+        .super-mode-indicator.active {
+            display: block;
+        }
         @keyframes superPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
         }
 
-        .user-info { display: flex; justify-content: space-between; font-size: 0.75rem; color: #aaa; }
-        .user-info strong { color: var(--accent-green); }
+        .mega-mode-indicator {
+            text-align: center;
+            padding: 0.5rem;
+            background: linear-gradient(135deg, #ffd700, #ff6d00, #ff1744, #d500f9, #2979ff);
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 1.1rem;
+            letter-spacing: 3px;
+            animation: megaPulse 0.4s ease-in-out infinite;
+            margin: 0.5rem 0;
+            display: none;
+            border: 2px solid rgba(255, 215, 0, 0.8);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+        .mega-mode-indicator.active {
+            display: block;
+        }
+        @keyframes megaPulse {
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+            }
+            50% {
+                transform: scale(1.08);
+                box-shadow: 0 0 60px rgba(255, 215, 0, 1), 0 0 90px rgba(213, 0, 249, 0.8);
+            }
+        }
+
+        .mega-progress {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 14px;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            text-align: center;
+        }
+        .mega-progress-title {
+            font-size: 0.9rem;
+            color: #ffd700;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+        .mega-progress-stats {
+            display: flex;
+            justify-content: space-around;
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+        .mega-progress-stats span {
+            font-weight: 700;
+        }
+        .mega-progress-stats .wins-needed {
+            color: #69f0ae;
+        }
+        .mega-progress-stats .spins-left {
+            color: #ffd700;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #aaa;
+        }
+        .user-info strong {
+            color: var(--accent-green);
+        }
 
         .balance-display {
-            background: rgba(0,0,0,0.4); border-radius: 18px; padding: 0.5rem 1rem;
-            margin: 0.6rem 0; border: 2px solid var(--accent-gold);
-            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 18px;
+            padding: 0.5rem 1rem;
+            margin: 0.6rem 0;
+            border: 2px solid var(--accent-gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .balance-label { color: #ccc; font-size: 0.8rem; text-transform: uppercase; }
-        .balance-amount { color: var(--accent-gold); font-size: 1.4rem; font-weight: 800; }
+        .balance-label {
+            color: #ccc;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+        .balance-amount {
+            color: var(--accent-gold);
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
 
         .super-balance-display {
-            background: rgba(255,109,0,0.15); border-radius: 18px; padding: 0.5rem 1rem;
-            margin: 0.3rem 0; border: 2px solid var(--accent-orange);
-            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 109, 0, 0.15);
+            border-radius: 18px;
+            padding: 0.5rem 1rem;
+            margin: 0.3rem 0;
+            border: 2px solid var(--accent-orange);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .super-balance-label { color: #ffab40; font-size: 0.8rem; text-transform: uppercase; }
-        .super-balance-amount { color: var(--accent-orange); font-size: 1.4rem; font-weight: 800; }
+        .super-balance-label {
+            color: #ffab40;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+        .super-balance-amount {
+            color: var(--accent-orange);
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
 
-        .bet-selector { display: flex; gap: 6px; justify-content: center; margin: 0.6rem 0; flex-wrap: wrap; }
+        .bet-selector {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            margin: 0.6rem 0;
+            flex-wrap: wrap;
+        }
         .bet-option {
-            padding: 0.4rem 0.8rem; border-radius: 16px;
-            border: 2px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05);
-            color: #ccc; cursor: pointer; font-weight: 600; font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: #ccc;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
         }
-        .bet-option:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
-        .bet-option.selected { background: var(--accent-gold); color: #1a0a2e; border-color: var(--accent-gold); }
+        .bet-option:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+        .bet-option.selected {
+            background: var(--accent-gold);
+            color: #1a0a2e;
+            border-color: var(--accent-gold);
+        }
 
-        .paytable-toggle { text-align: center; margin: 0.4rem 0; color: var(--accent-blue); cursor: pointer; font-size: 0.8rem; text-decoration: underline; }
-        .paytable { display: none; background: rgba(0,0,0,0.6); border-radius: 14px; padding: 0.8rem; margin: 0.5rem 0; font-size: 0.7rem; border: 1px solid rgba(255,255,255,0.15); }
-        .paytable.active { display: block; }
-        .paytable h4 { color: var(--accent-gold); text-align: center; margin-bottom: 0.4rem; }
-        .paytable-row { display: flex; justify-content: space-between; padding: 0.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .paytable-row span:last-child { color: var(--accent-gold); font-weight: 600; }
+        .paytable-toggle {
+            text-align: center;
+            margin: 0.4rem 0;
+            color: var(--accent-blue);
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-decoration: underline;
+        }
+        .paytable {
+            display: none;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 14px;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            font-size: 0.7rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .paytable.active {
+            display: block;
+        }
+        .paytable h4 {
+            color: var(--accent-gold);
+            text-align: center;
+            margin-bottom: 0.4rem;
+        }
+        .paytable-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.2rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .paytable-row span:last-child {
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
 
         .slot-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr);
-            gap: 6px; background: rgba(0,0,0,0.5); border-radius: 18px; padding: 10px;
-            border: 3px solid rgba(255,215,0,0.3); margin: 0.8rem 0;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 18px;
+            padding: 10px;
+            border: 3px solid rgba(255, 215, 0, 0.3);
+            margin: 0.8rem 0;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
+            transition: border-color 0.5s, box-shadow 0.5s;
+        }
+        .slot-grid.mega-active {
+            border: 4px solid rgba(255, 215, 0, 0.9) !important;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.6), 0 0 100px rgba(255, 23, 68, 0.4), inset 0 0 30px rgba(0, 0, 0, 0.8) !important;
+            animation: megaBorderGlow 0.6s ease-in-out infinite;
+        }
+        @keyframes megaBorderGlow {
+            0%,
+            100% {
+                border-color: rgba(255, 215, 0, 0.9);
+                box-shadow: 0 0 50px rgba(255, 215, 0, 0.6), 0 0 100px rgba(255, 23, 68, 0.4);
+            }
+            50% {
+                border-color: rgba(213, 0, 249, 0.9);
+                box-shadow: 0 0 70px rgba(213, 0, 249, 0.8), 0 0 130px rgba(41, 121, 255, 0.6);
+            }
         }
 
         .slot-cell {
-            aspect-ratio: 1; background: linear-gradient(145deg, #1a1a3e, #0d0d2b);
-            border-radius: 10px; display: flex; align-items: center; justify-content: center;
-            font-size: 2rem; border: 2px solid rgba(255,255,255,0.1); transition: all 0.3s; position: relative;
+            aspect-ratio: 1;
+            background: linear-gradient(145deg, #1a1a3e, #0d0d2b);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            position: relative;
         }
 
-        .slot-cell.spinning { animation: spinAnim 0.1s linear infinite; }
+        .slot-cell.spinning {
+            animation: spinAnim 0.1s linear infinite;
+        }
         @keyframes spinAnim {
-            0% { transform: rotateX(0deg); }
-            50% { transform: rotateX(90deg); }
-            100% { transform: rotateX(0deg); }
+            0% {
+                transform: rotateX(0deg);
+            }
+            50% {
+                transform: rotateX(90deg);
+            }
+            100% {
+                transform: rotateX(0deg);
+            }
         }
 
         .slot-cell.win {
             animation: winGlow 0.4s ease-in-out 5;
             border-color: var(--accent-gold) !important;
-            box-shadow: 0 0 30px rgba(255,215,0,0.9) !important; z-index: 5;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.9) !important;
+            z-index: 5;
         }
-        .slot-cell.wild { border-color: #ff1744 !important; box-shadow: 0 0 20px rgba(255,23,68,0.7) !important; }
-        .slot-cell.scatter { border-color: #d500f9 !important; box-shadow: 0 0 20px rgba(213,0,249,0.7) !important; }
+        .slot-cell.wild {
+            border-color: #ff1744 !important;
+            box-shadow: 0 0 20px rgba(255, 23, 68, 0.7) !important;
+        }
+        .slot-cell.scatter {
+            border-color: #d500f9 !important;
+            box-shadow: 0 0 20px rgba(213, 0, 249, 0.7) !important;
+        }
         .slot-cell.mega {
             animation: megaWin 0.3s ease-in-out 8;
             border-color: #ffd700 !important;
@@ -253,81 +632,167 @@
             border-color: #fff !important;
         }
         @keyframes winGlow {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.25); box-shadow: 0 0 50px rgba(255,215,0,1); }
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.25);
+                box-shadow: 0 0 50px rgba(255, 215, 0, 1);
+            }
         }
         @keyframes megaWin {
-            0%, 100% { transform: scale(1) rotate(0deg); }
-            25% { transform: scale(1.3) rotate(5deg); }
-            75% { transform: scale(1.3) rotate(-5deg); }
+            0%,
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+            25% {
+                transform: scale(1.3) rotate(5deg);
+            }
+            75% {
+                transform: scale(1.3) rotate(-5deg);
+            }
         }
         @keyframes explode {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.8); opacity: 0.5; box-shadow: 0 0 80px rgba(255,215,0,1); }
-            100% { transform: scale(0); opacity: 0; }
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.8);
+                opacity: 0.5;
+                box-shadow: 0 0 80px rgba(255, 215, 0, 1);
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
         }
 
-        .controls { display: flex; gap: 8px; flex-wrap: wrap; }
-        .controls .btn { flex: 1; min-width: 90px; }
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .controls .btn {
+            flex: 1;
+            min-width: 90px;
+        }
 
         .win-message {
-            text-align: center; font-size: 1.1rem; font-weight: 700;
-            color: var(--accent-gold); text-shadow: 0 0 15px rgba(255,215,0,0.6);
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
             min-height: 1.8rem;
         }
 
         .super-timer {
-            text-align: center; font-size: 2rem; font-weight: 900;
-            color: var(--accent-orange); margin: 0.5rem 0;
-            text-shadow: 0 0 30px rgba(255,109,0,0.8);
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--accent-orange);
+            margin: 0.5rem 0;
+            text-shadow: 0 0 30px rgba(255, 109, 0, 0.8);
         }
 
         .risk-game-area {
-            display: none; background: rgba(255,0,0,0.08);
-            border: 2px solid var(--accent-red); border-radius: 16px;
-            padding: 0.8rem; margin-top: 0.6rem; text-align: center;
+            display: none;
+            background: rgba(255, 0, 0, 0.08);
+            border: 2px solid var(--accent-red);
+            border-radius: 16px;
+            padding: 0.8rem;
+            margin-top: 0.6rem;
+            text-align: center;
         }
-        .risk-game-area.active { display: block; }
+        .risk-game-area.active {
+            display: block;
+        }
 
-        .risk-cards { display: flex; gap: 6px; justify-content: center; margin: 0.5rem 0; }
-        .risk-card {
-            width: 50px; height: 65px; background: linear-gradient(145deg, #2a1a3e, #1a0a2e);
-            border-radius: 8px; border: 2px solid rgba(255,255,255,0.2);
-            cursor: pointer; font-size: 1.6rem; display: flex;
-            align-items: center; justify-content: center; transition: all 0.3s;
+        .risk-cards {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            margin: 0.5rem 0;
         }
-        .risk-card:hover { border-color: var(--accent-red); transform: translateY(-4px); }
-        .risk-card.revealed { background: #ff1744; border-color: #ff5252; pointer-events: none; }
-        .risk-card.revealed-lose { background: #333; border-color: #555; pointer-events: none; }
+        .risk-card {
+            width: 50px;
+            height: 65px;
+            background: linear-gradient(145deg, #2a1a3e, #1a0a2e);
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        .risk-card:hover {
+            border-color: var(--accent-red);
+            transform: translateY(-4px);
+        }
+        .risk-card.revealed {
+            background: #ff1744;
+            border-color: #ff5252;
+            pointer-events: none;
+        }
+        .risk-card.revealed-lose {
+            background: #333;
+            border-color: #555;
+            pointer-events: none;
+        }
 
         .freespin-badge {
-            display: inline-block; background: var(--accent-purple); color: white;
-            padding: 0.2rem 0.6rem; border-radius: 10px; font-size: 0.7rem;
-            font-weight: 700; animation: pulse 1s infinite;
+            display: inline-block;
+            background: var(--accent-purple);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            animation: pulse 1s infinite;
         }
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.6;
+            }
         }
 
         .explosion-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 100;
-            background: radial-gradient(circle, rgba(255,215,0,0.6), rgba(255,109,0,0.4), transparent);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.6), rgba(255, 109, 0, 0.4), transparent);
             animation: screenExplode 0.8s ease-out forwards;
         }
         @keyframes screenExplode {
-            0% { opacity: 0; }
-            30% { opacity: 1; }
-            100% { opacity: 0; }
+            0% {
+                opacity: 0;
+            }
+            30% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
         }
 
         .leaderboard {
             margin-top: 0.8rem;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             border-radius: 16px;
             padding: 0.6rem;
-            border: 1px solid rgba(255,215,0,0.3);
+            border: 1px solid rgba(255, 215, 0, 0.3);
         }
         .leaderboard h4 {
             color: var(--accent-gold);
@@ -344,17 +809,34 @@
             display: flex;
             justify-content: space-between;
             padding: 0.2rem 0.4rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .leaderboard-rank { color: var(--accent-gold); width: 25px; }
-        .leaderboard-name { flex: 1; text-align: left; }
-        .leaderboard-score { color: #69f0ae; font-weight: bold; }
+        .leaderboard-rank {
+            color: var(--accent-gold);
+            width: 25px;
+        }
+        .leaderboard-name {
+            flex: 1;
+            text-align: left;
+        }
+        .leaderboard-score {
+            color: #69f0ae;
+            font-weight: bold;
+        }
 
         @media (max-width: 400px) {
-            .slot-cell { font-size: 1.5rem; }
-            .game-title { font-size: 1.8rem; }
-            .controls { flex-direction: column; }
-            .screen { padding: 1.2rem 0.8rem; }
+            .slot-cell {
+                font-size: 1.5rem;
+            }
+            .game-title {
+                font-size: 1.8rem;
+            }
+            .controls {
+                flex-direction: column;
+            }
+            .screen {
+                padding: 1.2rem 0.8rem;
+            }
         }
     </style>
 </head>
@@ -410,8 +892,20 @@
             </div>
             <div class="game-title">🎰 RUN CASINO</div>
             <div class="super-mode-indicator" id="superIndicator">💥 СУПЕР-ИГРА! 💥</div>
+            <div class="mega-mode-indicator" id="megaIndicator">👑 МЕГА-ИГРА! 👑</div>
             <div class="super-timer" id="superTimer"></div>
             <div id="freespinIndicator" style="text-align:center;min-height:1.2rem;"></div>
+
+            <!-- Прогресс мега-игры -->
+            <div class="mega-progress" id="megaProgress" style="display:none;">
+                <div class="mega-progress-title">👑 МЕГА-ИГРА: Судьба миллиарда 👑</div>
+                <div class="mega-progress-stats">
+                    <span>Спины: <span id="megaSpinsCount" style="color:#ffd700;">0/10</span></span>
+                    <span>Победы: <span id="megaWinsCount" style="color:#69f0ae;">0/7</span></span>
+                    <span class="wins-needed">Нужно: <span id="megaWinsNeeded">7</span></span>
+                </div>
+                <div style="font-size:0.7rem;color:#ff5252;margin-top:0.3rem;">⚠ Меньше 7 побед = баланс 10!</div>
+            </div>
 
             <div class="balance-display">
                 <span class="balance-label">💰 Баланс</span>
@@ -461,6 +955,8 @@
                 <div class="paytable-row"><span>4 SCATTER (⭐)</span><span>×5 + 10 ФРИСПИНОВ</span></div>
                 <div class="paytable-row" style="color:#ff6d00;"><span>💥 СУПЕР: 4 в ряд</span><span>500 000 (фикс)</span></div>
                 <div class="paytable-row" style="color:#ff6d00;"><span>💥 СУПЕР: треугольник</span><span>×50</span></div>
+                <div class="paytable-row" style="color:#ffd700;font-weight:900;"><span>👑 МЕГА: 3 SCATTER</span><span>×100 + 3 ФРИСПИНА</span></div>
+                <div class="paytable-row" style="color:#ffd700;font-weight:900;"><span>👑 МЕГА: 4 в ряд</span><span>×200</span></div>
             </div>
 
             <div class="slot-grid" id="slotGrid"></div>
@@ -469,7 +965,8 @@
             <div class="controls">
                 <button class="btn btn-gold" id="spinBtn" onclick="spin()">🎲 Крутить</button>
                 <button class="btn btn-auto" id="autoBtn" onclick="toggleAutoSpin()">🔄 АВТО</button>
-                <button class="btn btn-super" id="superBtn" onclick="startSuperGame()" style="display:none;">💥 СУПЕР-ИГРА 💥</button>
+                <button class="btn btn-mega" id="megaBtn" onclick="startMegaGame()" style="display:none;">👑 МЕГА 👑</button>
+                <button class="btn btn-super" id="superBtn" onclick="startSuperGame()" style="display:none;">💥 СУПЕР 💥</button>
                 <button class="btn btn-danger" id="riskBtn" onclick="startRiskGame()" disabled>🔥 Риск</button>
             </div>
 
@@ -505,8 +1002,8 @@
         function initAudio() {
             if (!audioCtx) {
                 try {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                } catch(e) {
+                    audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
                     console.warn("Web Audio API not supported");
                     return;
                 }
@@ -537,18 +1034,43 @@
                 osc.start();
                 gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
                 osc.stop(audioCtx.currentTime + duration);
-            } catch(e) {}
+            } catch (e) {}
         }
 
-        function playSpinSound() { playTone(880, 0.05, 'sine', 0.15); setTimeout(() => playTone(1046.5, 0.08, 'triangle', 0.1), 20); }
-        function playWinSound() { playTone(523.25, 0.2, 'sine', 0.25); setTimeout(() => playTone(659.25, 0.2, 'sine', 0.25), 150); setTimeout(() => playTone(783.99, 0.3, 'sine', 0.3), 300); }
-        function playBigWinSound() { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => setTimeout(() => playTone(f, 0.3, 'sine', 0.4), i * 150)); }
-        function playSuperWinSound() { [523.25, 659.25, 783.99, 1046.5, 1318.52].forEach((f, i) => setTimeout(() => playTone(f, 0.4, 'sine', 0.5), i * 200)); }
-        function playLoseSound() { playTone(440, 0.3, 'sawtooth', 0.2); setTimeout(() => playTone(349.23, 0.4, 'sawtooth', 0.2), 200); }
-        function playRiskWinSound() { playTone(659.25, 0.15, 'square', 0.25); setTimeout(() => playTone(783.99, 0.15, 'square', 0.25), 150); }
-        function playRiskLoseSound() { playTone(349.23, 0.2, 'triangle', 0.25); setTimeout(() => playTone(293.66, 0.3, 'triangle', 0.25), 200); }
+        function playSpinSound() { playTone(880, 0.05, 'sine', 0.15);
+            setTimeout(() => playTone(1046.5, 0.08, 'triangle', 0.1), 20); }
+
+        function playWinSound() { playTone(523.25, 0.2, 'sine', 0.25);
+            setTimeout(() => playTone(659.25, 0.2, 'sine', 0.25), 150);
+            setTimeout(() => playTone(783.99, 0.3, 'sine', 0.3), 300); }
+
+        function playBigWinSound() { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => setTimeout(() => playTone(f, 0.3, 'sine',
+                0.4), i * 150)); }
+
+        function playSuperWinSound() { [523.25, 659.25, 783.99, 1046.5, 1318.52].forEach((f, i) => setTimeout(() => playTone(f,
+                0.4, 'sine', 0.5), i * 200)); }
+
+        function playMegaWinSound() { [261.63, 329.63, 392, 523.25, 659.25, 783.99, 1046.5, 1318.52].forEach((f, i) =>
+            setTimeout(() => playTone(f, 0.5, 'sine', 0.6), i * 180)); }
+
+        function playMegaLoseSound() { [1046.5, 783.99, 523.25, 261.63].forEach((f, i) => setTimeout(() => playTone(f, 0.6,
+                'sawtooth', 0.5), i * 300)); }
+
+        function playLoseSound() { playTone(440, 0.3, 'sawtooth', 0.2);
+            setTimeout(() => playTone(349.23, 0.4, 'sawtooth', 0.2), 200); }
+
+        function playRiskWinSound() { playTone(659.25, 0.15, 'square', 0.25);
+            setTimeout(() => playTone(783.99, 0.15, 'square', 0.25), 150); }
+
+        function playRiskLoseSound() { playTone(349.23, 0.2, 'triangle', 0.25);
+            setTimeout(() => playTone(293.66, 0.3, 'triangle', 0.25), 200); }
+
         function playButtonClick() { playTone(698.46, 0.07, 'sine', 0.1); }
+
         function playSpinStart() { playTone(1318.52, 0.05, 'triangle', 0.2); }
+
+        function playMegaStartSound() { [392, 523.25, 659.25, 783.99, 1046.5].forEach((f, i) => setTimeout(() => playTone(f,
+                0.4, 'square', 0.5), i * 200)); }
 
         // ==================== PARTICLES ====================
         particlesJS('particles-js', {
@@ -570,15 +1092,28 @@
         });
 
         // ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
-        let pendingUser = null, currentIP = 'unknown', deviceFingerprint = 'unknown';
+        let pendingUser = null,
+            currentIP = 'unknown',
+            deviceFingerprint = 'unknown';
         const SYMBOLS = ['6', '7', '💚', '💜', '🖤', '💀', '⭐'];
         const SYMBOL_WEIGHTS = [12, 10, 15, 14, 14, 5, 3];
-        let gameBalance = 1000, currentBet = 10, lastWinAmount = 0;
-        let riskActive = false, freespinsRemaining = 0;
-        let superGameActive = false, superGameSpins = 0, superGameTimer = null;
+        let gameBalance = 1000,
+            currentBet = 10,
+            lastWinAmount = 0;
+        let riskActive = false,
+            freespinsRemaining = 0;
+        let superGameActive = false,
+            superGameSpins = 0,
+            superGameTimer = null;
         let superGameStartTime = 0;
         let superDeposit = 0;
         let superTotalWon = 0;
+        let megaGameActive = false,
+            megaGameSpins = 0,
+            megaGameWins = 0;
+        let megaGameTotalSpins = 10;
+        let megaGameRequiredWins = 7;
+        let megaGameSavedBalance = 0;
         let autoSpinActive = false;
         let autoSpinInterval = null;
         const MAX_PRIZE = 5000;
@@ -587,6 +1122,8 @@
         const SUPER_DURATION = 15;
         const SUPER_COOLDOWN = 3;
         const SUPER_MAX_SPINS = 5;
+        const MEGA_THRESHOLD = 1000000000;
+        const MEGA_BET_PERCENT = 0.1;
         const AUTO_SPIN_DELAY = 2000;
         let currentGlobalId = null;
 
@@ -599,7 +1136,7 @@
             try {
                 const scoreRef = getScoreDocRef(globalId);
                 const scoreDoc = await scoreRef.get();
-                
+
                 if (scoreDoc.exists) {
                     const data = scoreDoc.data();
                     const balance = data.score || 1000;
@@ -625,11 +1162,11 @@
 
         async function updateBalanceInScore(globalId, newBalance) {
             if (!auth.currentUser || !globalId) return;
-            
+
             try {
                 const scoreRef = getScoreDocRef(globalId);
                 const scoreDoc = await scoreRef.get();
-                
+
                 if (!scoreDoc.exists) {
                     await scoreRef.set({
                         score: newBalance,
@@ -663,31 +1200,34 @@
         }
 
         async function getDeviceInfo() {
-            try { const r = await fetch('https://api.ipify.org?format=json'); currentIP = (await r.json()).ip; } catch(e){}
-            deviceFingerprint = btoa(navigator.userAgent + screen.width + navigator.language).substring(0,40);
+            try { const r = await fetch('https://api.ipify.org?format=json');
+                currentIP = (await r.json()).ip; } catch (e) {}
+            deviceFingerprint = btoa(navigator.userAgent + screen.width + navigator.language).substring(0, 40);
         }
 
         function showMessage(id, text, err) {
-            const el = document.getElementById(id); if(!el) return;
-            el.textContent = text; el.className = 'message ' + (err?'error':'success');
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = text;
+            el.className = 'message ' + (err ? 'error' : 'success');
         }
 
-        function moveNext(cur, next) { if(cur.value.length===1) document.getElementById(next)?.focus(); }
+        function moveNext(cur, next) { if (cur.value.length === 1) document.getElementById(next)?.focus(); }
 
         function getRandomSymbol() {
-            const total = SYMBOL_WEIGHTS.reduce((a,b)=>a+b,0);
-            let r = Math.random()*total;
-            for(let i=0;i<SYMBOLS.length;i++) { r-=SYMBOL_WEIGHTS[i]; if(r<=0) return SYMBOLS[i]; }
+            const total = SYMBOL_WEIGHTS.reduce((a, b) => a + b, 0);
+            let r = Math.random() * total;
+            for (let i = 0; i < SYMBOLS.length; i++) { r -= SYMBOL_WEIGHTS[i]; if (r <= 0) return SYMBOLS[i]; }
             return SYMBOLS[0];
         }
 
         // ==================== ТАБЛИЦА ЛИДЕРОВ ====================
         async function showLeaderboard() {
             const panel = document.getElementById('leaderboardPanel');
-            if(panel.style.display === 'none') {
+            if (panel.style.display === 'none') {
                 playButtonClick();
                 panel.style.display = 'block';
-                
+
                 try {
                     const snapshot = await db.collection('score')
                         .doc('runcasino')
@@ -695,31 +1235,33 @@
                         .orderBy('score', 'desc')
                         .limit(10)
                         .get();
-                    
+
                     const listDiv = document.getElementById('leaderboardList');
-                    
-                    if(snapshot.empty) {
-                        listDiv.innerHTML = '<div style="color:#aaa;text-align:center;padding:10px;">Нет рекордов</div>';
+
+                    if (snapshot.empty) {
+                        listDiv.innerHTML =
+                            '<div style="color:#aaa;text-align:center;padding:10px;">Нет рекордов</div>';
                         return;
                     }
-                    
+
                     let html = '';
                     let rank = 1;
                     snapshot.forEach(doc => {
                         const data = doc.data();
                         const name = data.displayName || data.globalId || 'Игрок';
                         const score = data.score || 0;
-                        
+
                         html += `<div class="leaderboard-item">
                             <span class="leaderboard-rank">#${rank++}</span>
                             <span class="leaderboard-name">${name}</span>
-                            <span class="leaderboard-score">💰 ${score}</span>
+                            <span class="leaderboard-score">💰 ${score.toLocaleString()}</span>
                         </div>`;
                     });
                     listDiv.innerHTML = html;
-                } catch(e) {
+                } catch (e) {
                     console.error('Ошибка загрузки рекордов:', e);
-                    document.getElementById('leaderboardList').innerHTML = '<div style="color:#ff5252;">Ошибка загрузки</div>';
+                    document.getElementById('leaderboardList').innerHTML =
+                        '<div style="color:#ff5252;">Ошибка загрузки</div>';
                 }
             } else {
                 panel.style.display = 'none';
@@ -729,9 +1271,13 @@
         // ==================== FIREBASE ====================
         async function ensureUserDoc(uid, email) {
             const ref = db.collection('users').doc(uid);
-            if(!(await ref.get()).exists) await ref.set({
-                email, globalId: email.split('@')[0], displayName: email.split('@')[0],
-                role:'user', knownDevices:[], online:false,
+            if (!(await ref.get()).exists) await ref.set({
+                email,
+                globalId: email.split('@')[0],
+                displayName: email.split('@')[0],
+                role: 'user',
+                knownDevices: [],
+                online: false,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             return ref;
@@ -739,21 +1285,25 @@
 
         async function isDeviceKnown(uid) {
             const d = await db.collection('users').doc(uid).get();
-            return (d.data()?.knownDevices||[]).some(d=>d.fingerprint===deviceFingerprint);
+            return (d.data()?.knownDevices || []).some(d => d.fingerprint === deviceFingerprint);
         }
 
         async function addKnownDevice(uid) {
             const ref = db.collection('users').doc(uid);
             const d = await ref.get();
-            const devices = d.data()?.knownDevices||[];
-            if(!devices.some(d=>d.fingerprint===deviceFingerprint)) {
-                devices.push({fingerprint:deviceFingerprint, ip:currentIP, addedAt:firebase.firestore.FieldValue.serverTimestamp()});
-                await ref.update({knownDevices:devices});
+            const devices = d.data()?.knownDevices || [];
+            if (!devices.some(d => d.fingerprint === deviceFingerprint)) {
+                devices.push({
+                    fingerprint: deviceFingerprint,
+                    ip: currentIP,
+                    addedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                await ref.update({ knownDevices: devices });
             }
         }
 
         async function updateBalanceDB() {
-            if(currentGlobalId) {
+            if (currentGlobalId) {
                 await updateBalanceInScore(currentGlobalId, gameBalance);
             }
         }
@@ -762,97 +1312,270 @@
         window.login = async () => {
             const id = document.getElementById('loginIdentifier').value.trim();
             const pw = document.getElementById('loginPassword').value;
-            if(!id||!pw) return showMessage('authMessage','Заполните все поля',true);
+            if (!id || !pw) return showMessage('authMessage', 'Заполните все поля', true);
             await getDeviceInfo();
             const btn = document.querySelector('#loginScreen .btn-primary');
-            btn.disabled=true; btn.textContent='⏳...';
+            btn.disabled = true;
+            btn.textContent = '⏳...';
             try {
                 let email = id;
-                if(!id.includes('@')) {
-                    const snap = await db.collection('users').where('globalId','==',id).get();
-                    if(snap.empty) { btn.disabled=false; btn.textContent='🚀 Войти'; return showMessage('authMessage','Global ID не найден',true); }
+                if (!id.includes('@')) {
+                    const snap = await db.collection('users').where('globalId', '==', id).get();
+                    if (snap.empty) { btn.disabled = false;
+                        btn.textContent = '🚀 Войти'; return showMessage('authMessage', 'Global ID не найден', true); }
                     email = snap.docs[0].data().email;
                 }
                 const uc = await auth.signInWithEmailAndPassword(email, pw);
                 await ensureUserDoc(uc.user.uid, email);
-                await db.collection('users').doc(uc.user.uid).update({arcadeAccess:true, arcadeLastLogin:firebase.firestore.FieldValue.serverTimestamp()});
-                if(await isDeviceKnown(uc.user.uid)) {
-                    await db.collection('users').doc(uc.user.uid).update({online:true, lastSeen:firebase.firestore.FieldValue.serverTimestamp(), currentIP, currentDevice:deviceFingerprint});
-                    btn.disabled=false; btn.textContent='🚀 Войти';
+                await db.collection('users').doc(uc.user.uid).update({
+                    arcadeAccess: true,
+                    arcadeLastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                if (await isDeviceKnown(uc.user.uid)) {
+                    await db.collection('users').doc(uc.user.uid).update({
+                        online: true,
+                        lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                        currentIP,
+                        currentDevice: deviceFingerprint
+                    });
+                    btn.disabled = false;
+                    btn.textContent = '🚀 Войти';
                     await loadGame(uc.user);
                 } else {
                     pendingUser = uc.user;
-                    const code = Math.floor(1000+Math.random()*9000).toString();
-                    await db.collection('users').doc(uc.user.uid).update({twoFactorCode:code, twoFactorCodeExpires:new Date(Date.now()+5*60000)});
-                    console.log('🔑 2FA:',code);
-                    showScreen('twoFactorScreen'); document.getElementById('code1').focus();
-                    btn.disabled=false; btn.textContent='🚀 Войти';
+                    const code = Math.floor(1000 + Math.random() * 9000).toString();
+                    await db.collection('users').doc(uc.user.uid).update({
+                        twoFactorCode: code,
+                        twoFactorCodeExpires: new Date(Date.now() + 5 * 60000)
+                    });
+                    console.log('🔑 2FA:', code);
+                    showScreen('twoFactorScreen');
+                    document.getElementById('code1').focus();
+                    btn.disabled = false;
+                    btn.textContent = '🚀 Войти';
                 }
-            } catch(e) {
-                btn.disabled=false; btn.textContent='🚀 Войти';
-                showMessage('authMessage','Неверные данные',true);
+            } catch (e) {
+                btn.disabled = false;
+                btn.textContent = '🚀 Войти';
+                showMessage('authMessage', 'Неверные данные', true);
             }
         };
 
         window.verify2FA = async () => {
-            const code = ['code1','code2','code3','code4'].map(id=>document.getElementById(id).value).join('');
-            if(code.length!==4) return showMessage('twoFactorMessage','Введите 4 цифры',true);
-            if(!pendingUser) return;
+            const code = ['code1', 'code2', 'code3', 'code4'].map(id => document.getElementById(id).value).join('');
+            if (code.length !== 4) return showMessage('twoFactorMessage', 'Введите 4 цифры', true);
+            if (!pendingUser) return;
             const doc = await db.collection('users').doc(pendingUser.uid).get();
-            if(new Date() > doc.data()?.twoFactorCodeExpires?.toDate()) return showMessage('twoFactorMessage','Код истёк',true);
-            if(code === doc.data()?.twoFactorCode) {
-                if(document.getElementById('trustDevice').checked) await addKnownDevice(pendingUser.uid);
-                await db.collection('users').doc(pendingUser.uid).update({twoFactorCode:null, twoFactorCodeExpires:null, online:true, lastSeen:firebase.firestore.FieldValue.serverTimestamp(), currentIP, currentDevice:deviceFingerprint});
-                await loadGame(pendingUser); pendingUser=null;
-            } else showMessage('twoFactorMessage','Неверный код',true);
+            if (new Date() > doc.data()?.twoFactorCodeExpires?.toDate()) return showMessage('twoFactorMessage',
+                'Код истёк', true);
+            if (code === doc.data()?.twoFactorCode) {
+                if (document.getElementById('trustDevice').checked) await addKnownDevice(pendingUser.uid);
+                await db.collection('users').doc(pendingUser.uid).update({
+                    twoFactorCode: null,
+                    twoFactorCodeExpires: null,
+                    online: true,
+                    lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                    currentIP,
+                    currentDevice: deviceFingerprint
+                });
+                await loadGame(pendingUser);
+                pendingUser = null;
+            } else showMessage('twoFactorMessage', 'Неверный код', true);
         };
 
         window.cancel2FA = () => {
-            if(pendingUser) { auth.signOut(); db.collection('users').doc(pendingUser.uid).update({twoFactorCode:null,twoFactorCodeExpires:null}); }
-            pendingUser=null; ['code1','code2','code3','code4'].forEach(id=>document.getElementById(id).value='');
+            if (pendingUser) { auth.signOut();
+                db.collection('users').doc(pendingUser.uid).update({ twoFactorCode: null, twoFactorCodeExpires: null }); }
+            pendingUser = null;
+            ['code1', 'code2', 'code3', 'code4'].forEach(id => document.getElementById(id).value = '');
             showScreen('loginScreen');
         };
 
         window.logout = async () => {
             stopAutoSpin();
-            if(superGameTimer) clearInterval(superGameTimer);
-            if(auth.currentUser) { 
+            if (superGameTimer) clearInterval(superGameTimer);
+            if (auth.currentUser) {
                 await updateBalanceDB();
-                await db.collection('users').doc(auth.currentUser.uid).update({online:false}); 
-                await auth.signOut(); 
+                await db.collection('users').doc(auth.currentUser.uid).update({ online: false });
+                await auth.signOut();
             }
-            resetGame(); document.getElementById('loginIdentifier').value=''; document.getElementById('loginPassword').value='';
+            resetGame();
+            document.getElementById('loginIdentifier').value = '';
+            document.getElementById('loginPassword').value = '';
             showScreen('loginScreen');
         };
+
+        // ==================== МЕГА-ИГРА ====================
+        function checkMegaGameEligibility() {
+            if (!megaGameActive && gameBalance >= MEGA_THRESHOLD && !superGameActive) {
+                startMegaGame();
+            }
+        }
+
+        function startMegaGame() {
+            if (megaGameActive || superGameActive || gameBalance < MEGA_THRESHOLD) return;
+
+            playMegaStartSound();
+            megaGameActive = true;
+            megaGameSpins = 0;
+            megaGameWins = 0;
+            megaGameSavedBalance = gameBalance;
+            currentBet = Math.floor(gameBalance * MEGA_BET_PERCENT);
+
+            document.getElementById('megaIndicator').classList.add('active');
+            document.getElementById('megaProgress').style.display = 'block';
+            document.getElementById('slotGrid').classList.add('mega-active');
+            document.getElementById('megaBtn').style.display = 'none';
+            document.getElementById('superBtn').style.display = 'none';
+            document.getElementById('autoBtn').style.display = 'none';
+            document.getElementById('riskBtn').disabled = true;
+            document.getElementById('betSelector').style.opacity = '0.5';
+            document.getElementById('betSelector').style.pointerEvents = 'none';
+
+            stopAutoSpin();
+            updateMegaProgress();
+            updateUI();
+
+            document.getElementById('winMessage').textContent =
+                `👑 МЕГА-ИГРА! Ставка: ${currentBet.toLocaleString()}. Нужно 7/10 побед!`;
+        }
+
+        function updateMegaProgress() {
+            document.getElementById('megaSpinsCount').textContent = `${megaGameSpins}/${megaGameTotalSpins}`;
+            document.getElementById('megaWinsCount').textContent = `${megaGameWins}/${megaGameRequiredWins}`;
+            document.getElementById('megaWinsNeeded').textContent =
+                `${Math.max(0, megaGameRequiredWins - megaGameWins)}`;
+        }
+
+        function endMegaGame(success) {
+            megaGameActive = false;
+            document.getElementById('megaIndicator').classList.remove('active');
+            document.getElementById('megaProgress').style.display = 'none';
+            document.getElementById('slotGrid').classList.remove('mega-active');
+            document.getElementById('betSelector').style.opacity = '1';
+            document.getElementById('betSelector').style.pointerEvents = 'auto';
+
+            if (success) {
+                document.getElementById('winMessage').textContent =
+                    `🎉 МЕГА-ИГРА ПРОЙДЕНА! ${megaGameWins}/10 побед! Баланс: ${gameBalance.toLocaleString()}`;
+                playMegaWinSound();
+            } else {
+                gameBalance = 10;
+                document.getElementById('winMessage').textContent =
+                    `💀 МЕГА-ИГРА ПРОВАЛЕНА! ${megaGameWins}/10 побед. Баланс: 10`;
+                playMegaLoseSound();
+                updateBalanceDB();
+            }
+
+            megaGameSpins = 0;
+            megaGameWins = 0;
+            megaGameSavedBalance = 0;
+            currentBet = 10;
+            document.querySelectorAll('.bet-option').forEach(o => o.classList.remove('selected'));
+            const defaultBet = document.querySelector('.bet-option[data-bet="10"]');
+            if (defaultBet) defaultBet.classList.add('selected');
+
+            updateUI();
+        }
+
+        async function megaGameSpin() {
+            if (!megaGameActive) return;
+            if (megaGameSpins >= megaGameTotalSpins) {
+                if (megaGameWins >= megaGameRequiredWins) {
+                    endMegaGame(true);
+                } else {
+                    endMegaGame(false);
+                }
+                return;
+            }
+
+            megaGameSpins++;
+            updateMegaProgress();
+
+            gameBalance -= currentBet;
+            document.getElementById('balanceDisplay').textContent = gameBalance;
+
+            const allCells = document.querySelectorAll('.slot-cell');
+            allCells.forEach(c => { c.classList.add('spinning');
+                c.classList.remove('win', 'wild', 'scatter', 'mega', 'explosion'); });
+
+            const grid = [];
+            for (let r = 0; r < 3; r++) { grid[r] = []; for (let c = 0; c < 4; c++) grid[r][c] =
+                getRandomSymbol(); }
+
+            await new Promise(r => setTimeout(r, 1200));
+
+            allCells.forEach(c => c.classList.remove('spinning'));
+            for (let r = 0; r < 3; r++)
+                for (let c = 0; c < 4; c++) {
+                    const cell = document.getElementById(`cell-${r}-${c}`);
+                    cell.textContent = grid[r][c];
+                    if (grid[r][c] === '💀') cell.classList.add('wild');
+                    if (grid[r][c] === '⭐') cell.classList.add('scatter');
+                }
+
+            const result = checkWin(grid, false, true);
+
+            if (result.win > 0) {
+                megaGameWins++;
+                gameBalance += result.win;
+                document.getElementById('winMessage').innerHTML =
+                    `👑 МЕГА-ПОБЕДА! +${result.win.toLocaleString()}! (${megaGameWins}/${megaGameRequiredWins})<br><small>${result.details.join(' | ')}</small>`;
+                playWinSound();
+                result.cells.forEach(({ row, col }) => document.getElementById(`cell-${row}-${col}`).classList.add(
+                    'win'));
+                setTimeout(() => document.querySelectorAll('.slot-cell.win').forEach(c => c.classList.remove('win')),
+                    3500);
+            } else {
+                document.getElementById('winMessage').textContent =
+                    `👑 Спин ${megaGameSpins}/${megaGameTotalSpins} | Побед: ${megaGameWins}/${megaGameRequiredWins}`;
+                playLoseSound();
+            }
+
+            updateMegaProgress();
+            document.getElementById('balanceDisplay').textContent = gameBalance;
+
+            if (megaGameSpins >= megaGameTotalSpins) {
+                await new Promise(r => setTimeout(r, 1500));
+                if (megaGameWins >= megaGameRequiredWins) {
+                    endMegaGame(true);
+                } else {
+                    endMegaGame(false);
+                }
+            }
+        }
 
         // ==================== ИГРА ====================
         async function loadGame(user) {
             const doc = await db.collection('users').doc(user.uid).get();
-            const data = doc.data()||{};
+            const data = doc.data() || {};
             currentGlobalId = data.globalId || user.email?.split('@')[0] || 'player';
-            
+
             document.getElementById('displayName').textContent = data.displayName || user.email?.split('@')[0] || 'Игрок';
             document.getElementById('globalIdDisplay').textContent = currentGlobalId;
-            
+
             gameBalance = await getBalanceFromScore(currentGlobalId);
-            
+
             if (gameBalance < 10) {
                 gameBalance = 1000;
                 await updateBalanceInScore(currentGlobalId, gameBalance);
             }
-            
+
             document.getElementById('balanceDisplay').textContent = gameBalance;
             showScreen('gameScreen');
             initGrid();
             setupBetSelector();
             updateUI();
             initAudio();
+
+            setTimeout(() => checkMegaGameEligibility(), 500);
         }
 
         function setupBetSelector() {
-            document.querySelectorAll('.bet-option').forEach(o=>{
-                o.addEventListener('click',function(){
-                    document.querySelectorAll('.bet-option').forEach(x=>x.classList.remove('selected'));
+            document.querySelectorAll('.bet-option').forEach(o => {
+                o.addEventListener('click', function() {
+                    if (megaGameActive) return;
+                    document.querySelectorAll('.bet-option').forEach(x => x.classList.remove('selected'));
                     this.classList.add('selected');
                     currentBet = parseInt(this.dataset.bet);
                     updateUI();
@@ -862,18 +1585,21 @@
         }
 
         function initGrid() {
-            const g = document.getElementById('slotGrid'); g.innerHTML='';
-            for(let r=0;r<3;r++) for(let c=0;c<4;c++) {
-                const cell = document.createElement('div');
-                cell.className='slot-cell'; cell.id=`cell-${r}-${c}`;
-                cell.textContent = getRandomSymbol();
-                g.appendChild(cell);
-            }
+            const g = document.getElementById('slotGrid');
+            g.innerHTML = '';
+            for (let r = 0; r < 3; r++)
+                for (let c = 0; c < 4; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'slot-cell';
+                    cell.id = `cell-${r}-${c}`;
+                    cell.textContent = getRandomSymbol();
+                    g.appendChild(cell);
+                }
         }
 
         function updateSuperBalanceDisplay() {
             const display = document.getElementById('superBalanceDisplay');
-            if(superGameActive) {
+            if (superGameActive) {
                 display.style.display = 'flex';
                 document.getElementById('superBalanceAmount').textContent = superDeposit;
             } else {
@@ -887,36 +1613,57 @@
             const sb = document.getElementById('spinBtn');
             const rb = document.getElementById('riskBtn');
             const superBtn = document.getElementById('superBtn');
+            const megaBtn = document.getElementById('megaBtn');
             const autoBtn = document.getElementById('autoBtn');
             const superInd = document.getElementById('superIndicator');
 
-            if(gameBalance >= SUPER_COST && !superGameActive) {
+            if (megaGameActive) {
+                sb.textContent = `👑 МЕГА-СПИН (${megaGameSpins}/${megaGameTotalSpins})`;
+                sb.disabled = false;
+                superBtn.style.display = 'none';
+                megaBtn.style.display = 'none';
+                autoBtn.style.display = 'none';
+                rb.disabled = true;
+                superInd.classList.remove('active');
+                return;
+            }
+
+            if (gameBalance >= MEGA_THRESHOLD && !superGameActive) {
+                megaBtn.style.display = 'block';
+            } else {
+                megaBtn.style.display = 'none';
+            }
+
+            if (gameBalance >= SUPER_COST && !superGameActive && !megaGameActive) {
                 superBtn.style.display = 'block';
             } else {
                 superBtn.style.display = 'none';
             }
 
-            if(superGameActive) {
+            if (superGameActive) {
                 superInd.classList.add('active');
                 sb.textContent = `💥 СУПЕР-СПИН (${superGameSpins}/${SUPER_MAX_SPINS})`;
                 sb.disabled = false;
                 superBtn.style.display = 'none';
+                megaBtn.style.display = 'none';
                 autoBtn.style.display = 'none';
             } else {
                 superInd.classList.remove('active');
                 autoBtn.style.display = 'block';
-                sb.textContent = freespinsRemaining>0 ? `🎰 ФРИСПИН (${freespinsRemaining})` : `🎲 Крутить (${currentBet})`;
-                sb.disabled = (gameBalance < currentBet && freespinsRemaining<=0) || riskActive || autoSpinActive;
+                sb.textContent = freespinsRemaining > 0 ? `🎰 ФРИСПИН (${freespinsRemaining})` :
+                    `🎲 Крутить (${currentBet})`;
+                sb.disabled = (gameBalance < currentBet && freespinsRemaining <= 0) || riskActive || autoSpinActive;
                 autoBtn.textContent = autoSpinActive ? '⏹ СТОП' : '🔄 АВТО';
                 autoBtn.className = autoSpinActive ? 'btn btn-auto active' : 'btn btn-auto';
             }
-            rb.disabled = lastWinAmount<=0 || riskActive || superGameActive;
-            document.getElementById('freespinIndicator').innerHTML = freespinsRemaining>0 ? `<span class="freespin-badge">🔥 ${freespinsRemaining} ФРИСПИНОВ</span>` : '';
+            rb.disabled = lastWinAmount <= 0 || riskActive || superGameActive || megaGameActive;
+            document.getElementById('freespinIndicator').innerHTML = freespinsRemaining > 0 ?
+                `<span class="freespin-badge">🔥 ${freespinsRemaining} ФРИСПИНОВ</span>` : '';
         }
 
         function toggleAutoSpin() {
-            if(superGameActive) return;
-            if(autoSpinActive) {
+            if (superGameActive || megaGameActive) return;
+            if (autoSpinActive) {
                 stopAutoSpin();
             } else {
                 startAutoSpin();
@@ -925,8 +1672,8 @@
         }
 
         function startAutoSpin() {
-            if(autoSpinActive || superGameActive) return;
-            if(gameBalance < currentBet && freespinsRemaining <= 0) {
+            if (autoSpinActive || superGameActive || megaGameActive) return;
+            if (gameBalance < currentBet && freespinsRemaining <= 0) {
                 document.getElementById('winMessage').textContent = '❌ Недостаточно средств для автоигры';
                 playLoseSound();
                 return;
@@ -939,69 +1686,76 @@
 
         function stopAutoSpin() {
             autoSpinActive = false;
-            if(autoSpinInterval) clearTimeout(autoSpinInterval);
+            if (autoSpinInterval) clearTimeout(autoSpinInterval);
             autoSpinInterval = null;
             updateUI();
-            if(!superGameActive) document.getElementById('winMessage').textContent = '⏹ Автоигра остановлена';
+            if (!superGameActive && !megaGameActive) document.getElementById('winMessage').textContent =
+                '⏹ Автоигра остановлена';
         }
 
         function autoSpinLoop() {
-            if(!autoSpinActive) return;
-            if(superGameActive) { stopAutoSpin(); return; }
-            if(gameBalance < currentBet && freespinsRemaining <= 0) {
+            if (!autoSpinActive) return;
+            if (superGameActive || megaGameActive) { stopAutoSpin(); return; }
+            if (gameBalance < currentBet && freespinsRemaining <= 0) {
                 stopAutoSpin();
                 document.getElementById('winMessage').textContent = '❌ Средства закончились. Автоигра остановлена.';
                 playLoseSound();
                 return;
             }
-            if(riskActive) {
+            if (riskActive) {
                 autoSpinInterval = setTimeout(autoSpinLoop, 1000);
                 return;
             }
             performSpin().then(() => {
-                if(autoSpinActive) {
+                if (autoSpinActive) {
                     autoSpinInterval = setTimeout(autoSpinLoop, AUTO_SPIN_DELAY);
                 }
             });
         }
 
-        function checkWin(grid, isSuper = false) {
+        function checkWin(grid, isSuper = false, isMega = false) {
             let total = 0;
             const cells = [];
             const details = [];
 
             function addWin(amount, cellList, desc) {
-                let a = isSuper ? amount : Math.min(amount, MAX_PRIZE);
+                let a = isSuper ? amount : (isMega ? amount : Math.min(amount, MAX_PRIZE));
                 total += a;
-                cellList.forEach(c => { if(!cells.some(x=>x.row===c.row&&x.col===c.col)) cells.push(c); });
+                cellList.forEach(c => { if (!cells.some(x => x.row === c.row && x.col === c.col)) cells.push(c); });
                 details.push(desc);
             }
 
             function checkTriangles() {
                 const triangles = [];
-                for(let r=0;r<2;r++) {
-                    for(let c=1;c<3;c++) {
-                        const sym = grid[r][c]==='💀' ? (grid[r+1][c-1]==='💀'?grid[r+1][c+1]:grid[r+1][c-1]) : grid[r][c];
-                        if(sym==='⭐') continue;
-                        const c1 = grid[r+1][c-1]===sym || grid[r+1][c-1]==='💀';
-                        const c2 = grid[r+1][c+1]===sym || grid[r+1][c+1]==='💀';
-                        if(c1 && c2 && grid[r][c]!=='⭐') {
+                for (let r = 0; r < 2; r++) {
+                    for (let c = 1; c < 3; c++) {
+                        const sym = grid[r][c] === '💀' ? (grid[r + 1][c - 1] === '💀' ? grid[r + 1][c + 1] : grid[r + 1][
+                            c - 1
+                        ]) : grid[r][c];
+                        if (sym === '⭐') continue;
+                        const c1 = grid[r + 1][c - 1] === sym || grid[r + 1][c - 1] === '💀';
+                        const c2 = grid[r + 1][c + 1] === sym || grid[r + 1][c + 1] === '💀';
+                        if (c1 && c2 && grid[r][c] !== '⭐') {
                             triangles.push({
-                                cells: [{row:r,col:c}, {row:r+1,col:c-1}, {row:r+1,col:c+1}],
+                                cells: [{ row: r, col: c }, { row: r + 1, col: c - 1 }, { row: r + 1, col: c +
+                                        1 }],
                                 sym: sym
                             });
                         }
                     }
                 }
-                for(let r=1;r<3;r++) {
-                    for(let c=1;c<3;c++) {
-                        const sym = grid[r][c]==='💀' ? (grid[r-1][c-1]==='💀'?grid[r-1][c+1]:grid[r-1][c-1]) : grid[r][c];
-                        if(sym==='⭐') continue;
-                        const c1 = grid[r-1][c-1]===sym || grid[r-1][c-1]==='💀';
-                        const c2 = grid[r-1][c+1]===sym || grid[r-1][c+1]==='💀';
-                        if(c1 && c2 && grid[r][c]!=='⭐') {
+                for (let r = 1; r < 3; r++) {
+                    for (let c = 1; c < 3; c++) {
+                        const sym = grid[r][c] === '💀' ? (grid[r - 1][c - 1] === '💀' ? grid[r - 1][c + 1] : grid[r - 1][
+                            c - 1
+                        ]) : grid[r][c];
+                        if (sym === '⭐') continue;
+                        const c1 = grid[r - 1][c - 1] === sym || grid[r - 1][c - 1] === '💀';
+                        const c2 = grid[r - 1][c + 1] === sym || grid[r - 1][c + 1] === '💀';
+                        if (c1 && c2 && grid[r][c] !== '⭐') {
                             triangles.push({
-                                cells: [{row:r,col:c}, {row:r-1,col:c-1}, {row:r-1,col:c+1}],
+                                cells: [{ row: r, col: c }, { row: r - 1, col: c - 1 }, { row: r - 1, col: c +
+                                        1 }],
                                 sym: sym
                             });
                         }
@@ -1010,73 +1764,93 @@
                 return triangles;
             }
 
-            for(let r=0;r<3;r++) {
+            for (let r = 0; r < 3; r++) {
                 const row = grid[r];
 
                 function countSeq(start, symbol) {
                     let count = 0;
                     const seqCells = [];
-                    for(let c=start; c<4; c++) {
-                        if(row[c]===symbol || row[c]==='💀') { count++; seqCells.push({row:r, col:c}); }
-                        else break;
+                    for (let c = start; c < 4; c++) {
+                        if (row[c] === symbol || row[c] === '💀') { count++;
+                            seqCells.push({ row: r, col: c }); } else break;
                     }
-                    return {count, cells: seqCells};
+                    return { count, cells: seqCells };
                 }
 
-                if(row[0]==='6' && (row[1]==='💚'||row[1]==='💀') && (row[2]==='💜'||row[2]==='💀') && (row[3]==='7'||row[3]==='💀')) {
-                    addWin(isSuper ? SUPER_PRIZE : 500, [{row:r,col:0},{row:r,col:1},{row:r,col:2},{row:r,col:3}], `6💚💜7 ряд ${r+1}: +${isSuper?SUPER_PRIZE:500}`);
+                if (row[0] === '6' && (row[1] === '💚' || row[1] === '💀') && (row[2] === '💜' || row[2] === '💀') && (row[
+                        3] === '7' || row[3] === '💀')) {
+                    const megaBonus = isMega ? currentBet * 500 : (isSuper ? SUPER_PRIZE : 500);
+                    addWin(megaBonus, [{ row: r, col: 0 }, { row: r, col: 1 }, { row: r, col: 2 }, { row: r, col: 3 }],
+                        `6💚💜7 ряд ${r+1}: +${megaBonus}`);
                 }
 
-                for(let c=0;c<=0;c++) {
-                    const sym = row[c]==='💀' ? row[c+1] : row[c];
-                    if(sym==='💀'||sym==='⭐') continue;
-                    const {count, cells:seq} = countSeq(c, sym);
-                    if(count>=4) {
-                        if(isSuper) {
+                for (let c = 0; c <= 0; c++) {
+                    const sym = row[c] === '💀' ? row[c + 1] : row[c];
+                    if (sym === '💀' || sym === '⭐') continue;
+                    const { count, cells: seq } = countSeq(c, sym);
+                    if (count >= 4) {
+                        if (isSuper) {
                             addWin(SUPER_PRIZE, seq, `💥 СУПЕР-ПРИЗ! 4×${sym} ряд ${r+1}: +${SUPER_PRIZE}`);
+                        } else if (isMega) {
+                            addWin(currentBet * 200, seq, `👑 МЕГА! 4×${sym} ряд ${r+1}: +${currentBet*200}`);
                         } else {
-                            const mult = sym==='💚'?25 : sym==='💜'?20 : sym==='🖤'?12 : sym==='6'?30 : sym==='7'?40 : 15;
-                            addWin(currentBet*mult, seq, `4×${sym} ряд ${r+1}: +${currentBet*mult}`);
+                            const mult = sym === '💚' ? 25 : sym === '💜' ? 20 : sym === '🖤' ? 12 : sym === '6' ? 30 : sym ===
+                                '7' ? 40 : 15;
+                            addWin(currentBet * mult, seq, `4×${sym} ряд ${r+1}: +${currentBet*mult}`);
                         }
                     }
                 }
 
-                for(let c=0;c<=1;c++) {
-                    const sym = row[c]==='💀' ? (row[c+1]==='💀'?row[c+2]:row[c+1]) : row[c];
-                    if(sym==='💀'||sym==='⭐') continue;
-                    const {count, cells:seq} = countSeq(c, sym);
-                    if(count>=3 && count<4) {
-                        const alreadyCounted = seq.some(s=>cells.some(x=>x.row===s.row&&x.col===s.col));
-                        if(!alreadyCounted) {
-                            const mult = sym==='💚'?5 : sym==='💜'?4 : sym==='🖤'?3 : sym==='6'?8 : sym==='7'?10 : 3;
-                            addWin(currentBet*mult, seq.slice(0,3), `3×${sym} ряд ${r+1}: +${currentBet*mult}`);
+                for (let c = 0; c <= 1; c++) {
+                    const sym = row[c] === '💀' ? (row[c + 1] === '💀' ? row[c + 2] : row[c + 1]) : row[c];
+                    if (sym === '💀' || sym === '⭐') continue;
+                    const { count, cells: seq } = countSeq(c, sym);
+                    if (count >= 3 && count < 4) {
+                        const alreadyCounted = seq.some(s => cells.some(x => x.row === s.row && x.col === s.col));
+                        if (!alreadyCounted) {
+                            const mult = sym === '💚' ? 5 : sym === '💜' ? 4 : sym === '🖤' ? 3 : sym === '6' ? 8 : sym ===
+                                '7' ? 10 : 3;
+                            addWin(currentBet * mult, seq.slice(0, 3), `3×${sym} ряд ${r+1}: +${currentBet*mult}`);
                         }
                     }
                 }
 
-                let six=-1, seven=-1;
-                for(let i=0;i<4;i++) { if(row[i]==='6'&&six===-1) six=i; if((row[i]==='7'||row[i]==='💀')&&six!==-1&&i>six) {seven=i;break;} }
-                if(six!==-1&&seven!==-1) {
-                    const already = cells.some(c=>c.row===r&&(c.col===six||c.col===seven));
-                    if(!already) addWin(currentBet*5, [{row:r,col:six},{row:r,col:seven}], `6→7 ряд ${r+1}: +${currentBet*5}`);
+                let six = -1,
+                    seven = -1;
+                for (let i = 0; i < 4; i++) { if (row[i] === '6' && six === -1) six = i; if ((row[i] === '7' || row[i] ===
+                        '💀') && six !== -1 && i > six) { seven = i; break; } }
+                if (six !== -1 && seven !== -1) {
+                    const already = cells.some(c => c.row === r && (c.col === six || c.col === seven));
+                    if (!already) addWin(currentBet * 5, [{ row: r, col: six }, { row: r, col: seven }],
+                        `6→7 ряд ${r+1}: +${currentBet*5}`);
                 }
 
                 let scatterCount = 0;
                 const scatterCells = [];
-                for(let c=0;c<4;c++) { if(row[c]==='⭐') { scatterCount++; scatterCells.push({row:r,col:c}); } }
-                if(scatterCount>=3 && !isSuper) {
-                    const fs = scatterCount===4?10:5;
-                    const mult = scatterCount===4?5:2;
-                    freespinsRemaining += fs;
-                    addWin(currentBet*mult, scatterCells, `⭐×${scatterCount} ряд ${r+1}: +${currentBet*mult} +${fs}FS`);
+                for (let c = 0; c < 4; c++) { if (row[c] === '⭐') { scatterCount++;
+                        scatterCells.push({ row: r, col: c }); } }
+                if (scatterCount >= 3 && !isSuper) {
+                    if (isMega) {
+                        const megaScatterMult = scatterCount === 4 ? 300 : 100;
+                        const megaScatterFS = scatterCount === 4 ? 5 : 3;
+                        freespinsRemaining += megaScatterFS;
+                        addWin(currentBet * megaScatterMult, scatterCells,
+                            `👑 МЕГА SCATTER ×${scatterCount} ряд ${r+1}: +${currentBet*megaScatterMult} +${megaScatterFS}FS`);
+                    } else {
+                        const fs = scatterCount === 4 ? 10 : 5;
+                        const mult = scatterCount === 4 ? 5 : 2;
+                        freespinsRemaining += fs;
+                        addWin(currentBet * mult, scatterCells,
+                            `⭐×${scatterCount} ряд ${r+1}: +${currentBet*mult} +${fs}FS`);
+                    }
                 }
             }
 
-            if(isSuper) {
+            if (isSuper) {
                 const triangles = checkTriangles();
                 triangles.forEach(tri => {
-                    const already = tri.cells.some(c=>cells.some(x=>x.row===c.row&&x.col===c.col));
-                    if(!already) {
+                    const already = tri.cells.some(c => cells.some(x => x.row === c.row && x.col === c.col));
+                    if (!already) {
                         const mult = 50;
                         const amount = currentBet * mult;
                         addWin(amount, tri.cells, `🔺 Треугольник ${tri.sym}: +${amount}`);
@@ -1084,12 +1858,18 @@
                 });
             }
 
-            return {win: isSuper ? total : Math.min(total, MAX_PRIZE), cells, details};
+            return { win: isSuper ? total : (isMega ? total : Math.min(total, MAX_PRIZE)), cells, details };
         }
 
         async function performSpin() {
-            if(riskActive) return;
-            if(!superGameActive && gameBalance < currentBet && freespinsRemaining <= 0) {
+            if (riskActive) return;
+
+            if (megaGameActive) {
+                await megaGameSpin();
+                return;
+            }
+
+            if (!superGameActive && gameBalance < currentBet && freespinsRemaining <= 0) {
                 stopAutoSpin();
                 return;
             }
@@ -1097,21 +1877,22 @@
             playSpinStart();
             playSpinSound();
 
-            if(!superGameActive && freespinsRemaining <= 0) {
+            if (!superGameActive && freespinsRemaining <= 0) {
                 gameBalance -= currentBet;
                 await updateBalanceDB();
-            } else if(!superGameActive && freespinsRemaining > 0) {
+            } else if (!superGameActive && freespinsRemaining > 0) {
                 freespinsRemaining--;
             }
 
-            if(superGameActive) {
+            if (superGameActive) {
                 const elapsed = (Date.now() - superGameStartTime) / 1000;
-                if(superGameSpins > 0 && elapsed < SUPER_COOLDOWN) {
-                    document.getElementById('winMessage').textContent = `⏳ Жди ${Math.ceil(SUPER_COOLDOWN - elapsed)} сек...`;
+                if (superGameSpins > 0 && elapsed < SUPER_COOLDOWN) {
+                    document.getElementById('winMessage').textContent =
+                        `⏳ Жди ${Math.ceil(SUPER_COOLDOWN - elapsed)} сек...`;
                     updateUI();
                     return;
                 }
-                if(superGameSpins >= SUPER_MAX_SPINS) {
+                if (superGameSpins >= SUPER_MAX_SPINS) {
                     document.getElementById('winMessage').textContent = '✅ Все 5 супер-спинов использованы!';
                     updateUI();
                     return;
@@ -1125,68 +1906,81 @@
             document.getElementById('winMessage').textContent = '';
 
             const allCells = document.querySelectorAll('.slot-cell');
-            allCells.forEach(c=>{c.classList.add('spinning'); c.classList.remove('win','wild','scatter','mega','explosion');});
+            allCells.forEach(c => { c.classList.add('spinning');
+                c.classList.remove('win', 'wild', 'scatter', 'mega', 'explosion'); });
 
             const grid = [];
-            for(let r=0;r<3;r++) { grid[r]=[]; for(let c=0;c<4;c++) grid[r][c]=getRandomSymbol(); }
+            for (let r = 0; r < 3; r++) { grid[r] = []; for (let c = 0; c < 4; c++) grid[r][c] =
+                getRandomSymbol(); }
 
-            await new Promise(r=>setTimeout(r, superGameActive ? 800 : 1500));
+            await new Promise(r => setTimeout(r, superGameActive ? 800 : 1500));
 
-            allCells.forEach(c=>c.classList.remove('spinning'));
-            for(let r=0;r<3;r++) for(let c=0;c<4;c++) {
-                const cell = document.getElementById(`cell-${r}-${c}`);
-                cell.textContent = grid[r][c];
-                if(grid[r][c]==='💀') cell.classList.add('wild');
-                if(grid[r][c]==='⭐') cell.classList.add('scatter');
-            }
+            allCells.forEach(c => c.classList.remove('spinning'));
+            for (let r = 0; r < 3; r++)
+                for (let c = 0; c < 4; c++) {
+                    const cell = document.getElementById(`cell-${r}-${c}`);
+                    cell.textContent = grid[r][c];
+                    if (grid[r][c] === '💀') cell.classList.add('wild');
+                    if (grid[r][c] === '⭐') cell.classList.add('scatter');
+                }
 
             const result = checkWin(grid, superGameActive);
             lastWinAmount = result.win;
 
-            if(result.win > 0) {
+            if (result.win > 0) {
                 gameBalance += result.win;
 
-                if(superGameActive) {
+                if (superGameActive) {
                     superTotalWon += result.win;
                 }
 
-                if(result.win >= 500000) {
+                if (result.win >= 500000) {
                     playSuperWinSound();
-                } else if(result.win >= 10000) {
+                } else if (result.win >= 10000) {
                     playBigWinSound();
                 } else {
                     playWinSound();
                 }
 
-                document.getElementById('winMessage').innerHTML = `${superGameActive?'💥':'🎉'} +${result.win}!<br><small>${result.details.join(' | ')}</small>`;
-                result.cells.forEach(({row,col})=>document.getElementById(`cell-${row}-${col}`).classList.add('win'));
+                document.getElementById('winMessage').innerHTML =
+                    `${superGameActive?'💥':'🎉'} +${result.win.toLocaleString()}!<br><small>${result.details.join(' | ')}</small>`;
+                result.cells.forEach(({ row, col }) => document.getElementById(`cell-${row}-${col}`).classList.add(
+                'win'));
 
-                if(superGameActive && result.win >= SUPER_PRIZE) {
-                    result.cells.forEach(({row,col})=>document.getElementById(`cell-${row}-${col}`).classList.add('explosion'));
+                if (superGameActive && result.win >= SUPER_PRIZE) {
+                    result.cells.forEach(({ row, col }) => document.getElementById(`cell-${row}-${col}`).classList.add(
+                        'explosion'));
                     const overlay = document.createElement('div');
                     overlay.className = 'explosion-overlay';
                     document.body.appendChild(overlay);
-                    setTimeout(()=>overlay.remove(), 800);
+                    setTimeout(() => overlay.remove(), 800);
                 }
 
-                if(superGameActive && result.win >= SUPER_PRIZE * 0.5) {
-                    result.cells.forEach(({row,col})=>document.getElementById(`cell-${row}-${col}`).classList.add('mega'));
+                if (superGameActive && result.win >= SUPER_PRIZE * 0.5) {
+                    result.cells.forEach(({ row, col }) => document.getElementById(`cell-${row}-${col}`).classList.add(
+                        'mega'));
                 }
 
-                setTimeout(()=>document.querySelectorAll('.slot-cell.win,.slot-cell.mega,.slot-cell.explosion').forEach(c=>c.classList.remove('win','mega','explosion')), 4000);
+                setTimeout(() => document.querySelectorAll('.slot-cell.win,.slot-cell.mega,.slot-cell.explosion')
+                    .forEach(c => c.classList.remove('win', 'mega', 'explosion')), 4000);
             } else {
                 playLoseSound();
-                document.getElementById('winMessage').textContent = superGameActive ? '💥 Супер-спин...' : (freespinsRemaining>0 ? '🔄 Фриспин...' : 'Попробуй ещё! 🍀');
+                document.getElementById('winMessage').textContent = superGameActive ? '💥 Супер-спин...' : (
+                    freespinsRemaining > 0 ? '🔄 Фриспин...' : 'Попробуй ещё! 🍀');
                 lastWinAmount = 0;
             }
 
             await updateBalanceDB();
 
-            if(superGameActive) {
+            if (superGameActive) {
                 const elapsed = (Date.now() - superGameStartTime) / 1000;
-                if(elapsed >= SUPER_DURATION || superGameSpins >= SUPER_MAX_SPINS) {
+                if (elapsed >= SUPER_DURATION || superGameSpins >= SUPER_MAX_SPINS) {
                     endSuperGame();
                 }
+            }
+
+            if (!megaGameActive && !superGameActive && gameBalance >= MEGA_THRESHOLD) {
+                setTimeout(() => checkMegaGameEligibility(), 800);
             }
 
             updateUI();
@@ -1194,7 +1988,11 @@
         }
 
         async function spin() {
-            if(autoSpinActive) {
+            if (megaGameActive) {
+                await megaGameSpin();
+                return;
+            }
+            if (autoSpinActive) {
                 stopAutoSpin();
                 return;
             }
@@ -1202,7 +2000,7 @@
         }
 
         function startSuperGame() {
-            if(gameBalance < SUPER_COST || superGameActive) return;
+            if (gameBalance < SUPER_COST || superGameActive || megaGameActive) return;
             playButtonClick();
             superDeposit = SUPER_COST;
             gameBalance -= SUPER_COST;
@@ -1210,35 +2008,40 @@
             superGameSpins = 0;
             superTotalWon = 0;
             superGameStartTime = Date.now();
-            document.getElementById('superTimer').textContent = `⏱ ${SUPER_DURATION} сек | Спинов: 0/${SUPER_MAX_SPINS}`;
+            document.getElementById('superTimer').textContent =
+                `⏱ ${SUPER_DURATION} сек | Спинов: 0/${SUPER_MAX_SPINS}`;
             document.getElementById('superBalanceAmount').textContent = superDeposit;
             stopAutoSpin();
             updateBalanceDB();
             superGameTimer = setInterval(() => {
                 const elapsed = Math.floor((Date.now() - superGameStartTime) / 1000);
                 const remaining = SUPER_DURATION - elapsed;
-                if(remaining <= 0) {
+                if (remaining <= 0) {
                     endSuperGame();
                 } else {
-                    document.getElementById('superTimer').textContent = `⏱ ${remaining} сек | Спинов: ${superGameSpins}/${SUPER_MAX_SPINS}`;
+                    document.getElementById('superTimer').textContent =
+                        `⏱ ${remaining} сек | Спинов: ${superGameSpins}/${SUPER_MAX_SPINS}`;
                 }
             }, 500);
             updateUI();
-            document.getElementById('winMessage').textContent = '💥 СУПЕР-ИГРА АКТИВИРОВАНА! Депозит заморожен. Жми Крутить!';
+            document.getElementById('winMessage').textContent =
+                '💥 СУПЕР-ИГРА АКТИВИРОВАНА! Депозит заморожен. Жми Крутить!';
         }
 
         function endSuperGame() {
             superGameActive = false;
-            if(superGameTimer) clearInterval(superGameTimer);
+            if (superGameTimer) clearInterval(superGameTimer);
             superGameTimer = null;
             const refund = Math.max(0, superDeposit - superTotalWon);
-            if(refund > 0) {
+            if (refund > 0) {
                 gameBalance += refund;
-                document.getElementById('winMessage').textContent = `🏁 Супер-игра завершена! Возврат: +${refund}. Выигрыш: ${superTotalWon}`;
+                document.getElementById('winMessage').textContent =
+                    `🏁 Супер-игра завершена! Возврат: +${refund.toLocaleString()}. Выигрыш: ${superTotalWon.toLocaleString()}`;
             } else {
-                document.getElementById('winMessage').textContent = `🏁 Супер-игра завершена! Выигрыш: ${superTotalWon}. Депозит окупился!`;
+                document.getElementById('winMessage').textContent =
+                    `🏁 Супер-игра завершена! Выигрыш: ${superTotalWon.toLocaleString()}. Депозит окупился!`;
             }
-            if(gameBalance < 10) gameBalance = 10;
+            if (gameBalance < 10) gameBalance = 10;
             superDeposit = 0;
             superTotalWon = 0;
             document.getElementById('superTimer').textContent = '';
@@ -1246,67 +2049,100 @@
             document.getElementById('superBalanceDisplay').style.display = 'none';
             updateBalanceDB();
             updateUI();
+
+            setTimeout(() => checkMegaGameEligibility(), 500);
         }
 
         function startRiskGame() {
-            if(lastWinAmount<=0||riskActive||superGameActive) return;
+            if (lastWinAmount <= 0 || riskActive || superGameActive || megaGameActive) return;
             playButtonClick();
-            riskActive=true;
+            riskActive = true;
             stopAutoSpin();
             document.getElementById('riskGameArea').classList.add('active');
             document.getElementById('riskAmount').textContent = lastWinAmount;
-            const div = document.getElementById('riskCards'); div.innerHTML='';
-            const winIdx = Math.floor(Math.random()*4);
-            for(let i=0;i<4;i++) {
+            const div = document.getElementById('riskCards');
+            div.innerHTML = '';
+            const winIdx = Math.floor(Math.random() * 4);
+            for (let i = 0; i < 4; i++) {
                 const card = document.createElement('div');
-                card.className='risk-card'; card.textContent='?';
-                card.onclick = ()=>revealRisk(i, winIdx);
+                card.className = 'risk-card';
+                card.textContent = '?';
+                card.onclick = () => revealRisk(i, winIdx);
                 div.appendChild(card);
             }
             updateUI();
         }
 
         function revealRisk(chosen, winIdx) {
-            if(!riskActive) return; riskActive=false;
-            document.querySelectorAll('.risk-card').forEach((c,i)=>{
-                c.textContent = i===winIdx?'❤️':'💙';
-                c.classList.add(i===winIdx?'revealed':'revealed-lose');
-                c.style.pointerEvents='none';
+            if (!riskActive) return;
+            riskActive = false;
+            document.querySelectorAll('.risk-card').forEach((c, i) => {
+                c.textContent = i === winIdx ? '❤️' : '💙';
+                c.classList.add(i === winIdx ? 'revealed' : 'revealed-lose');
+                c.style.pointerEvents = 'none';
             });
-            if(chosen===winIdx) {
+            if (chosen === winIdx) {
                 gameBalance += lastWinAmount;
-                document.getElementById('winMessage').textContent = `🎯 РИСК! +${lastWinAmount*2} всего!`;
+                document.getElementById('winMessage').textContent =
+                `🎯 РИСК! +${(lastWinAmount*2).toLocaleString()} всего!`;
                 playRiskWinSound();
             } else {
-                document.getElementById('winMessage').textContent = `💔 Потеряно ${lastWinAmount}`;
+                document.getElementById('winMessage').textContent =
+                `💔 Потеряно ${lastWinAmount.toLocaleString()}`;
                 playRiskLoseSound();
             }
-            lastWinAmount=0; updateBalanceDB(); updateUI();
-            setTimeout(()=>{document.getElementById('riskGameArea').classList.remove('active');},2500);
+            lastWinAmount = 0;
+            updateBalanceDB();
+            updateUI();
+            setTimeout(() => { document.getElementById('riskGameArea').classList.remove('active'); }, 2500);
         }
 
         function cancelRisk() {
-            riskActive=false; document.getElementById('riskGameArea').classList.remove('active');
-            document.getElementById('winMessage').textContent='Риск отменён'; lastWinAmount=0; updateUI();
+            riskActive = false;
+            document.getElementById('riskGameArea').classList.remove('active');
+            document.getElementById('winMessage').textContent = 'Риск отменён';
+            lastWinAmount = 0;
+            updateUI();
             playButtonClick();
         }
 
         function resetGame() {
             stopAutoSpin();
-            riskActive=false; freespinsRemaining=0; lastWinAmount=0;
-            if(superGameTimer) clearInterval(superGameTimer);
-            superGameActive=false; superGameSpins=0; superGameTimer=null;
-            superDeposit=0; superTotalWon=0;
+            riskActive = false;
+            freespinsRemaining = 0;
+            lastWinAmount = 0;
+            if (superGameTimer) clearInterval(superGameTimer);
+            superGameActive = false;
+            superGameSpins = 0;
+            superGameTimer = null;
+            superDeposit = 0;
+            superTotalWon = 0;
+            megaGameActive = false;
+            megaGameSpins = 0;
+            megaGameWins = 0;
+            megaGameSavedBalance = 0;
             document.getElementById('riskGameArea').classList.remove('active');
-            document.getElementById('superTimer').textContent='';
+            document.getElementById('superTimer').textContent = '';
             document.getElementById('superIndicator').classList.remove('active');
-            document.getElementById('superBalanceDisplay').style.display='none';
-            document.getElementById('winMessage').textContent='';
+            document.getElementById('megaIndicator').classList.remove('active');
+            document.getElementById('megaProgress').style.display = 'none';
+            document.getElementById('slotGrid').classList.remove('mega-active');
+            document.getElementById('superBalanceDisplay').style.display = 'none';
+            document.getElementById('winMessage').textContent = '';
+            document.getElementById('betSelector').style.opacity = '1';
+            document.getElementById('betSelector').style.pointerEvents = 'auto';
+            currentBet = 10;
+            document.querySelectorAll('.bet-option').forEach(o => o.classList.remove('selected'));
+            const defaultBet = document.querySelector('.bet-option[data-bet="10"]');
+            if (defaultBet) defaultBet.classList.add('selected');
         }
 
-        document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('loginScreen').classList.contains('active'))login();});
-        auth.onAuthStateChanged(async u=>{if(u&&document.getElementById('gameScreen').classList.contains('active')===false&&document.getElementById('twoFactorScreen').classList.contains('active')===false&&document.getElementById('loginScreen').classList.contains('active'))await loadGame(u);});
-        
+        document.addEventListener('keydown', e => { if (e.key === 'Enter' && document.getElementById('loginScreen')
+                .classList.contains('active')) login(); });
+        auth.onAuthStateChanged(async u => { if (u && document.getElementById('gameScreen').classList.contains(
+                'active') === false && document.getElementById('twoFactorScreen').classList.contains('active') ===
+                false && document.getElementById('loginScreen').classList.contains('active')) await loadGame(u); });
+
         document.body.addEventListener('click', function firstClick() {
             initAudio();
             document.body.removeEventListener('click', firstClick);
