@@ -1787,10 +1787,14 @@
                 return;
             }
 
+            const spinButton = document.getElementById('spinBtn');
+            if (spinButton.disabled) return;
             if (!superGameActive && gameBalance < currentBet && freespinsRemaining <= 0) {
                 stopAutoSpin();
                 return;
             }
+            // Блокируем повторный запуск до первого await: двойное нажатие не спишет ставку дважды.
+            spinButton.disabled = true;
 
             playSpinStart();
             playSpinSound();
@@ -1808,11 +1812,13 @@
                     document.getElementById('winMessage').textContent =
                         `⏳ Жди ${Math.ceil(SUPER_COOLDOWN - elapsed)} сек...`;
                     updateUI();
+                    spinButton.disabled = false;
                     return;
                 }
                 if (superGameSpins >= SUPER_MAX_SPINS) {
                     document.getElementById('winMessage').textContent = '✅ Все 5 супер-спинов использованы!';
                     updateUI();
+                    spinButton.disabled = false;
                     return;
                 }
                 superGameSpins++;
@@ -1820,7 +1826,6 @@
             }
 
             updateUI();
-            document.getElementById('spinBtn').disabled = true;
             document.getElementById('winMessage').textContent = '';
 
             const allCells = document.querySelectorAll('.slot-cell');
