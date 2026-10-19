@@ -307,8 +307,12 @@
       const rect = container.getBoundingClientRect();
       gameWidth = rect.width;
       gameHeight = rect.height;
-      canvas.width = gameWidth;
-      canvas.height = gameHeight;
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(gameWidth * pixelRatio);
+      canvas.height = Math.round(gameHeight * pixelRatio);
+      canvas.style.width = gameWidth + 'px';
+      canvas.style.height = gameHeight + 'px';
+      ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     }
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
