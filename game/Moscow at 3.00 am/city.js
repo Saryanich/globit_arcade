@@ -1,4 +1,4 @@
-/* Enhanced low-poly night city: Kremlin, residential blocks, village edge and grass. */
+
 (function(){
 'use strict';
 window.GloBitCity = {
