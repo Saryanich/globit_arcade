@@ -419,6 +419,13 @@
             });
           }
         }
+        try {
+          const boardRef = db.collection('arcade_leaderboards').doc('mario').collection('entries').doc(globalId);
+          const boardSnap = await boardRef.get();
+          if (!boardSnap.exists || totalScore > (boardSnap.data().score || 0)) {
+            await boardRef.set({ uid: currentUser.uid, globalId, displayName: userData?.displayName || globalId, score: totalScore, updatedAt: new Date() }, { merge: true });
+          }
+        } catch (boardError) { console.warn('Не удалось обновить публичную таблицу:', boardError); }
       } catch (e) { console.error('Ошибка сохранения рекорда:', e); }
     }
     
@@ -1424,7 +1431,7 @@
        const out = document.getElementById('leaderboardContent');
        out.textContent = 'Загрузка...';
        try {
-         const snap = await db.collection('score').doc('mario').collection('records').orderBy('score','desc').limit(10).get();
+         const snap = await db.collection('arcade_leaderboards').doc('mario').collection('entries').orderBy('score','desc').limit(10).get();
          if (snap.empty) { out.textContent = 'Пока нет результатов'; return; }
          out.innerHTML = snap.docs.map((d,i)=>'<div class="leader-row"><span>'+(i+1)+'. '+String(d.data().displayName||d.data().globalId||'Игрок').replace(/[&<>"]/g,'')+'</span><b>'+Number(d.data().score||0).toLocaleString()+'</b></div>').join('');
        } catch(e) { out.textContent = 'Таблица недоступна: проверьте правила Firestore для score/mario/records.'; }
