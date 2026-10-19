@@ -3,6 +3,7 @@
 'use strict';
 window.GloBitCity = {
  build(scene, THREE, mat, location) {
+   if(this.currentRoot) scene.remove(this.currentRoot);
    const root = new THREE.Group(); root.name='enhanced-city';
    const box=(w,h,d,c,x,y,z,rough=.92)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c,rough));m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;root.add(m);return m;};
    const cone=(r,h,c,x,y,z,n=8)=>{const m=new THREE.Mesh(new THREE.ConeGeometry(r,h,n),mat(c));m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;root.add(m);return m;};
@@ -36,8 +37,10 @@ window.GloBitCity = {
      box(.07,h*.72,.08,0x6d6a5c,x-w*.34,h*.38,z+d/2+.12);
    }
    // Outskirts: grassy fields, narrow road, village houses and fences.
-   const grass=new THREE.Mesh(new THREE.PlaneGeometry(140,70),mat(0x263e25));grass.rotation.x=-Math.PI/2;grass.position.set(0,.01,-135);grass.receiveShadow=true;root.add(grass);
-   const countryRoad=new THREE.Mesh(new THREE.PlaneGeometry(8,75),mat(0x33362f));countryRoad.rotation.x=-Math.PI/2;countryRoad.position.set(0,.04,-135);root.add(countryRoad);
+   const grassColor=location==='river'?0x233b34:location==='industrial'?0x2e3427:location==='village'?0x314a25:0x263e25;
+   const grass=new THREE.Mesh(new THREE.PlaneGeometry(140,70),mat(grassColor));grass.rotation.x=-Math.PI/2;grass.position.set(0,.01,-135);grass.receiveShadow=true;root.add(grass);
+   const roadColor=location==='industrial'?0x272b2a:location==='river'?0x2c3434:0x33362f;
+   const countryRoad=new THREE.Mesh(new THREE.PlaneGeometry(location==='industrial'?12:8,75),mat(roadColor));countryRoad.rotation.x=-Math.PI/2;countryRoad.position.set(0,.04,-135);root.add(countryRoad);
    for(let i=0;i<22;i++){
      const side=i%2?1:-1, z=-104-Math.random()*58, x=side*(8+Math.random()*17);
      const w=3.3+Math.random()*2.2,h=2.3+Math.random()*1.2;
@@ -60,7 +63,15 @@ window.GloBitCity = {
      cone(.9,2.5,0x2d5134,x,4.1,z,7);
    }
    root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
-   scene.add(root);
+   if(location==='river'){
+     const river=new THREE.Mesh(new THREE.PlaneGeometry(48,72),mat(0x122e42,.35));river.rotation.x=-Math.PI/2;river.position.set(35,.025,-125);root.add(river);
+     for(let z=-95;z>-160;z-=7)box(2,.12,.2,0x77796a,10,.14,z);
+   } else if(location==='industrial'){
+     for(const x of [-19,19]){box(7,9,8,0x343c3b,x,4.5,-119);cylinder(1.2,1.4,14,0x4a504e,x,7,-120,12);cylinder(1.22,1.22,.3,0xe0a34b,x,14,-120,12);}
+   } else if(location==='village'){
+     for(let z=-115;z>-165;z-=12){box(1.4,4,1.4,0x55483b,-5,2,z);box(1.4,4,1.4,0x55483b,5,2,z);}
+   }
+   scene.add(root);this.currentRoot=root;
    return root;
  }
 };
