@@ -474,7 +474,11 @@
         canvas: document.getElementById('gameCanvas'),
         antialias: true
       }); 
-      renderer.setSize(window.innerWidth, window.innerHeight); 
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
       renderer.shadowMap.enabled = true;
       
       const ambient = new THREE.AmbientLight(0x606080); 
@@ -765,6 +769,8 @@
     
     window.addEventListener('keydown', (e) => {
       if(!state.gameActive) return;
+      // Не перескакиваем через полосы при удержании клавиши.
+      if (e.repeat && (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key.toLowerCase() === 'a' || e.key.toLowerCase() === 'd')) return;
       if(e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') state.playerLane = Math.max(0, state.playerLane-1);
       if(e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') state.playerLane = Math.min(2, state.playerLane+1);
       if(e.key === 'ArrowDown' || e.key.toLowerCase() === 's'){ activateBrake(); e.preventDefault(); }
