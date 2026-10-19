@@ -20,6 +20,10 @@
  <div class="panel scan"><strong>◉ ОПТИКА НОЧНОГО ВИДЕНИЯ</strong><br>ТЕПЛОВОЙ КОНТУР: <span id="scanStatus">АКТИВЕН</span><div class="bar"><i id="scanbar"></i></div><span>СЕКТОР: <b id="sector">045°</b></span><br><span>СИСТЕМА: <b>ПВО / АВТОНАВЕДЕНИЕ</b></span><br><span id="aimText">ЛКМ / КАСАНИЕ — ОГОНЬ</span></div>
  <div class="controls"><button id="pauseBtn">Ⅱ ПАУЗА</button><button id="upgradeBtn">⚙ УЛУЧШЕНИЯ</button><button id="menuBtn">☰ МЕНЮ</button></div>
  <button id="mobileFire">ОГОНЬ</button>
+ <div id="immersionFx" aria-hidden="true"><div class="fx-scanlines"></div><div class="fx-noise"></div><div class="fx-vignette"></div><div class="fx-flash"></div></div>
+ <div id="missileCameraHud" class="cam-hud"><div class="cam-top"><span>MISSILE CAM / IR-04</span><span id="camLink">LINK 98%</span></div><div class="cam-reticle"></div><div class="cam-bottom"><span id="camMode">THERMAL · NIGHT</span><span id="camRange">RANGE -- m</span></div><div class="cam-bracket tl"></div><div class="cam-bracket tr"></div><div class="cam-bracket bl"></div><div class="cam-bracket br"></div></div>
+ <div id="miniRadar" class="mini-radar"><div class="radar-title">РАДАР / СЕКТОР 045°</div><canvas id="radarCanvas" width="220" height="220"></canvas><div class="radar-foot"><span>TRACK: <b id="radarTracks">00</b></span><span>THREAT: <b id="radarThreat">LOW</b></span></div></div>
+ <div id="airRaidBanner" class="air-raid-banner"><span class="raid-dot"></span><div><b>ВОЗДУШНАЯ ТРЕВОГА</b><small id="raidMessage">Обнаружены воздушные цели. Сохраняйте внимание.</small></div><button id="raidMute" aria-label="Отключить звуковую тревогу">♫</button></div>
 </div>
 <div id="menu" class="launch-dashboard">
  <div class="dashboard-shell">
@@ -36,6 +40,7 @@
    <div class="mission-objective"><div class="objective-head"><span>ЗАДАЧА СМЕНЫ</span><span id="missionLevel">УРОВЕНЬ 1</span></div><h2 id="missionTitle">Оборона Москвы</h2><p id="objectiveText">Сбить 5 дронов, 2 Shahed и 1 ракету</p><div class="objective-tags"><span>✦ Ручной перехват</span><span>◉ Ночное видение</span><span>⌁ 3D-город</span></div></div>
    <div class="dash-stats"><div><small>УРОВЕНЬ</small><b id="dashLevel">1</b></div><div><small>МОНЕТЫ</small><b><span id="dashCoins">0</span> ₽</b></div><div><small>ЗДОРОВЬЕ</small><b id="dashHp">100%</b></div></div>
    <button class="primary start-shift" id="startBtn">▶ НАЧАТЬ СМЕНУ <span>→</span></button>
+   <button id="sirenPreview" class="siren-preview">◖ ПРОСЛУШАТЬ ВОЗДУШНУЮ ТРЕВОГУ</button>
    <div class="dashboard-foot"><span>ПК: WASD / мышь</span><span>Телефон: экранные джойстики</span></div><div id="menuNotice" class="notice"></div>
   </section>
  </div><button id="resumeBtn" hidden aria-hidden="true" tabindex="-1"></button>
@@ -45,6 +50,7 @@
  <div class="setting-row"><div><b>Экранные джойстики</b><small>Два виртуальных стика во время полёта</small></div><input id="joystickToggle" type="checkbox" checked></div>
  <div class="setting-row"><div><b>Гироскоп телефона</b><small>Наклоняй устройство, чтобы менять курс</small></div><input id="gyroToggle" type="checkbox"></div>
  <div class="setting-row"><div><b>Отдача / вибрация</b><small>Короткая тактильная отдача во время полёта, если поддерживается устройством</small></div><input id="vibrationToggle" type="checkbox" checked></div>
+ <div class="setting-row"><div><b>Яркость камеры</b><small>Яркость изображения ночной камеры</small></div><strong id="brightnessLabel">100%</strong></div><input id="settingBrightness" type="range" min="55" max="145" value="100" class="setting-range">
  <div class="setting-row"><div><b>Графика</b><small>Влияет на плавность на телефонах</small></div><select id="settingGraphics" class="field"><option value="high">Высокая</option><option value="medium">Средняя</option><option value="low">Производительная</option></select></div>
  <p class="settings-note">Гироскоп включается после разрешения браузера, если устройство требует разрешение на motion sensors.</p><button id="settingsDone" class="primary wide">СОХРАНИТЬ НАСТРОЙКИ</button>
 </div></div>
