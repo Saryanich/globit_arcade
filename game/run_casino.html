@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Run Casino - Premium Sound Slots</title>
+
+    <link rel="icon" type="image/jpeg" href="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a2e1a">
+
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js">
+    </script>
+
+    <style>
+        :root {
+            --accent-green: #00e676;
+            --accent-blue: #2979ff;
+            --accent-red: #ff1744;
+            --accent-gold: #ffd700;
+            --accent-purple: #d500f9;
+            --accent-orange: #ff6d00;
+            --text-primary: #ffffff;
+            --text-secondary: #8899bb;
+            --blur: blur(25px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(160deg, #0a2e1a 0%, #0a1a2e 40%, #1a0a2e 80%, #0d1a30 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        #particles-js {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 520px;
+        }
+
+        .screen {
+            background: rgba(15, 25, 45, 0.85);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border-radius: 24px;
+            border: 1px solid rgba(0, 230, 118, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 230, 118, 0.1);
+            padding: 2rem 1.5rem;
+            color: var(--text-primary);
+            display: none;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeSlideIn 0.4s ease-out;
+        }
+
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .logo {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent-green);
+            box-shadow: 0 0 25px rgba(0, 230, 118, 0.5);
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%,
+            100% {
+                box-shadow: 0 0 25px rgba(0, 230, 118, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(0, 230, 118, 0.9), 0 0 70px rgba(255, 23, 68, 0.3);
+            }
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+            background: linear-gradient(135deg, #00e676, #2979ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.3rem;
+        }
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 1.2rem;
+            font-size: 0.85rem;
+        }
+        .input-group {
+            margin-bottom: 0.8rem;
+        }
+        label {
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #90caf9;
+            margin-bottom: 0.2rem;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+        }
+        input:focus {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 15px rgba(0, 230, 118, 0.2);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.7rem;
+            border: none;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.3px;
+            margin-top: 0.4rem;
+            text-transform: uppercase;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #00e676, #00c853);
+            color: #0a1a2e;
+            font-weight: 700;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #ff1744, #d50000);
+            color: white;
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #1a0a2e;
+            font-weight: 700;
+        }
+        .btn-gold:hover {
+            transform: translateY(-2px);
+        }
+        .btn-gold:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .btn-super {
+            background: linear-gradient(135deg, #ff6d00, #ff1744, #d500f9);
+            color: white;
+            font-weight: 900;
+            font-size: 1.1rem;
+            animation: superBtnGlow 1s ease-in-out infinite;
+            box-shadow: 0 0 30px rgba(255, 109, 0, 0.7), 0 0 60px rgba(213, 0, 249, 0.5);
+            letter-spacing: 2px;
+        }
+        @keyframes superBtnGlow {
+            0%,
+            100% {
+                box-shadow: 0 0 30px rgba(255, 109, 0, 0.7), 0 0 60px rgba(213, 0, 249, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 50px rgba(255, 109, 0, 1), 0 0 90px rgba(213, 0, 249, 0.8);
+            }
+        }
+        .btn-super:hover {
+            transform: scale(1.05);
+        }
+        .btn-super:disabled {
+            opacity: 0.5;
+            animation: none;
+        }
+
+        .btn-mega {
+            background: linear-gradient(135deg, #ffd700, #ff6d00, #ff1744, #d500f9, #2979ff);
+            color: white;
+            font-weight: 900;
+            font-size: 1.1rem;
+            animation: megaBtnGlow 0.8s ease-in-out infinite;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.8), 0 0 80px rgba(255, 23, 68, 0.6), 0 0 120px rgba(41, 121, 255, 0.4);
+            letter-spacing: 3px;
+            border: 3px solid rgba(255, 215, 0, 0.8);
+        }
+        @keyframes megaBtnGlow {
+            0%,
+            100% {
+                box-shadow: 0 0 40px rgba(255, 215, 0, 0.8), 0 0 80px rgba(255, 23, 68, 0.6);
+            }
+            25% {
+                box-shadow: 0 0 60px rgba(213, 0, 249, 1), 0 0 100px rgba(41, 121, 255, 0.8);
+            }
+            50% {
+                box-shadow: 0 0 80px rgba(255, 109, 0, 1), 0 0 120px rgba(255, 23, 68, 0.9);
+            }
+            75% {
+                box-shadow: 0 0 60px rgba(41, 121, 255, 1), 0 0 100px rgba(213, 0, 249, 0.8);
+            }
+        }
+        .btn-mega:hover {
+            transform: scale(1.08);
+        }
+        .btn-mega:disabled {
+            opacity: 0.5;
+            animation: none;
+        }
+
+        .btn-auto {
+            background: linear-gradient(135deg, #2979ff, #00e676);
+            color: white;
+            font-weight: 700;
+        }
+        .btn-auto:hover {
+            transform: translateY(-2px);
+        }
+        .btn-auto.active {
+            animation: autoPulse 0.8s ease-in-out infinite;
+        }
+        @keyframes autoPulse {
+            0%,
+            100% {
+                box-shadow: 0 0 10px rgba(41, 121, 255, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 25px rgba(41, 121, 255, 0.9), 0 0 40px rgba(0, 230, 118, 0.5);
+            }
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ccc;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 0.6rem;
+            font-size: 0.8rem;
+            min-height: 1rem;
+        }
+        .error {
+            color: #ff5252;
+        }
+        .success {
+            color: #69f0ae;
+        }
+
+        .twofa-code {
+            display: flex;
+            gap: 0.4rem;
+            justify-content: center;
+            margin: 0.8rem 0;
+        }
+        .twofa-code input {
+            width: 40px;
+            height: 45px;
+            text-align: center;
+            font-size: 1.4rem;
+            padding: 0;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin: 0.6rem 0;
+            color: #bbb;
+            font-size: 0.8rem;
+        }
+
+        .game-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            text-align: center;
+            background: linear-gradient(135deg, #ffd700, #ff6b35, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            animation: titleShine 2s ease-in-out infinite;
+        }
+        @keyframes titleShine {
+            0%,
+            100% {
+                filter: brightness(1);
+            }
+            50% {
+                filter: brightness(1.3);
+            }
+        }
+
+        .super-mode-indicator {
+            text-align: center;
+            padding: 0.5rem;
+            background: linear-gradient(135deg, #ff6d00, #d500f9);
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            animation: superPulse 0.5s ease-in-out infinite;
+            margin: 0.5rem 0;
+            display: none;
+        }
+        .super-mode-indicator.active {
+            display: block;
+        }
+        @keyframes superPulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .mega-mode-indicator {
+            text-align: center;
+            padding: 0.5rem;
+            background: linear-gradient(135deg, #ffd700, #ff6d00, #ff1744, #d500f9, #2979ff);
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 1.1rem;
+            letter-spacing: 3px;
+            animation: megaPulse 0.4s ease-in-out infinite;
+            margin: 0.5rem 0;
+            display: none;
+            border: 2px solid rgba(255, 215, 0, 0.8);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+        .mega-mode-indicator.active {
+            display: block;
+        }
+        @keyframes megaPulse {
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+            }
+            50% {
+                transform: scale(1.08);
+                box-shadow: 0 0 60px rgba(255, 215, 0, 1), 0 0 90px rgba(213, 0, 249, 0.8);
+            }
+        }
+
+        .mega-progress {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 14px;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            text-align: center;
+        }
+        .mega-progress-title {
+            font-size: 0.9rem;
+            color: #ffd700;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+        .mega-progress-stats {
+            display: flex;
+            justify-content: space-around;
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+        .mega-progress-stats span {
+            font-weight: 700;
+        }
+        .mega-progress-stats .wins-needed {
+            color: #69f0ae;
+        }
+        .mega-progress-stats .spins-left {
+            color: #ffd700;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #aaa;
+        }
+        .user-info strong {
+            color: var(--accent-green);
+        }
+
+        .balance-display {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 18px;
+            padding: 0.5rem 1rem;
+            margin: 0.6rem 0;
+            border: 2px solid var(--accent-gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .balance-label {
+            color: #ccc;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+        .balance-amount {
+            color: var(--accent-gold);
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        .super-balance-display {
+            background: rgba(255, 109, 0, 0.15);
+            border-radius: 18px;
+            padding: 0.5rem 1rem;
+            margin: 0.3rem 0;
+            border: 2px solid var(--accent-orange);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .super-balance-label {
+            color: #ffab40;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+        .super-balance-amount {
+            color: var(--accent-orange);
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        .bet-selector {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            margin: 0.6rem 0;
+            flex-wrap: wrap;
+        }
+        .bet-option {
+            padding: 0.4rem 0.8rem;
+            border-radius: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: #ccc;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        .bet-option:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+        .bet-option.selected {
+            background: var(--accent-gold);
+            color: #1a0a2e;
+            border-color: var(--accent-gold);
+        }
+
+        .paytable-toggle {
+            text-align: center;
+            margin: 0.4rem 0;
+            color: var(--accent-blue);
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-decoration: underline;
+        }
+        .paytable {
+            display: none;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 14px;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            font-size: 0.7rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .paytable.active {
+            display: block;
+        }
+        .paytable h4 {
+            color: var(--accent-gold);
+            text-align: center;
+            margin-bottom: 0.4rem;
+        }
+        .paytable-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.2rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .paytable-row span:last-child {
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 18px;
+            padding: 10px;
+            border: 3px solid rgba(255, 215, 0, 0.3);
+            margin: 0.8rem 0;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
+            transition: border-color 0.5s, box-shadow 0.5s;
+        }
+        .slot-grid.mega-active {
+            border: 4px solid rgba(255, 215, 0, 0.9) !important;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.6), 0 0 100px rgba(255, 23, 68, 0.4), inset 0 0 30px rgba(0, 0, 0, 0.8) !important;
+            animation: megaBorderGlow 0.6s ease-in-out infinite;
+        }
+        @keyframes megaBorderGlow {
+            0%,
+            100% {
+                border-color: rgba(255, 215, 0, 0.9);
+                box-shadow: 0 0 50px rgba(255, 215, 0, 0.6), 0 0 100px rgba(255, 23, 68, 0.4);
+            }
+            50% {
+                border-color: rgba(213, 0, 249, 0.9);
+                box-shadow: 0 0 70px rgba(213, 0, 249, 0.8), 0 0 130px rgba(41, 121, 255, 0.6);
+            }
+        }
+
+        .slot-cell {
+            aspect-ratio: 1;
+            background: linear-gradient(145deg, #1a1a3e, #0d0d2b);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .slot-cell.spinning {
+            animation: spinAnim 0.1s linear infinite;
+        }
+        @keyframes spinAnim {
+            0% {
+                transform: rotateX(0deg);
+            }
+            50% {
+                transform: rotateX(90deg);
+            }
+            100% {
+                transform: rotateX(0deg);
+            }
+        }
+
+        .slot-cell.win {
+            animation: winGlow 0.4s ease-in-out 5;
+            border-color: var(--accent-gold) !important;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.9) !important;
+            z-index: 5;
+        }
+        .slot-cell.wild {
+            border-color: #ff1744 !important;
+            box-shadow: 0 0 20px rgba(255, 23, 68, 0.7) !important;
+        }
+        .slot-cell.scatter {
+            border-color: #d500f9 !important;
+            box-shadow: 0 0 20px rgba(213, 0, 249, 0.7) !important;
+        }
+        .slot-cell.mega {
+            animation: megaWin 0.3s ease-in-out 8;
+            border-color: #ffd700 !important;
+        }
+        .slot-cell.explosion {
+            animation: explode 0.6s ease-out forwards;
+            background: radial-gradient(circle, #ffd700, #ff6d00, #ff1744) !important;
+            border-color: #fff !important;
+        }
+        @keyframes winGlow {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.25);
+                box-shadow: 0 0 50px rgba(255, 215, 0, 1);
+            }
+        }
+        @keyframes megaWin {
+            0%,
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+            25% {
+                transform: scale(1.3) rotate(5deg);
+            }
+            75% {
+                transform: scale(1.3) rotate(-5deg);
+            }
+        }
+        @keyframes explode {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.8);
+                opacity: 0.5;
+                box-shadow: 0 0 80px rgba(255, 215, 0, 1);
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .controls .btn {
+            flex: 1;
+            min-width: 90px;
+        }
+
+        .win-message {
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+            min-height: 1.8rem;
+        }
+
+        .super-timer {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--accent-orange);
+            margin: 0.5rem 0;
+            text-shadow: 0 0 30px rgba(255, 109, 0, 0.8);
+        }
+
+        .risk-game-area {
+            display: none;
+            background: rgba(255, 0, 0, 0.08);
+            border: 2px solid var(--accent-red);
+            border-radius: 16px;
+            padding: 0.8rem;
+            margin-top: 0.6rem;
+            text-align: center;
+        }
+        .risk-game-area.active {
+            display: block;
+        }
+
+        .risk-cards {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            margin: 0.5rem 0;
+        }
+        .risk-card {
+            width: 50px;
+            height: 65px;
+            background: linear-gradient(145deg, #2a1a3e, #1a0a2e);
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        .risk-card:hover {
+            border-color: var(--accent-red);
+            transform: translateY(-4px);
+        }
+        .risk-card.revealed {
+            background: #ff1744;
+            border-color: #ff5252;
+            pointer-events: none;
+        }
+        .risk-card.revealed-lose {
+            background: #333;
+            border-color: #555;
+            pointer-events: none;
+        }
+
+        .freespin-badge {
+            display: inline-block;
+            background: var(--accent-purple);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        .explosion-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.6), rgba(255, 109, 0, 0.4), transparent);
+            animation: screenExplode 0.8s ease-out forwards;
+        }
+        @keyframes screenExplode {
+            0% {
+                opacity: 0;
+            }
+            30% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .slot-cell {
+                font-size: 1.5rem;
+            }
+            .game-title {
+                font-size: 1.8rem;
+            }
+            .controls {
+                flex-direction: column;
+            }
+            .screen {
+                padding: 1.2rem 0.8rem;
+            }
+        }
+    
+        button, .bet-option, .slot-cell { -webkit-tap-highlight-color: transparent; user-select: none; }
+        button:focus-visible { outline: 2px solid #00e676; outline-offset: 3px; }
+        button { transition: transform .1s ease, filter .12s ease, box-shadow .15s ease; }
+        button:active { transform: scale(.97); filter: brightness(1.12); }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+        }
+    .start-menu{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;overflow-y:auto;padding:16px;background:radial-gradient(ellipse at top,#193e50 0%,#090d1c 65%,#05070d 100%)}
+.start-menu-card{width:min(100%,440px);max-height:calc(100dvh - 32px);overflow-y:auto;padding:22px;text-align:center;border-radius:24px;background:rgba(15,25,45,.94);border:1px solid rgba(0,230,118,.32);box-shadow:0 20px 60px #000a,0 0 30px #00e67612}
+.start-logo{width:64px;height:64px;object-fit:cover;border-radius:16px}
+.start-menu-card h1{margin:8px 0;color:#ffd700;font-size:clamp(24px,6vw,34px)}
+.start-subtitle{color:#aab6cf;margin:0 0 18px;font-size:13px}
+.start-label{color:#c4d2e8;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:14px 0 10px}
+.start-characters{display:flex;gap:10px;margin-bottom:14px}
+.casino-character{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;align-items:center;padding:12px 5px;color:#fff;background:#ffffff0b;border:1px solid #ffffff20;border-radius:14px;font-size:27px;cursor:pointer}
+.casino-character span{font-size:12px}
+.casino-character.selected{border-color:#00e676;background:#00e67620;box-shadow:0 0 16px #00e67622}
+.start-menu-btn{width:100%;padding:12px;margin-top:9px;border:1px solid #ffffff20;border-radius:12px;color:#fff;background:linear-gradient(135deg,#253854,#182238);font-weight:800;cursor:pointer}
+.start-menu-btn.primary{color:#08150d;background:linear-gradient(135deg,#69f0ae,#00c853);border:0;font-size:16px}
+.casino-leaderboard{margin-top:10px;max-height:23vh;overflow:auto;padding:8px 12px;text-align:left;background:#0004;border-radius:12px}
+#casinoLeaderboardContent{color:#fff;font-size:13px;line-height:1.8}
+#casinoLeaderboardContent .leader-row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #ffffff20;padding:4px 0}
+.start-note{margin-top:12px;color:#8090aa;font-size:11px;line-height:1.5}
+@media(max-height:650px){.start-menu{align-items:flex-start}.start-menu-card{padding:14px}.start-label{margin:8px 0}.start-menu-btn{padding:9px}}
+</style>
+</head>
+<body>
+    <div id="particles-js"></div>
+<div id="startMenu" class="start-menu">
+  <div class="start-menu-card">
+    <img src="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg" alt="GloBIT Arcade" class="start-logo">
+    <h1>🎰 RUN CASINO</h1>
+    <p class="start-subtitle">Выбери персонажа, настрой звук и начинай игру</p>
+    <div class="start-label">👤 Выбери персонажа</div>
+    <div class="start-characters" id="casinoCharacterSelector">
+      <button type="button" class="casino-character selected" data-character="0">🧑‍🚀<span>Игрок</span></button>
+      <button type="button" class="casino-character" data-character="1">🦊<span>Лис</span></button>
+      <button type="button" class="casino-character" data-character="2">🤖<span>Робот</span></button>
+    </div>
+    <button type="button" class="start-menu-btn" id="casinoSoundToggle">🔊 Звук: ВКЛ</button>
+    <button type="button" class="start-menu-btn" id="casinoLeaderboardToggle">🏆 Таблица лидеров</button>
+    <div id="casinoLeaderboardPanel" class="casino-leaderboard hidden"><div class="start-label">🏆 Лучшие игроки</div><div id="casinoLeaderboardContent">Нажмите, чтобы загрузить таблицу</div></div>
+    <button type="button" class="start-menu-btn primary" id="casinoStartButton">▶ НАЧАТЬ ИГРУ</button>
+    <div class="start-note">Вход не требуется. Если GloBIT Arcade уже авторизовал вас, аккаунт будет использован автоматически.</div>
+  </div>
+</div>
+
+    <div class="app-container">
+<!-- ИГРА -->
+        <div id="gameScreen" class="screen">
+            <div class="user-info">
+                <span>👤 <strong id="displayName">Игрок</strong></span>
+                <span>🆔 <strong id="globalIdDisplay">—</strong></span>
+            </div>
+            <div class="game-title">🎰 RUN CASINO</div>
+            <div class="super-mode-indicator" id="superIndicator">💥 СУПЕР-ИГРА! 💥</div>
+            <div class="mega-mode-indicator" id="megaIndicator">👑 МЕГА-ИГРА! 👑</div>
+            <div class="super-timer" id="superTimer"></div>
+            <div id="freespinIndicator" style="text-align:center;min-height:1.2rem;"></div>
+
+            <!-- Прогресс мега-игры -->
+            <div class="mega-progress" id="megaProgress" style="display:none;">
+                <div class="mega-progress-title">👑 МЕГА-ИГРА: Судьба миллиарда 👑</div>
+                <div class="mega-progress-stats">
+                    <span>Спины: <span id="megaSpinsCount" style="color:#ffd700;">0/10</span></span>
+                    <span>Победы: <span id="megaWinsCount" style="color:#69f0ae;">0/7</span></span>
+                    <span class="wins-needed">Нужно: <span id="megaWinsNeeded">7</span></span>
+                </div>
+                <div style="font-size:0.7rem;color:#ff5252;margin-top:0.3rem;">⚠ Меньше 7 побед = баланс 10!</div>
+            </div>
+
+            <div class="balance-display">
+                <span class="balance-label">💰 Баланс</span>
+                <span class="balance-amount" id="balanceDisplay">1000</span>
+            </div>
+
+            <div class="super-balance-display" id="superBalanceDisplay" style="display:none;">
+                <span class="super-balance-label">💥 Супер-депозит</span>
+                <span class="super-balance-amount" id="superBalanceAmount">150000</span>
+            </div>
+<div class="bet-selector" id="betSelector">
+                <div class="bet-option selected" data-bet="10">10</div>
+                <div class="bet-option" data-bet="50">50</div>
+                <div class="bet-option" data-bet="100">100</div>
+                <div class="bet-option" data-bet="200">200</div>
+                <div class="bet-option" data-bet="500">500</div>
+                <div class="bet-option" data-bet="1000">1K</div>
+                <div class="bet-option" data-bet="50000">50K</div>
+            </div>
+
+            <div class="paytable-toggle" onclick="togglePaytable()">📋 Таблица выплат ▼</div>
+            <div class="paytable" id="paytable">
+                <h4>🏆 КОМБИНАЦИИ (множитель × ставка)</h4>
+                <div class="paytable-row"><span>🃏 WILD (💀)</span><span>Заменяет любой символ</span></div>
+                <div class="paytable-row"><span>3 одинаковых в ряд</span><span>×3</span></div>
+                <div class="paytable-row"><span>4 одинаковых в ряд</span><span>×15</span></div>
+                <div class="paytable-row"><span>3×💚 в ряд</span><span>×5</span></div>
+                <div class="paytable-row"><span>4×💚 в ряд</span><span>×25</span></div>
+                <div class="paytable-row"><span>3×💜 в ряд</span><span>×4</span></div>
+                <div class="paytable-row"><span>4×💜 в ряд</span><span>×20</span></div>
+                <div class="paytable-row"><span>3×🖤 в ряд</span><span>×3</span></div>
+                <div class="paytable-row"><span>4×🖤 в ряд</span><span>×12</span></div>
+                <div class="paytable-row"><span>3×6 в ряд</span><span>×8</span></div>
+                <div class="paytable-row"><span>4×6 в ряд</span><span>×30</span></div>
+                <div class="paytable-row"><span>3×7 в ряд</span><span>×10</span></div>
+                <div class="paytable-row"><span>4×7 в ряд</span><span>×40</span></div>
+                <div class="paytable-row"><span>6💚💜7 в ряд</span><span>500 (фикс)</span></div>
+                <div class="paytable-row"><span>6→7 (любые позиции)</span><span>×5</span></div>
+                <div class="paytable-row"><span>3 SCATTER (⭐)</span><span>×2 + 5 ФРИСПИНОВ</span></div>
+                <div class="paytable-row"><span>4 SCATTER (⭐)</span><span>×5 + 10 ФРИСПИНОВ</span></div>
+                <div class="paytable-row" style="color:#ff6d00;"><span>💥 СУПЕР: 4 в ряд</span><span>500 000 (фикс)</span></div>
+                <div class="paytable-row" style="color:#ff6d00;"><span>💥 СУПЕР: треугольник</span><span>×50</span></div>
+                <div class="paytable-row" style="color:#ffd700;font-weight:900;"><span>👑 МЕГА: 3 SCATTER</span><span>×100 + 3 ФРИСПИНА</span></div>
+                <div class="paytable-row" style="color:#ffd700;font-weight:900;"><span>👑 МЕГА: 4 в ряд</span><span>×200</span></div>
+            </div>
+
+            <div class="slot-grid" id="slotGrid"></div>
+            <div class="win-message" id="winMessage"></div>
+
+            <div class="controls">
+                <button class="btn btn-gold" id="spinBtn" onclick="spin()">🎲 Крутить</button>
+                <button class="btn btn-auto" id="autoBtn" onclick="toggleAutoSpin()">🔄 АВТО</button>
+                <button class="btn btn-mega" id="megaBtn" onclick="startMegaGame()" style="display:none;">👑 МЕГА 👑</button>
+                <button class="btn btn-super" id="superBtn" onclick="startSuperGame()" style="display:none;">💥 СУПЕР 💥</button>
+                <button class="btn btn-danger" id="riskBtn" onclick="startRiskGame()" disabled>🔥 Риск</button>
+            </div>
+
+            <div class="risk-game-area" id="riskGameArea">
+                <div style="font-weight:700;color:#ff5252;">🎯 Риск-игра! Удвой!</div>
+                <p style="color:#ccc;font-size:0.8rem;">Найди ❤️ среди карт</p>
+                <div class="risk-cards" id="riskCards"></div>
+                <p style="font-size:0.75rem;color:#aaa;">Ставка: <strong id="riskAmount">0</strong></p>
+                <button class="btn btn-secondary" onclick="cancelRisk()" style="font-size:0.75rem;">Отмена</button>
+            </div>
+
+            <button class="btn btn-secondary" onclick="logout()" style="margin-top:0.6rem;">🚪 Выйти</button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== FIREBASE ====================
+        firebase.initializeApp({
+            apiKey: "AIzaSyA6GGJxAiao77U7_9mBUEjftmS_FnSWbIw",
+            authDomain: "glob-data.firebaseapp.com",
+            projectId: "glob-data",
+            storageBucket: "glob-data.firebasestorage.app",
+            messagingSenderId: "122757049174",
+            appId: "1:122757049174:web:ebb425edd0e1a8ea9a44f7"
+        });
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        // Повторно используем локальную Firebase-сессию GloBIT Arcade.
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.warn);
+
+        // ==================== ЗВУКОВАЯ СИСТЕМА ====================
+        let audioCtx = null;
+        let audioEnabled = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                try {
+                    audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.warn("Web Audio API not supported");
+                    return;
+                }
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume().then(() => {
+                    audioEnabled = true;
+                }).catch(e => console.warn("Audio resume failed", e));
+            } else if (audioCtx.state === 'running') {
+                audioEnabled = true;
+            }
+        }
+
+        document.addEventListener('click', function enableAudioOnFirstClick() {
+            initAudio();
+        }, { once: true });
+
+        function playTone(frequency, duration, type = 'sine', volume = 0.3) {
+            if (!audioEnabled || !audioCtx || audioCtx.state !== 'running') return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = type;
+                osc.frequency.value = frequency;
+                gain.gain.value = volume;
+                osc.start();
+                gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        function playSpinSound() { playTone(880, 0.05, 'sine', 0.15);
+            setTimeout(() => playTone(1046.5, 0.08, 'triangle', 0.1), 20); }
+
+        function playWinSound() { playTone(523.25, 0.2, 'sine', 0.25);
+            setTimeout(() => playTone(659.25, 0.2, 'sine', 0.25), 150);
+            setTimeout(() => playTone(783.99, 0.3, 'sine', 0.3), 300); }
+
+        function playBigWinSound() { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => setTimeout(() => playTone(f, 0.3, 'sine',
+                0.4), i * 150)); }
+
+        function playSuperWinSound() { [523.25, 659.25, 783.99, 1046.5, 1318.52].forEach((f, i) => setTimeout(() => playTone(f,
+                0.4, 'sine', 0.5), i * 200)); }
+
+        function playMegaWinSound() { [261.63, 329.63, 392, 523.25, 659.25, 783.99, 1046.5, 1318.52].forEach((f, i) =>
+            setTimeout(() => playTone(f, 0.5, 'sine', 0.6), i * 180)); }
+
+        function playMegaLoseSound() { [1046.5, 783.99, 523.25, 261.63].forEach((f, i) => setTimeout(() => playTone(f, 0.6,
+                'sawtooth', 0.5), i * 300)); }
+
+        function playLoseSound() { playTone(440, 0.3, 'sawtooth', 0.2);
+            setTimeout(() => playTone(349.23, 0.4, 'sawtooth', 0.2), 200); }
+
+        function playRiskWinSound() { playTone(659.25, 0.15, 'square', 0.25);
+            setTimeout(() => playTone(783.99, 0.15, 'square', 0.25), 150); }
+
+        function playRiskLoseSound() { playTone(349.23, 0.2, 'triangle', 0.25);
+            setTimeout(() => playTone(293.66, 0.3, 'triangle', 0.25), 200); }
+
+        function playButtonClick() { playTone(698.46, 0.07, 'sine', 0.1); }
+
+        function playSpinStart() { playTone(1318.52, 0.05, 'triangle', 0.2); }
+
+        function playMegaStartSound() { [392, 523.25, 659.25, 783.99, 1046.5].forEach((f, i) => setTimeout(() => playTone(f,
+                0.4, 'square', 0.5), i * 200)); }
+
+        // ==================== PARTICLES ====================
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 45, density: { enable: true, value_area: 800 } },
+                color: { value: ['#00e676', '#2979ff', '#ff1744', '#ffd700', '#d500f9', '#ff6d00'] },
+                shape: { type: 'circle' },
+                opacity: { value: 0.35, random: true },
+                size: { value: 2.5, random: true },
+                line_linked: { enable: true, distance: 140, color: '#2979ff', opacity: 0.1, width: 1 },
+                move: { enable: true, speed: 1, direction: 'none', random: true, out_mode: 'out' }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: true, mode: 'grab' }, onclick: { enable: true, mode: 'push' } },
+                modes: { grab: { distance: 140, line_linked: { opacity: 0.3 } }, push: { particles_nb: 3 } }
+            },
+            retina_detect: true
+        });
+
+        // ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
+        let pendingUser = null,
+            currentIP = 'unknown',
+            deviceFingerprint = 'unknown';
+        const SYMBOLS = ['6', '7', '💚', '💜', '🖤', '💀', '⭐'];
+        const SYMBOL_WEIGHTS = [12, 10, 15, 14, 14, 5, 3];
+        let gameBalance = 1000,
+            currentBet = 10,
+            lastWinAmount = 0;
+        let riskActive = false,
+            freespinsRemaining = 0;
+        let superGameActive = false,
+            superGameSpins = 0,
+            superGameTimer = null;
+        let superGameStartTime = 0;
+        let superDeposit = 0;
+        let superTotalWon = 0;
+        let megaGameActive = false,
+            megaGameSpins = 0,
+            megaGameWins = 0;
+        let megaGameTotalSpins = 10;
+        let megaGameRequiredWins = 7;
+        let megaGameSavedBalance = 0;
+        let autoSpinActive = false;
+        let autoSpinInterval = null;
+        const MAX_PRIZE = 5000;
+        const SUPER_PRIZE = 500000;
+        const SUPER_COST = 150000;
+        const SUPER_DURATION = 15;
+        const SUPER_COOLDOWN = 3;
+        const SUPER_MAX_SPINS = 5;
+        const MEGA_THRESHOLD = 1000000000;
+        const MEGA_BET_PERCENT = 0.1;
+        const AUTO_SPIN_DELAY = 2000;
+        let currentGlobalId = null;
+
+        // ==================== ФУНКЦИИ ДЛЯ РАБОТЫ С БАЛАНСОМ В SCORE ====================
+        function getScoreDocRef(globalId) {
+            return db.collection('score').doc('runcasino').collection('records').doc(globalId);
+        }
+
+        async function getBalanceFromScore(globalId) {
+            try {
+                const scoreRef = getScoreDocRef(globalId);
+                const scoreDoc = await scoreRef.get();
+
+                if (scoreDoc.exists) {
+                    const data = scoreDoc.data();
+                    const balance = data.score || 1000;
+                    console.log(`💰 Баланс загружен из score для ${globalId}: ${balance}`);
+                    return balance;
+                } else {
+                    await scoreRef.set({
+                        score: 1000,
+                        globalId: globalId,
+                        email: auth.currentUser?.email || '',
+                        displayName: globalId,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    });
+                    console.log(`✅ Создан новый счет для ${globalId}: 1000`);
+                    return 1000;
+                }
+            } catch (e) {
+                console.error('❌ Ошибка получения баланса из score:', e);
+                return 1000;
+            }
+        }
+
+        async function updateBalanceInScore(globalId, newBalance) {
+            if (!auth.currentUser || !globalId) return;
+
+            try {
+                const scoreRef = getScoreDocRef(globalId);
+                const scoreDoc = await scoreRef.get();
+
+                if (!scoreDoc.exists) {
+                    await scoreRef.set({
+                        score: newBalance,
+                        globalId: globalId,
+                        email: auth.currentUser.email,
+                        displayName: document.getElementById('displayName').textContent || globalId,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    });
+                } else {
+                    await scoreRef.update({
+                        score: newBalance,
+                        updatedAt: new Date()
+                    });
+                }
+                try {
+                    const user = auth.currentUser;
+                    if (user) {
+                        await db.collection('arcade_leaderboards').doc('runcasino').collection('entries').doc(globalId).set({
+                            uid: user.uid,
+                            globalId,
+                            displayName: document.getElementById('displayName').textContent || globalId,
+                            score: newBalance,
+                            updatedAt: new Date()
+                        }, { merge: true });
+                    }
+                } catch (boardError) { console.warn('Не удалось обновить публичную таблицу:', boardError); }
+                console.log(`💾 Баланс сохранен в score для ${globalId}: ${newBalance}`);
+            } catch (e) {
+                console.error('❌ Ошибка сохранения баланса в score:', e);
+            }
+        }
+
+        // ==================== НАВИГАЦИЯ ====================
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function togglePaytable() {
+            document.getElementById('paytable').classList.toggle('active');
+            playButtonClick();
+        }
+
+        async function getDeviceInfo() {
+            try { const r = await fetch('https://api.ipify.org?format=json');
+                currentIP = (await r.json()).ip; } catch (e) {}
+            deviceFingerprint = btoa(navigator.userAgent + screen.width + navigator.language).substring(0, 40);
+        }
+
+        function showMessage(id, text, err) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = text;
+            el.className = 'message ' + (err ? 'error' : 'success');
+        }
+
+        function moveNext(cur, next) { if (cur.value.length === 1) document.getElementById(next)?.focus(); }
+
+        function getRandomSymbol() {
+            const total = SYMBOL_WEIGHTS.reduce((a, b) => a + b, 0);
+            let r = Math.random() * total;
+            for (let i = 0; i < SYMBOLS.length; i++) { r -= SYMBOL_WEIGHTS[i]; if (r <= 0) return SYMBOLS[i]; }
+            return SYMBOLS[0];
+        }
+
+        // ==================== FIREBASE ====================
+        async function ensureUserDoc(uid, email) {
+            const ref = db.collection('users').doc(uid);
+            if (!(await ref.get()).exists) await ref.set({
+                email,
+                globalId: email.split('@')[0],
+                displayName: email.split('@')[0],
+                role: 'user',
+                knownDevices: [],
+                online: false,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            return ref;
+        }
+
+        async function isDeviceKnown(uid) {
+            const d = await db.collection('users').doc(uid).get();
+            return (d.data()?.knownDevices || []).some(d => d.fingerprint === deviceFingerprint);
+        }
+
+        async function addKnownDevice(uid) {
+            const ref = db.collection('users').doc(uid);
+            const d = await ref.get();
+            const devices = d.data()?.knownDevices || [];
+            if (!devices.some(d => d.fingerprint === deviceFingerprint)) {
+                devices.push({
+                    fingerprint: deviceFingerprint,
+                    ip: currentIP,
+                    addedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                await ref.update({ knownDevices: devices });
+            }
+        }
+
+        async function updateBalanceDB() {
+            if (currentGlobalId) {
+                await updateBalanceInScore(currentGlobalId, gameBalance);
+            }
+        }
+        // Авторизация выполняется в GloBIT Arcade; здесь используется уже существующая сессия.
+        window.logout = async () => {
+            stopAutoSpin();
+            if (superGameTimer) clearInterval(superGameTimer);
+            if (auth.currentUser) await updateBalanceDB();
+            resetGame();
+            document.getElementById('startMenu').style.display = 'flex';
+            showScreen('gameScreen');
+        };
+
+        // ==================== МЕГА-ИГРА ====================
+        function checkMegaGameEligibility() {
+            if (!megaGameActive && gameBalance >= MEGA_THRESHOLD && !superGameActive) {
+                startMegaGame();
+            }
+        }
+
+        function startMegaGame() {
+            if (megaGameActive || superGameActive || gameBalance < MEGA_THRESHOLD) return;
+
+            playMegaStartSound();
+            megaGameActive = true;
+            megaGameSpins = 0;
+            megaGameWins = 0;
+            megaGameSavedBalance = gameBalance;
+            currentBet = Math.floor(gameBalance * MEGA_BET_PERCENT);
+
+            document.getElementById('megaIndicator').classList.add('active');
+            document.getElementById('megaProgress').style.display = 'block';
+            document.getElementById('slotGrid').classList.add('mega-active');
+            document.getElementById('megaBtn').style.display = 'none';
+            document.getElementById('superBtn').style.display = 'none';
+            document.getElementById('autoBtn').style.display = 'none';
+            document.getElementById('riskBtn').disabled = true;
+            document.getElementById('betSelector').style.opacity = '0.5';
+            document.getElementById('betSelector').style.pointerEvents = 'none';
+
+            stopAutoSpin();
+            updateMegaProgress();
+            updateUI();
+
+            document.getElementById('winMessage').textContent =
+                `👑 МЕГА-ИГРА! Ставка: ${currentBet.toLocaleString()}. Нужно 7/10 побед!`;
+        }
+
+        function updateMegaProgress() {
+            document.getElementById('megaSpinsCount').textContent = `${megaGameSpins}/${megaGameTotalSpins}`;
+            document.getElementById('megaWinsCount').textContent = `${megaGameWins}/${megaGameRequiredWins}`;
+            document.getElementById('megaWinsNeeded').textContent =
+                `${Math.max(0, megaGameRequiredWins - megaGameWins)}`;
+        }
+
+        function endMegaGame(success) {
+            megaGameActive = false;
+            document.getElementById('megaIndicator').classList.remove('active');
+            document.getElementById('megaProgress').style.display = 'none';
+            document.getElementById('slotGrid').classList.remove('mega-active');
+            document.getElementById('betSelector').style.opacity = '1';
+            document.getElementById('betSelector').style.pointerEvents = 'auto';
+
+            if (success) {
+                document.getElementById('winMessage').textContent =
+                    `🎉 МЕГА-ИГРА ПРОЙДЕНА! ${megaGameWins}/10 побед! Баланс: ${gameBalance.toLocaleString()}`;
+                playMegaWinSound();
+            } else {
+                gameBalance = 10;
+                document.getElementById('winMessage').textContent =
+                    `💀 МЕГА-ИГРА ПРОВАЛЕНА! ${megaGameWins}/10 побед. Баланс: 10`;
+                playMegaLoseSound();
+                updateBalanceDB();
+            }
+
+            megaGameSpins = 0;
+            megaGameWins = 0;
+            megaGameSavedBalance = 0;
+            currentBet = 10;
+            document.querySelectorAll('.bet-option').forEach(o => o.classList.remove('selected'));
+            const defaultBet = document.querySelector('.bet-option[data-bet="10"]');
+            if (defaultBet) defaultBet.classList.add('selected');
+
+            updateUI();
+        }
+
+        async function megaGameSpin() {
+            if (!megaGameActive) return;
+            if (megaGameSpins >= megaGameTotalSpins) {
+                if (megaGameWins >= megaGameRequiredWins) {
+                    endMegaGame(true);
+                } else {
+                    endMegaGame(false);
+                }
+                return;
+            }
+
+            megaGameSpins++;
+            updateMegaProgress();
+
+            gameBalance -= currentBet;
+            document.getElementById('balanceDisplay').textContent = gameBalance;
+
+            const allCells = document.querySelectorAll('.slot-cell');
+            allCells.forEach(c => { c.classList.add('spinning');
+                c.classList.remove('win', 'wild', 'scatter', 'mega', 'explosion'); });
+
+            const grid = [];
+            for (let r = 0; r < 3; r++) { grid[r] = []; for (let c = 0; c < 4; c++) grid[r][c] =
+                getRandomSymbol(); }
+
+            await new Promise(r => setTimeout(r, 1200));
+
+            allCells.forEach(c => c.classList.remove('spinning'));
+            for (let r = 0; r < 3; r++)
+                for (let c = 0; c < 4; c++) {
+                    const cell = document.getElementById(`cell-${r}-${c}`);
+                    cell.textContent = grid[r][c];
+                    if (grid[r][c] === '💀') cell.classList.add('wild');
+                    if (grid[r][c] === '⭐') cell.classList.add('scatter');
+                }
+
+            const result = checkWin(grid, false, true);
+
+            if (result.win > 0) {
+                megaGameWins++;
+                gameBalance += result.win;
+                document.getElementById('winMessage').innerHTML =
+                    `👑 МЕГА-ПОБЕДА! +${result.win.toLocaleString()}! (${megaGameWins}/${megaGameRequiredWins})<br><small>${result.details.join(' | ')}</small>`;
+                playWinSound();
+                result.cells.forEach(({ row, col }) => document.getElementById(`cell-${row}-${col}`).classList.add(
+                    'win'));
+                setTimeout(() => document.querySelectorAll('.slot-cell.win').forEach(c => c.classList.remove('win')),
+                    3500);
+            } else {
+                document.getElementById('winMessage').textContent =
+                    `👑 Спин ${megaGameSpins}/${megaGameTotalSpins} | Побед: ${megaGameWins}/${megaGameRequiredWins}`;
+                playLoseSound();
+            }
+
+            updateMegaProgress();
+            document.getElementById('balanceDisplay').textContent = gameBalance;
+
+            if (megaGameSpins >= megaGameTotalSpins) {
+                await new Promise(r => setTimeout(r, 1500));
+                if (megaGameWins >= megaGameRequiredWins) {
+                    endMegaGame(true);
+                } else {
+                    endMegaGame(false);
+                }
+            }
+        }
+
+        // ==================== ИГРА ====================
+        async function loadGame(user) {
+            const doc = await db.collection('users').doc(user.uid).get();
+            const data = doc.data() || {};
+            currentGlobalId = data.globalId || user.email?.split('@')[0] || 'player';
+
+            document.getElementById('displayName').textContent = data.displayName || user.email?.split('@')[0] || 'Игрок';
+            document.getElementById('globalIdDisplay').textContent = currentGlobalId;
+
+            gameBalance = await getBalanceFromScore(currentGlobalId);
+
+            if (gameBalance < 10) {
+                gameBalance = 1000;
+                await updateBalanceInScore(currentGlobalId, gameBalance);
+            }
+
+            document.getElementById('balanceDisplay').textContent = gameBalance;
+            try {
+                await db.collection('arcade_leaderboards').doc('runcasino').collection('entries').doc(currentGlobalId).set({
+                    uid: user.uid, globalId: currentGlobalId,
+                    displayName: data.displayName || user.email?.split('@')[0] || 'Игрок',
+                    score: gameBalance, updatedAt: new Date()
+                }, { merge: true });
+            } catch (boardError) { console.warn('Не удалось синхронизировать таблицу:', boardError); }
+            showScreen('gameScreen');
+            initGrid();
+            setupBetSelector();
+            updateUI();
+            // Звук включается только по настройке стартового меню.
+
+            // Проверка супер-режима отложена до начала игры.
+        }
+
+        function setupBetSelector() {
+            document.querySelectorAll('.bet-option').forEach(o => {
+                o.addEventListener('click', function() {
+                    if (megaGameActive) return;
+                    document.querySelectorAll('.bet-option').forEach(x => x.classList.remove('selected'));
+                    this.classList.add('selected');
+                    currentBet = parseInt(this.dataset.bet);
+                    updateUI();
+                    playButtonClick();
+                });
+            });
+        }
+
+        function initGrid() {
+            const g = document.getElementById('slotGrid');
+            g.innerHTML = '';
+            for (let r = 0; r < 3; r++)
+                for (let c = 0; c < 4; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'slot-cell';
+                    cell.id = `cell-${r}-${c}`;
+                    cell.textContent = getRandomSymbol();
+                    g.appendChild(cell);
+                }
+        }
+
+        function updateSuperBalanceDisplay() {
+            const display = document.getElementById('superBalanceDisplay');
+            if (superGameActive) {
+                display.style.display = 'flex';
+                document.getElementById('superBalanceAmount').textContent = superDeposit;
+            } else {
+                display.style.display = 'none';
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('balanceDisplay').textContent = gameBalance;
+            updateSuperBalanceDisplay();
+            const sb = document.getElementById('spinBtn');
+            const rb = document.getElementById('riskBtn');
+            const superBtn = document.getElementById('superBtn');
+            const megaBtn = document.getElementById('megaBtn');
+            const autoBtn = document.getElementById('autoBtn');
+            const superInd = document.getElementById('superIndicator');
+
+            if (megaGameActive) {
+                sb.textContent = `👑 МЕГА-СПИН (${megaGameSpins}/${megaGameTotalSpins})`;
+                sb.disabled = false;
+                superBtn.style.display = 'none';
+                megaBtn.style.display = 'none';
+                autoBtn.style.display = 'none';
+                rb.disabled = true;
+                superInd.classList.remove('active');
+                return;
+            }
+
+            if (gameBalance >= MEGA_THRESHOLD && !superGameActive) {
+                megaBtn.style.display = 'block';
+            } else {
+                megaBtn.style.display = 'none';
+            }
+
+            if (gameBalance >= SUPER_COST && !superGameActive && !megaGameActive) {
+                superBtn.style.display = 'block';
+            } else {
+                superBtn.style.display = 'none';
+            }
+
+            if (superGameActive) {
+                superInd.classList.add('active');
+                sb.textContent = `💥 СУПЕР-СПИН (${superGameSpins}/${SUPER_MAX_SPINS})`;
+                sb.disabled = false;
+                superBtn.style.display = 'none';
+                megaBtn.style.display = 'none';
+                autoBtn.style.display = 'none';
+            } else {
+                superInd.classList.remove('active');
+                autoBtn.style.display = 'block';
+                sb.textContent = freespinsRemaining > 0 ? `🎰 ФРИСПИН (${freespinsRemaining})` :
+                    `🎲 Крутить (${currentBet})`;
+                sb.disabled = (gameBalance < currentBet && freespinsRemaining <= 0) || riskActive || autoSpinActive;
+                autoBtn.textContent = autoSpinActive ? '⏹ СТОП' : '🔄 АВТО';
+                autoBtn.className = autoSpinActive ? 'btn btn-auto active' : 'btn btn-auto';
+            }
+            rb.disabled = lastWinAmount <= 0 || riskActive || superGameActive || megaGameActive;
+            document.getElementById('freespinIndicator').innerHTML = freespinsRemaining > 0 ?
+                `<span class="freespin-badge">🔥 ${freespinsRemaining} ФРИСПИНОВ</span>` : '';
+        }
+
+        function toggleAutoSpin() {
+            if (superGameActive || megaGameActive) return;
+            if (autoSpinActive) {
+                stopAutoSpin();
+            } else {
+                startAutoSpin();
+            }
+            playButtonClick();
+        }
+
+        function startAutoSpin() {
+            if (autoSpinActive || superGameActive || megaGameActive) return;
+            if (gameBalance < currentBet && freespinsRemaining <= 0) {
+                document.getElementById('winMessage').textContent = '❌ Недостаточно средств для автоигры';
+                playLoseSound();
+                return;
+            }
+            autoSpinActive = true;
+            updateUI();
+            document.getElementById('winMessage').textContent = '🔄 Автоигра запущена...';
+            autoSpinLoop();
+        }
+
+        function stopAutoSpin() {
+            autoSpinActive = false;
+            if (autoSpinInterval) clearTimeout(autoSpinInterval);
+            autoSpinInterval = null;
+            updateUI();
+            if (!superGameActive && !megaGameActive) document.getElementById('winMessage').textContent =
+                '⏹ Автоигра остановлена';
+        }
+
+        function autoSpinLoop() {
+            if (!autoSpinActive) return;
+            if (superGameActive || megaGameActive) { stopAutoSpin(); return; }
+            if (gameBalance < currentBet && freespinsRemaining <= 0) {
+                stopAutoSpin();
+                document.getElementById('winMessage').textContent = '❌ Средства закончились. Автоигра остановлена.';
+                playLoseSound();
+                return;
+            }
+            if (riskActive) {
+                autoSpinInterval = setTimeout(autoSpinLoop, 1000);
+                return;
+            }
+            performSpin().then(() => {
+                if (autoSpinActive) {
+                    autoSpinInterval = setTimeout(autoSpinLoop, AUTO_SPIN_DELAY);
+                }
+            });
+        }
+
+        function checkWin(grid, isSuper = false, isMega = false) {
+            let total = 0;
+            const cells = [];
+            const details = [];
+
+            function addWin(amount, cellList, desc) {
+                let a = isSuper ? amount : (isMega ? amount : Math.min(amount, MAX_PRIZE));
+                total += a;
+                cellList.forEach(c => { if (!cells.some(x => x.row === c.row && x.col === c.col)) cells.push(c); });
+                details.push(desc);
+            }
+
+            function checkTriangles() {
+                const triangles = [];
+                for (let r = 0; r < 2; r++) {
+                    for (let c = 1; c < 3; c++) {
+                        const sym = grid[r][c] === '💀' ? (grid[r + 1][c - 1] === '💀' ? grid[r + 1][c + 1] : grid[r + 1][
+                            c - 1
+                        ]) : grid[r][c];
+                        if (sym === '⭐') continue;
+                        const c1 = grid[r + 1][c - 1] === sym || grid[r + 1][c - 1] === '💀';
+                        const c2 = grid[r + 1][c + 1] === sym || grid[r + 1][c + 1] === '💀';
+                        if (c1 && c2 && grid[r][c] !== '⭐') {
+                            triangles.push({
+                                cells: [{ row: r, col: c }, { row: r + 1, col: c - 1 }, { row: r + 1, col: c +
+                                        1 }],
+                                sym: sym
+                            });
+                        }
+                    }
+                }
+                for (let r = 1; r < 3; r++) {
+                    for (let c = 1; c < 3; c++) {
+                        const sym = grid[r][c] === '💀' ? (grid[r - 1][c - 1] === '💀' ? grid[r - 1][c + 1] : grid[r - 1][
+                            c - 1
+                        ]) : grid[r][c];
+                        if (sym === '⭐') continue;
+                        const c1 = grid[r - 1][c - 1] === sym || grid[r - 1][c - 1] === '💀';
+                        const c2 = grid[r - 1][c + 1] === sym || grid[r - 1][c + 1] === '💀';
+                        if (c1 && c2 && grid[r][c] !== '⭐') {
+                            triangles.push({
+                                cells: [{ row: r, col: c }, { row: r - 1, col: c - 1 }, { row: r - 1, col: c +
+                                        1 }],
+                                sym: sym
+                            });
+                        }
+                    }
+                }
+                return triangles;
+            }
+
+            for (let r = 0; r < 3; r++) {
+                const row = grid[r];
+
+                function countSeq(start, symbol) {
+                    let count = 0;
+                    const seqCells = [];
+                    for (let c = start; c < 4; c++) {
+                        if (row[c] === symbol || row[c] === '💀') { count++;
+                            seqCells.push({ row: r, col: c }); } else break;
+                    }
+                    return { count, cells: seqCells };
+                }
+
+                if (row[0] === '6' && (row[1] === '💚' || row[1] === '💀') && (row[2] === '💜' || row[2] === '💀') && (row[
+                        3] === '7' || row[3] === '💀')) {
+                    const megaBonus = isMega ? currentBet * 500 : (isSuper ? SUPER_PRIZE : 500);
+                    addWin(megaBonus, [{ row: r, col: 0 }, { row: r, col: 1 }, { row: r, col: 2 }, { row: r, col: 3 }],
+                        `6💚💜7 ряд ${r+1}: +${megaBonus}`);
+                }
+
+                for (let c = 0; c <= 0; c++) {
+                    const sym = row[c] === '💀' ? row[c + 1] : row[c];
+                    if (sym === '💀' || sym === '⭐') continue;
+                    const { count, cells: seq } = countSeq(c, sym);
+                    if (count >= 4) {
+                        if (isSuper) {
+                            addWin(SUPER_PRIZE, seq, `💥 СУПЕР-ПРИЗ! 4×${sym} ряд ${r+1}: +${SUPER_PRIZE}`);
+                        } else if (isMega) {
+                            addWin(currentBet * 200, seq, `👑 МЕГА! 4×${sym} ряд ${r+1}: +${currentBet*200}`);
+                        } else {
+                            const mult = sym === '💚' ? 25 : sym === '💜' ? 20 : sym === '🖤' ? 12 : sym === '6' ? 30 : sym ===
+                                '7' ? 40 : 15;
+                            addWin(currentBet * mult, seq, `4×${sym} ряд ${r+1}: +${currentBet*mult}`);
+                        }
+                    }
+                }
+
+                for (let c = 0; c <= 1; c++) {
+                    const sym = row[c] === '💀' ? (row[c + 1] === '💀' ? row[c + 2] : row[c + 1]) : row[c];
+                    if (sym === '💀' || sym === '⭐') continue;
+                    const { count, cells: seq } = countSeq(c, sym);
+                    if (count >= 3 && count < 4) {
+                        const alreadyCounted = seq.some(s => cells.some(x => x.row === s.row && x.col === s.col));
+                        if (!alreadyCounted) {
+                            const mult = sym === '💚' ? 5 : sym === '💜' ? 4 : sym === '🖤' ? 3 : sym === '6' ? 8 : sym ===
+                                '7' ? 10 : 3;
+                            addWin(currentBet * mult, seq.slice(0, 3), `3×${sym} ряд ${r+1}: +${currentBet*mult}`);
+                        }
+                    }
+                }
+
+                let six = -1,
+                    seven = -1;
+                for (let i = 0; i < 4; i++) { if (row[i] === '6' && six === -1) six = i; if ((row[i] === '7' || row[i] ===
+                        '💀') && six !== -1 && i > six) { seven = i; break; } }
+                if (six !== -1 && seven !== -1) {
+                    const already = cells.some(c => c.row === r && (c.col === six || c.col === seven));
+                    if (!already) addWin(currentBet * 5, [{ row: r, col: six }, { row: r, col: seven }],
+                        `6→7 ряд ${r+1}: +${currentBet*5}`);
+                }
+
+                let scatterCount = 0;
+                const scatterCells = [];
+                for (let c = 0; c < 4; c++) { if (row[c] === '⭐') { scatterCount++;
+                        scatterCells.push({ row: r, col: c }); } }
+                if (scatterCount >= 3 && !isSuper) {
+                    if (isMega) {
+                        const megaScatterMult = scatterCount === 4 ? 300 : 100;
+                        const megaScatterFS = scatterCount === 4 ? 5 : 3;
+                        freespinsRemaining += megaScatterFS;
+                        addWin(currentBet * megaScatterMult, scatterCells,
+                            `👑 МЕГА SCATTER ×${scatterCount} ряд ${r+1}: +${currentBet*megaScatterMult} +${megaScatterFS}FS`);
+                    } else {
+                        const fs = scatterCount === 4 ? 10 : 5;
+                        const mult = scatterCount === 4 ? 5 : 2;
+                        freespinsRemaining += fs;
+                        addWin(currentBet * mult, scatterCells,
+                            `⭐×${scatterCount} ряд ${r+1}: +${currentBet*mult} +${fs}FS`);
+                    }
+                }
+            }
+
+            if (isSuper) {
+                const triangles = checkTriangles();
+                triangles.forEach(tri => {
+                    const already = tri.cells.some(c => cells.some(x => x.row === c.row && x.col === c.col));
+                    if (!already) {
+                        const mult = 50;
+                        const amount = currentBet * mult;
+                        addWin(amount, tri.cells, `🔺 Треугольник ${tri.sym}: +${amount}`);
+                    }
+                });
+            }
+
+            return { win: isSuper ? total : (isMega ? total : Math.min(total, MAX_PRIZE)), cells, details };
+        }
+
+        async function performSpin() {
+            if (riskActive) return;
+
+            if (megaGameActive) {
+                await megaGameSpin();
+                return;
+            }
+
+            const spinButton = document.getElementById('spinBtn');
+            if (spinButton.disabled) return;
+            if (!superGameActive && gameBalance < currentBet && freespinsRemaining <= 0) {
+                stopAutoSpin();
+                return;
+            }
+            // Блокируем повторный запуск до первого await: двойное нажатие не спишет ставку дважды.
+            spinButton.disabled = true;
+
+            playSpinStart();
+            playSpinSound();
+
+            if (!superGameActive && freespinsRemaining <= 0) {
+                gameBalance -= currentBet;
+                await updateBalanceDB();
+            } else if (!superGameActive && freespinsRemaining > 0) {
+                freespinsRemaining--;
+            }
+
+            if (superGameActive) {
+                const elapsed = (Date.now() - superGameStartTime) / 1000;
+                if (superGameSpins > 0 && elapsed < SUPER_COOLDOWN) {
+                    document.getElementById('winMessage').textContent =
+                        `⏳ Жди ${Math.ceil(SUPER_COOLDOWN - elapsed)} сек...`;
+                    updateUI();
+                    spinButton.disabled = false;
+                    return;
+                }
+                if (superGameSpins >= SUPER_MAX_SPINS) {
+                    document.getElementById('winMessage').textContent = '✅ Все 5 супер-спинов использованы!';
+                    updateUI();
+                    spinButton.disabled = false;
+                    return;
+                }
+                superGameSpins++;
+                superGameStartTime = Date.now();
+            }
+
+            updateUI();
+            document.getElementById('winMessage').textContent = '';
+
+            const allCells = document.querySelectorAll('.slot-cell');
+            allCells.forEach(c => { c.classList.add('spinning');
+                c.classList.remove('win', 'wild', 'scatter', 'mega', 'explosion'); });
+
+            const grid = [];
+            for (let r = 0; r < 3; r++) { grid[r] = []; for (let c = 0; c < 4; c++) grid[r][c] =
+                getRandomSymbol(); }
+
+            await new Promise(r => setTimeout(r, superGameActive ? 800 : 1500));
+
+            allCells.forEach(c => c.classList.remove('spinning'));
+            for (let r = 0; r < 3; r++)
+                for (let c = 0; c < 4; c++) {
+                    const cell = document.getElementById(`cell-${r}-${c}`);
+                    cell.textContent = grid[r][c];
+                    if (grid[r][c] === '💀') cell.classList.add('wild');
+                    if (grid[r][c] === '⭐') cell.classList.add('scatter');
+                }
+
+            const result = checkWin(grid, superGameActive);
+            lastWinAmount = result.win;
+
+            if (result.win > 0) {
+                gameBalance += result.win;
+
+                if (superGameActive) {
+                    superTotalWon += result.win;
+                }
+
+                if (result.win >= 500000) {
+                    playSuperWinSound();
+                } else if (result.win >= 10000) {
+                    playBigWinSound();
+                } else {
+                    playWinSound();
+                }
+
+                document.getElementById('winMessage').innerHTML =
+                    `${superGameActive?'💥':'🎉'} +${result.win.toLocaleString()}!<br><small>${result.details.join(' | ')}</small>`;
+                result.cells.forEach(({ row, col }) => document.getElementById(`cell-${row}-${col}`).classList.add(
+                'win'));
+
+                if (superGameActive && result.win >= SUPER_PRIZE) {
+                    result.cells.forEach(({ row, col }) => document.getElementById(`cell-${row}-${col}`).classList.add(
+                        'explosion'));
+                    const overlay = document.createElement('div');
+                    overlay.className = 'explosion-overlay';
+                    document.body.appendChild(overlay);
+                    setTimeout(() => overlay.remove(), 800);
+                }
+
+                if (superGameActive && result.win >= SUPER_PRIZE * 0.5) {
+                    result.cells.forEach(({ row, col }) => document.getElementById(`cell-${row}-${col}`).classList.add(
+                        'mega'));
+                }
+
+                setTimeout(() => document.querySelectorAll('.slot-cell.win,.slot-cell.mega,.slot-cell.explosion')
+                    .forEach(c => c.classList.remove('win', 'mega', 'explosion')), 4000);
+            } else {
+                playLoseSound();
+                document.getElementById('winMessage').textContent = superGameActive ? '💥 Супер-спин...' : (
+                    freespinsRemaining > 0 ? '🔄 Фриспин...' : 'Попробуй ещё! 🍀');
+                lastWinAmount = 0;
+            }
+
+            await updateBalanceDB();
+
+            if (superGameActive) {
+                const elapsed = (Date.now() - superGameStartTime) / 1000;
+                if (elapsed >= SUPER_DURATION || superGameSpins >= SUPER_MAX_SPINS) {
+                    endSuperGame();
+                }
+            }
+
+            if (!megaGameActive && !superGameActive && gameBalance >= MEGA_THRESHOLD) {
+                setTimeout(() => checkMegaGameEligibility(), 800);
+            }
+
+            updateUI();
+            document.getElementById('spinBtn').disabled = false;
+        }
+
+        async function spin() {
+            if (megaGameActive) {
+                await megaGameSpin();
+                return;
+            }
+            if (autoSpinActive) {
+                stopAutoSpin();
+                return;
+            }
+            await performSpin();
+        }
+
+        function startSuperGame() {
+            if (gameBalance < SUPER_COST || superGameActive || megaGameActive) return;
+            playButtonClick();
+            superDeposit = SUPER_COST;
+            gameBalance -= SUPER_COST;
+            superGameActive = true;
+            superGameSpins = 0;
+            superTotalWon = 0;
+            superGameStartTime = Date.now();
+            document.getElementById('superTimer').textContent =
+                `⏱ ${SUPER_DURATION} сек | Спинов: 0/${SUPER_MAX_SPINS}`;
+            document.getElementById('superBalanceAmount').textContent = superDeposit;
+            stopAutoSpin();
+            updateBalanceDB();
+            superGameTimer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - superGameStartTime) / 1000);
+                const remaining = SUPER_DURATION - elapsed;
+                if (remaining <= 0) {
+                    endSuperGame();
+                } else {
+                    document.getElementById('superTimer').textContent =
+                        `⏱ ${remaining} сек | Спинов: ${superGameSpins}/${SUPER_MAX_SPINS}`;
+                }
+            }, 500);
+            updateUI();
+            document.getElementById('winMessage').textContent =
+                '💥 СУПЕР-ИГРА АКТИВИРОВАНА! Депозит заморожен. Жми Крутить!';
+        }
+
+        function endSuperGame() {
+            superGameActive = false;
+            if (superGameTimer) clearInterval(superGameTimer);
+            superGameTimer = null;
+            const refund = Math.max(0, superDeposit - superTotalWon);
+            if (refund > 0) {
+                gameBalance += refund;
+                document.getElementById('winMessage').textContent =
+                    `🏁 Супер-игра завершена! Возврат: +${refund.toLocaleString()}. Выигрыш: ${superTotalWon.toLocaleString()}`;
+            } else {
+                document.getElementById('winMessage').textContent =
+                    `🏁 Супер-игра завершена! Выигрыш: ${superTotalWon.toLocaleString()}. Депозит окупился!`;
+            }
+            if (gameBalance < 10) gameBalance = 10;
+            superDeposit = 0;
+            superTotalWon = 0;
+            document.getElementById('superTimer').textContent = '';
+            document.getElementById('superIndicator').classList.remove('active');
+            document.getElementById('superBalanceDisplay').style.display = 'none';
+            updateBalanceDB();
+            updateUI();
+
+            setTimeout(() => checkMegaGameEligibility(), 500);
+        }
+
+        function startRiskGame() {
+            if (lastWinAmount <= 0 || riskActive || superGameActive || megaGameActive) return;
+            playButtonClick();
+            riskActive = true;
+            stopAutoSpin();
+            document.getElementById('riskGameArea').classList.add('active');
+            document.getElementById('riskAmount').textContent = lastWinAmount;
+            const div = document.getElementById('riskCards');
+            div.innerHTML = '';
+            const winIdx = Math.floor(Math.random() * 4);
+            for (let i = 0; i < 4; i++) {
+                const card = document.createElement('div');
+                card.className = 'risk-card';
+                card.textContent = '?';
+                card.onclick = () => revealRisk(i, winIdx);
+                div.appendChild(card);
+            }
+            updateUI();
+        }
+
+        function revealRisk(chosen, winIdx) {
+            if (!riskActive) return;
+            riskActive = false;
+            document.querySelectorAll('.risk-card').forEach((c, i) => {
+                c.textContent = i === winIdx ? '❤️' : '💙';
+                c.classList.add(i === winIdx ? 'revealed' : 'revealed-lose');
+                c.style.pointerEvents = 'none';
+            });
+            if (chosen === winIdx) {
+                gameBalance += lastWinAmount;
+                document.getElementById('winMessage').textContent =
+                `🎯 РИСК! +${(lastWinAmount*2).toLocaleString()} всего!`;
+                playRiskWinSound();
+            } else {
+                document.getElementById('winMessage').textContent =
+                `💔 Потеряно ${lastWinAmount.toLocaleString()}`;
+                playRiskLoseSound();
+            }
+            lastWinAmount = 0;
+            updateBalanceDB();
+            updateUI();
+            setTimeout(() => { document.getElementById('riskGameArea').classList.remove('active'); }, 2500);
+        }
+
+        function cancelRisk() {
+            riskActive = false;
+            document.getElementById('riskGameArea').classList.remove('active');
+            document.getElementById('winMessage').textContent = 'Риск отменён';
+            lastWinAmount = 0;
+            updateUI();
+            playButtonClick();
+        }
+
+        function resetGame() {
+            stopAutoSpin();
+            riskActive = false;
+            freespinsRemaining = 0;
+            lastWinAmount = 0;
+            if (superGameTimer) clearInterval(superGameTimer);
+            superGameActive = false;
+            superGameSpins = 0;
+            superGameTimer = null;
+            superDeposit = 0;
+            superTotalWon = 0;
+            megaGameActive = false;
+            megaGameSpins = 0;
+            megaGameWins = 0;
+            megaGameSavedBalance = 0;
+            document.getElementById('riskGameArea').classList.remove('active');
+            document.getElementById('superTimer').textContent = '';
+            document.getElementById('superIndicator').classList.remove('active');
+            document.getElementById('megaIndicator').classList.remove('active');
+            document.getElementById('megaProgress').style.display = 'none';
+            document.getElementById('slotGrid').classList.remove('mega-active');
+            document.getElementById('superBalanceDisplay').style.display = 'none';
+            document.getElementById('winMessage').textContent = '';
+            document.getElementById('betSelector').style.opacity = '1';
+            document.getElementById('betSelector').style.pointerEvents = 'auto';
+            currentBet = 10;
+            document.querySelectorAll('.bet-option').forEach(o => o.classList.remove('selected'));
+            const defaultBet = document.querySelector('.bet-option[data-bet="10"]');
+            if (defaultBet) defaultBet.classList.add('selected');
+        }
+        let menuInitialized = false;
+        async function initGuestCasino() {
+            if (menuInitialized) return;
+            menuInitialized = true;
+            currentGlobalId = null;
+            gameBalance = 1000;
+            document.getElementById('displayName').textContent = 'Гость';
+            document.getElementById('globalIdDisplay').textContent = 'Гость';
+            document.getElementById('balanceDisplay').textContent = gameBalance;
+            initGrid();
+            setupBetSelector();
+            updateUI();
+        }
+        auth.onAuthStateChanged(async user => {
+            if (user) {
+                try { await loadGame(user); menuInitialized = true; }
+                catch (e) { console.warn('Аккаунт недоступен, гостевой режим:', e); await initGuestCasino(); }
+            } else { await initGuestCasino(); }
+        });
+        let casinoSoundOn = true;
+        document.getElementById('casinoSoundToggle').addEventListener('click', () => {
+            casinoSoundOn = !casinoSoundOn;
+            audioEnabled = casinoSoundOn;
+            document.getElementById('casinoSoundToggle').textContent = casinoSoundOn ? '🔊 Звук: ВКЛ' : '🔇 Звук: ВЫКЛ';
+            if (casinoSoundOn) initAudio();
+            else if (audioCtx && audioCtx.state === 'running') audioCtx.suspend().catch(() => {});
+        });
+        document.querySelectorAll('#casinoCharacterSelector .casino-character').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#casinoCharacterSelector .casino-character').forEach(x => x.classList.remove('selected'));
+                btn.classList.add('selected');
+            });
+        });
+        document.getElementById('casinoStartButton').addEventListener('click', () => {
+            if (!menuInitialized) initGuestCasino();
+            document.getElementById('startMenu').style.display = 'none';
+            showScreen('gameScreen');
+            if (casinoSoundOn) initAudio();
+        });
+        document.getElementById('casinoLeaderboardToggle').addEventListener('click', async () => {
+            const panel = document.getElementById('casinoLeaderboardPanel');
+            panel.classList.toggle('hidden');
+            if (panel.classList.contains('hidden')) return;
+            const out = document.getElementById('casinoLeaderboardContent');
+            out.textContent = 'Загрузка...';
+            try {
+                const snap = await db.collection('arcade_leaderboards').doc('runcasino').collection('entries').orderBy('score','desc').limit(10).get();
+                if (snap.empty) { out.textContent = 'Пока нет результатов'; return; }
+                out.innerHTML = snap.docs.map((d,i) => '<div class="leader-row"><span>'+(i+1)+'. '+String(d.data().displayName||d.data().globalId||'Игрок').replace(/[&<>"]/g,'')+'</span><b>'+Number(d.data().score||0).toLocaleString()+'</b></div>').join('');
+            } catch (e) { out.textContent = 'Таблица недоступна: проверьте правила Firestore для score/runcasino/records.'; }
+        });
+        document.body.addEventListener('click', function firstClick() {
+            if (casinoSoundOn) initAudio();
+            document.body.removeEventListener('click', firstClick);
+        }, { once: true });
+    </script>
+</body>
+</html>
