@@ -1587,6 +1587,7 @@ spawnWave = function spawnWaveOverhaul() {
   lastSpawn = performance.now();
   const objective=$('objectiveText');
   if(objective) objective.textContent='Сбить: '+drones+' дронов · '+shaheds+' Shahed · '+rockets+' ракет'+(level>=50?' · БОСС: ПОТУЖНОЛИТ':'');
+  const missionLevel=$('missionLevel');if(missionLevel)missionLevel.textContent='УРОВЕНЬ '+level;
   toast('ВОЛНА ' + state.level + ' · ЦЕЛЕЙ: ' + state.total);
   ui();
 };
@@ -1992,9 +1993,9 @@ installMissionUI();
   ctx.save();ctx.strokeStyle='#224b31';ctx.lineWidth=2;for(let x=-WORLD.half;x<=WORLD.half;x+=WORLD.roadStep){ctx.beginPath();ctx.moveTo(px(x),0);ctx.lineTo(px(x),h);ctx.stroke();}for(let z=-WORLD.half;z<=WORLD.half;z+=WORLD.roadStep){ctx.beginPath();ctx.moveTo(0,py(z));ctx.lineTo(w,py(z));ctx.stroke();}
   ctx.strokeStyle='#237e8a';ctx.lineWidth=5;ctx.beginPath();for(let i=0;i<=30;i++){const x=-WORLD.half+i*WORLD.half*2/30,z=x*.22+30;i?ctx.lineTo(px(x),py(z)):ctx.moveTo(px(x),py(z));}ctx.stroke();
   Object.entries(MOSCOW_LOCATIONS).forEach(([key,loc])=>{ctx.fillStyle=key==='kremlin'?'#f4d27a':'#679ac0';ctx.beginPath();ctx.arc(px(loc.x),py(loc.z),key==='kremlin'?8:5,0,Math.PI*2);ctx.fill();});
-  if(state.running)state.targets.filter(t=>!t.dead).forEach(t=>{const x=px(t.group.position.x),y=py(t.group.position.z);ctx.fillStyle=t.boss?'#ff9d45':'#ff6464';ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=10;ctx.beginPath();ctx.moveTo(x,y-8);ctx.lineTo(x+6,y+5);ctx.lineTo(x-6,y+5);ctx.closePath();ctx.fill();});
+  if(state.running){state.targets.filter(t=>!t.dead).forEach(t=>{const x=px(t.group.position.x),y=py(t.group.position.z);ctx.fillStyle=t.boss?'#ff9d45':'#ff6464';ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=10;ctx.beginPath();ctx.moveTo(x,y-8);ctx.lineTo(x+6,y+5);ctx.lineTo(x-6,y+5);ctx.closePath();ctx.fill();});}else{for(let i=0;i<8;i++){const x=px(-WORLD.half*.72+((i*173)%(WORLD.half*1.44))),y=py(-WORLD.half*.75+((i*251)%(WORLD.half*1.5)));ctx.fillStyle='#ff6464';ctx.globalAlpha=.8;ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;}}
   ctx.shadowBlur=0;const x=px(playerX),y=py(playerZ);ctx.fillStyle='#a8ff8c';ctx.shadowColor='#a8ff8c';ctx.shadowBlur=14;ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#eaffdf';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,13,0,Math.PI*2);ctx.stroke();ctx.restore();}
- setInterval(()=>{if(byId('menu')&&!byId('menu').classList.contains('hide'))drawDashboardThreats();},500);
+ setInterval(()=>{if(byId('menu')&&!byId('menu').classList.contains('hide'))drawDashboardThreats();if(byId('dashLevel'))byId('dashLevel').textContent=state.level;if(byId('dashCoins'))byId('dashCoins').textContent=state.coins.toLocaleString('ru-RU');if(byId('dashHp'))byId('dashHp').textContent=Math.round(state.hp)+'%';if(byId('missionLevel'))byId('missionLevel').textContent='УРОВЕНЬ '+state.level;},400);
 })();
 
 shoot = function noAutoAimDuringFlight() {
