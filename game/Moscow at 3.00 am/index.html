@@ -1,66 +1,74 @@
 <!doctype html>
 <html lang="ru">
-<head> 
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#050b09">
 <title>Москва в 3 часа ночи — GloBIT Arcade</title>
-<meta name="theme-color" content="#07120f">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
-<base href="./">
 <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-<canvas id="scene"></canvas>
-<div class="hud" id="hud">
- <div class="topbar"><div class="panel brand">GLOBIT // NIGHT DEFENCE<br><span style="color:#8da78d;font-size:9px">МОСКВА • 03:00 • NVG-04</span></div><div class="stats"><div class="panel stat">УРОВЕНЬ<b id="level">1</b></div><div class="panel stat">₽<b id="coins">0</b></div><div class="panel stat">ЦЕЛИ<b id="targets">0</b></div><div class="panel stat">ЗДОРОВЬЕ<b id="hp">100%</b></div></div></div>
- <div class="crosshair"></div>
- <div class="panel bossbar" id="bossbar"><b id="bossname">ЦЕЛЬ ОБНАРУЖЕНА</b><div class="bar"><i id="bosshp"></i></div></div>
- <div class="panel scan"><strong>◉ ОПТИКА НОЧНОГО ВИДЕНИЯ</strong><br>ТЕПЛОВОЙ КОНТУР: <span id="scanStatus">АКТИВЕН</span><div class="bar"><i id="scanbar"></i></div><span>СЕКТОР: <b id="sector">045°</b></span><br><span>СИСТЕМА: <b>ПВО / АВТОНАВЕДЕНИЕ</b></span><br><span id="aimText">ЛКМ / КАСАНИЕ — ОГОНЬ</span></div>
- <div class="controls"><button id="pauseBtn">Ⅱ ПАУЗА</button><button id="upgradeBtn">⚙ УЛУЧШЕНИЯ</button><button id="menuBtn">☰ МЕНЮ</button></div>
- <button id="mobileFire">ОГОНЬ</button>
- <div id="immersionFx" aria-hidden="true"><div class="fx-scanlines"></div><div class="fx-noise"></div><div class="fx-vignette"></div><div class="fx-flash"></div></div>
- <div id="missileCameraHud" class="cam-hud"><div class="cam-top"><span>MISSILE CAM / IR-04</span><span id="camLink">LINK 98%</span></div><div class="cam-reticle"></div><div class="cam-bottom"><span id="camMode">THERMAL · NIGHT</span><span id="camRange">RANGE -- m</span></div><div class="cam-bracket tl"></div><div class="cam-bracket tr"></div><div class="cam-bracket bl"></div><div class="cam-bracket br"></div></div>
- <div id="miniRadar" class="mini-radar"><div class="radar-title">РАДАР / СЕКТОР 045°</div><canvas id="radarCanvas" width="220" height="220"></canvas><div class="radar-foot"><span>TRACK: <b id="radarTracks">00</b></span><span>THREAT: <b id="radarThreat">LOW</b></span></div></div>
- <div id="airRaidBanner" class="air-raid-banner"><span class="raid-dot"></span><div><b>ВОЗДУШНАЯ ТРЕВОГА</b><small id="raidMessage">Обнаружены воздушные цели. Сохраняйте внимание.</small></div><button id="raidMute" aria-label="Отключить звуковую тревогу">♫</button></div>
+<canvas id="scene" aria-label="3D-симулятор"></canvas>
+<div id="gameHud" class="game-hud hidden">
+  <div class="hud-top">
+    <div class="brand-mini">GLOBIT ARCADE <span>• МОСКВА / 03:00</span></div>
+    <div class="hud-stats"><div><small>УРОВЕНЬ</small><b id="levelValue">1</b></div><div><small>₽</small><b id="coinValue">0</b></div><div><small>ЦЕЛИ</small><b id="targetValue">0</b></div><div><small>ЦЕЛОСТНОСТЬ</small><b id="healthValue">100%</b></div></div>
+    <button id="pauseBtn" class="icon-btn" aria-label="Пауза">Ⅱ</button>
+  </div>
+  <div class="camera-tag"><span class="live-dot"></span><span id="cameraMode">КАМЕРА РАКЕТЫ · IR</span><span id="rangeValue">ДАЛЬНОСТЬ —</span></div>
+  <div class="reticle"><i></i><b></b></div>
+  <div class="hud-bottom-left"><div class="readout"><small>СКОРОСТЬ</small><b id="speedValue">0 км/ч</b></div><div class="readout"><small>ВЫСОТА</small><b id="altitudeValue">0 м</b></div><div class="readout"><small>КУРС</small><b id="headingValue">000°</b></div></div>
+  <div class="radar-panel"><div class="radar-head">ТАКТИЧЕСКАЯ КАРТА <button id="mapExpand">↗</button></div><canvas id="radarCanvas" width="240" height="240"></canvas><div class="radar-legend"><span>● ИГРОК</span><span>● ЦЕЛИ</span></div></div>
+  <div id="flightControls" class="flight-controls">
+    <div class="joy-wrap"><span>КУРС / ВЫСОТА</span><div id="joySteer" class="joystick"><i class="joy-knob"></i></div></div>
+    <div class="joy-wrap"><span>ТЯГА / КРЕН</span><div id="joyThrottle" class="joystick"><i class="joy-knob"></i></div></div>
+    <button id="mobileBoost" class="boost-btn">ТЯГА +</button>
+  </div>
+  <div class="desktop-help">W/S — высота · A/D — курс · Q/E — крен · Shift — ускорение · C — камера · Esc — пауза</div>
+  <div id="toast" class="toast" role="status"></div>
+  <div id="pauseOverlay" class="overlay hidden"><div class="overlay-card"><h2>ПАУЗА</h2><p>Полёт остановлен.</p><button id="continueBtn" class="primary">ПРОДОЛЖИТЬ</button><button id="returnMenuBtn" class="secondary">В АНГАР</button></div></div>
 </div>
-<div id="menu" class="launch-dashboard">
- <div class="dashboard-shell">
-  <section class="city-map-panel panel">
-   <div class="dash-panel-head"><div><span class="dash-kicker">TACTICAL DISPLAY / 03:00</span><h2>КАРТА ГОРОДА</h2></div><span class="live-pill"><i></i> LIVE</span></div>
-   <canvas id="launchMapPreview" width="720" height="720" aria-label="Тактическая карта города"></canvas>
-   <div class="map-legend"><span><i class="legend-player"></i> ИГРОК</span><span><i class="legend-enemy"></i> ВОЗДУШНЫЕ ЦЕЛИ</span><span><i class="legend-location"></i> ОБЪЕКТЫ</span></div>
-   <label class="location-label" for="locationSelect">РАЙОН ОПЕРАЦИИ</label>
-   <select id="locationSelect" class="field"><option value="moscow">Москва · Кремль и центр</option><option value="village">Подмосковье · деревня и шоссе</option><option value="river">Москва-река · набережная</option><option value="industrial">Промзона · ночные заводы</option></select>
-  </section>
-  <section class="mission-panel">
-   <header class="dashboard-top-actions"><button id="inviteOpen" class="dash-action"><span>♧</span><b>Друг</b></button><button id="ratingOpen" class="dash-action"><span>♜</span><b>Рейтинг</b></button><button id="settingsOpen" class="dash-action"><span>⚙</span><b>Настройки</b></button></header>
-   <div class="mission-brand"><div class="arcade-brand">IT Global - GloBIT Arcade</div><span class="dash-kicker">NIGHT DEFENCE / 3D SIMULATOR</span><div class="title">МОСКВА <em>В 3 ЧАСА</em> НОЧИ</div><p>Ночная смена ПВО. Найди цели на тактической карте и перехвати их вручную.</p></div>
-   <div class="mission-objective"><div class="objective-head"><span>ЗАДАЧА СМЕНЫ</span><span id="missionLevel">УРОВЕНЬ 1</span></div><h2 id="missionTitle">Оборона Москвы</h2><p id="objectiveText">Сбить 5 дронов, 2 Shahed и 1 ракету</p><div class="objective-tags"><span>✦ Ручной перехват</span><span>◉ Ночное видение</span><span>⌁ 3D-город</span></div></div>
-   <div class="dash-stats"><div><small>УРОВЕНЬ</small><b id="dashLevel">1</b></div><div><small>МОНЕТЫ</small><b><span id="dashCoins">0</span> ₽</b></div><div><small>ЗДОРОВЬЕ</small><b id="dashHp">100%</b></div></div>
-   <button class="primary start-shift" id="startBtn">▶ НАЧАТЬ СМЕНУ <span>→</span></button>
-   <button id="sirenPreview" class="siren-preview">◖ ПРОСЛУШАТЬ ВОЗДУШНУЮ ТРЕВОГУ</button>
-   <div class="dashboard-foot"><span>ПК: WASD / мышь</span><span>Телефон: экранные джойстики</span></div><div id="menuNotice" class="notice"></div>
-  </section>
- </div><button id="resumeBtn" hidden aria-hidden="true" tabindex="-1"></button>
+
+<div id="mainMenu" class="main-menu">
+  <div class="menu-shell">
+    <section class="map-card">
+      <div class="section-heading"><div><small>TACTICAL DISPLAY / 03:00</small><h2>КАРТА ОПЕРАЦИИ</h2></div><span class="live-chip">LIVE SIM</span></div>
+      <canvas id="menuMap" width="600" height="600"></canvas>
+      <div class="map-key"><span><i class="key-city"></i> ГОРОД</span><span><i class="key-player"></i> РАКЕТА</span><span><i class="key-target"></i> ЦЕЛИ</span></div>
+      <label for="districtSelect">РАЙОН</label>
+      <select id="districtSelect" class="field"><option value="moscow">Москва · Кремль и центр</option><option value="river">Москва-река · набережная</option><option value="industrial">Промзона · заводы</option><option value="suburbs">Подмосковье · шоссе</option></select>
+    </section>
+    <section class="mission-card">
+      <div class="top-actions"><button data-panel="friendPanel">♧ Друг</button><button data-panel="ratingPanel">♜ Рейтинг</button><button data-panel="settingsPanel">⚙ Настройки</button></div>
+      <div class="brand-line">IT Global — GloBIT Arcade</div><small class="eyebrow">NIGHT DEFENCE / 3D SIMULATOR</small>
+      <h1>МОСКВА <em>В 3 ЧАСА</em> НОЧИ</h1>
+      <p class="intro">Ночная смена. Управляй полётом ракеты от первого лица, находи воздушные цели и перехватывай их вручную.</p>
+      <div class="mission-info"><div><small>ЗАДАНИЕ</small><b id="missionName">Оборона Москвы</b></div><p>Перехвати цели, не задев городские объекты. За каждую цель начисляются монеты.</p><div class="tags"><span>◉ Камера ракеты</span><span>⌖ Ручное управление</span><span>▦ 3D-город</span></div></div>
+      <div class="menu-stats"><div><small>УРОВЕНЬ</small><b id="menuLevel">1</b></div><div><small>БАЛАНС</small><b><span id="menuCoins">0</span> ₽</b></div><div><small>РЕКОРД</small><b id="bestValue">0</b></div></div>
+      <button id="launchBtn" class="primary launch-btn">▶ ЗАПУСТИТЬ РАКЕТУ <span>→</span></button>
+      <div id="menuMessage" class="menu-message">ПК: WASD + мышь · Телефон: два джойстика</div>
+    </section>
+  </div>
 </div>
-<div id="settingsModal" class="dash-modal hidden"><div class="dash-modal-card"><header><div><span class="dash-kicker">PERSONAL CONTROL</span><h2>Настройки управления</h2></div><button id="settingsClose" class="modal-close">✕</button></header>
- <div class="setting-row"><div><b>Чувствительность</b><small>Скорость реакции ракеты на управление</small></div><strong id="sensitivityLabel">100%</strong></div><input id="settingSensitivity" type="range" min="40" max="180" value="100" class="setting-range">
- <div class="setting-row"><div><b>Экранные джойстики</b><small>Два виртуальных стика во время полёта</small></div><input id="joystickToggle" type="checkbox" checked></div>
- <div class="setting-row"><div><b>Гироскоп телефона</b><small>Наклоняй устройство, чтобы менять курс</small></div><input id="gyroToggle" type="checkbox"></div>
- <div class="setting-row"><div><b>Отдача / вибрация</b><small>Короткая тактильная отдача во время полёта, если поддерживается устройством</small></div><input id="vibrationToggle" type="checkbox" checked></div>
- <div class="setting-row"><div><b>Яркость камеры</b><small>Яркость изображения ночной камеры</small></div><strong id="brightnessLabel">100%</strong></div><input id="settingBrightness" type="range" min="55" max="145" value="100" class="setting-range">
- <div class="setting-row"><div><b>Графика</b><small>Влияет на плавность на телефонах</small></div><select id="settingGraphics" class="field"><option value="high">Высокая</option><option value="medium">Средняя</option><option value="low">Производительная</option></select></div>
- <p class="settings-note">Гироскоп включается после разрешения браузера, если устройство требует разрешение на motion sensors.</p><button id="settingsDone" class="primary wide">СОХРАНИТЬ НАСТРОЙКИ</button>
-</div></div>
-<div id="inviteModal" class="dash-modal hidden"><div class="dash-modal-card invite-card"><header><div><span class="dash-kicker">GLOBIT NETWORK</span><h2>Пригласить друга</h2></div><button id="inviteClose" class="modal-close">✕</button></header><p>Укажи Global ID друга, чтобы найти профиль и подготовить приглашение.</p><input id="friendId" class="field" placeholder="Global ID друга (22 символа)" maxlength="22"><button id="findFriend" class="primary wide">НАЙТИ ДРУГА</button><div id="friendResult" class="small"></div><button id="inviteFriend" class="wide" disabled>ПРИГЛАСИТЬ В ГРУППУ</button><div id="inviteStatus" class="notice"></div></div></div>
-<div class="toast" id="toast"></div>
-<div id="leaderboardModal" class="modal hidden"><div class="modal-card"><button id="closeLeaderboard" class="modal-close">✕</button><h2>🏆 ТАБЛИЦА ЛИДЕРОВ</h2><p class="small">Рейтинг по монетам, уровню и времени в игре</p><div id="leaderboardRows" class="leaderboard-rows">Загрузка рекордов…</div></div></div>
-<div id="orientWarning"><div class="warningBox"><span class="phoneIcon">📱</span><h2>Поверни устройство</h2><p>Симулятор рассчитан на горизонтальный экран. Поверни телефон боком для удобного управления и полного обзора.</p></div></div>
-<script src="./boss-models.js"></script>
-<script src="./city.js"></script>
+
+<div id="panelLayer" class="panel-layer hidden">
+  <section id="settingsPanel" class="modal-panel hidden"><header><div><small>PERSONAL CONTROL</small><h2>Настройки</h2></div><button class="close-panel">✕</button></header>
+    <label class="setting-label">Чувствительность <b id="sensitivityText">100%</b></label><input id="sensitivity" type="range" min="40" max="180" value="100">
+    <label class="setting-label">Графика<select id="quality" class="field"><option value="high">Высокая</option><option value="medium">Средняя</option><option value="low">Производительная</option></select></label>
+    <label class="toggle-row"><span>Экранные джойстики</span><input id="showJoysticks" type="checkbox" checked></label>
+    <label class="toggle-row"><span>Вибрация на телефоне</span><input id="vibration" type="checkbox" checked></label>
+    <button id="saveSettings" class="primary wide">СОХРАНИТЬ</button>
+  </section>
+  <section id="friendPanel" class="modal-panel hidden"><header><div><small>GLOBIT NETWORK</small><h2>Пригласить друга</h2></div><button class="close-panel">✕</button></header><p>Совместная игра пока недоступна в этой версии. Можно скопировать ссылку на игру и отправить другу.</p><button id="copyGameLink" class="primary wide">СКОПИРОВАТЬ ССЫЛКУ</button><div id="friendMessage" class="menu-message"></div></section>
+  <section id="ratingPanel" class="modal-panel hidden"><header><div><small>PERSONAL BEST</small><h2>Рейтинг</h2></div><button class="close-panel">✕</button></header><p>Локальная статистика на этом устройстве.</p><div class="rating-line"><span>Лучший результат</span><b id="ratingBest">0 ₽</b></div><div class="rating-line"><span>Максимальный уровень</span><b id="ratingLevel">1</b></div><button id="clearStats" class="secondary wide">СБРОСИТЬ СТАТИСТИКУ</button></section>
+  <div class="panel-backdrop"></div>
+</div>
+<div id="rotateNotice" class="rotate-notice"><div>↻</div><h2>Поверни телефон горизонтально</h2><p>Так появится больше места для камеры и управления.</p></div>
 <script src="./audio.js"></script>
 <script src="./game.js"></script>
-
-</body></html>
+</body>
+</html>
