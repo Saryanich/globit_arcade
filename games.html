@@ -315,6 +315,8 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        // Сохраняем одну Firebase-сессию между каталогом и играми на этом же сайте.
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.warn);
 
         particlesJS('particles-js', {
             particles: {
@@ -358,13 +360,11 @@
             if (!currentUser) return;
             try {
                 const snap = await db.collection('arcade_games').get();
-                for (const doc of snap.docs) {
-                    const ratingsRef = db.collection('arcade_games').doc(doc.id).collection('ratings').doc(currentUser.uid);
-                    const ratingDoc = await ratingsRef.get();
-                    if (ratingDoc.exists) {
-                        userRatings[doc.id] = ratingDoc.data().rating;
-                    }
-                }
+                await Promise.all(snap.docs.map(async doc => {
+                    const ratingRef = db.collection('arcade_games').doc(doc.id).collection('ratings').doc(currentUser.uid);
+                    const ratingDoc = await ratingRef.get();
+                    if (ratingDoc.exists) userRatings[doc.id] = ratingDoc.data().rating;
+                }));
             } catch (e) {
                 console.error('Ошибка загрузки оценок пользователя:', e);
             }
