@@ -104,3 +104,46 @@ button,input{font:inherit}button{cursor:pointer;color:#eaffdf;background:linear-
 .siren-preview{width:100%;padding:9px 12px;border:1px solid #ff676766;border-radius:9px;background:#240e0e88;color:#ffd5c8;font-size:10px;font-weight:800;letter-spacing:.08em;cursor:pointer}
 @media(max-width:650px){#missileCameraHud{inset:7% 4%;font-size:8px}.cam-reticle{width:36px;height:36px}#miniRadar{right:8px;bottom:8px;width:clamp(112px,24vw,150px);padding:5px}.radar-title{font-size:8px}.radar-foot{font-size:7px}.air-raid-banner{top:9%;padding:9px 10px}.air-raid-banner b{font-size:10px}.air-raid-banner small{font-size:9px}}
 body.fx-heavy .fx-noise{opacity:.14}body.fx-heavy .fx-scanlines{opacity:.75}body.fx-jammed #immersionFx{opacity:1}body.fx-jammed .fx-flash{animation:jamFlash .24s steps(2) 2}@keyframes jamFlash{0%,100%{opacity:0}45%{opacity:.16}}
+
+
+/* Responsive dashboard fixes: keep the tactical map and menu content inside the viewport. */
+#menu.launch-dashboard{place-items:center;overflow:auto;overscroll-behavior:contain}
+#menu.launch-dashboard .dashboard-shell{width:min(1120px,96vw);height:min(740px,92dvh);max-height:92dvh;min-height:0;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:clamp(8px,1.4vw,18px);align-items:stretch}
+#menu.launch-dashboard .city-map-panel{min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;padding:clamp(10px,1.2vw,16px)}
+#menu.launch-dashboard #launchMapPreview{display:block;width:100%;height:clamp(150px,31vh,290px);max-height:290px;min-height:140px;flex:0 0 auto;aspect-ratio:auto;object-fit:contain;border-radius:8px;background:#061410;border:1px solid #355b41}
+#menu.launch-dashboard .mission-panel{min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:clamp(12px,1.6vw,22px);gap:clamp(7px,1vh,12px)}
+#menu.launch-dashboard .arcade-brand{font-size:clamp(12px,1.15vw,15px);font-weight:900;letter-spacing:.035em;color:#dfffe7;margin-bottom:6px}
+#menu.launch-dashboard .mission-brand{padding:2px 0}
+#menu.launch-dashboard .mission-brand .title{font-size:clamp(24px,3vw,38px);line-height:1.02;letter-spacing:-.045em;margin:5px 0 7px}
+#menu.launch-dashboard .mission-brand p{font-size:clamp(10px,.9vw,12px);line-height:1.4}
+#menu.launch-dashboard .mission-objective{padding:clamp(9px,1.2vw,15px)}
+#menu.launch-dashboard .objective-tags{margin-top:8px}
+#menu.launch-dashboard .dash-stats>div{padding:8px}
+#menu.launch-dashboard .start-shift{min-height:44px}
+#menu.launch-dashboard .dashboard-top-actions{position:relative;z-index:35;pointer-events:auto}
+#menu.launch-dashboard .dash-action,#menu.launch-dashboard button,#menu.launch-dashboard select{pointer-events:auto;touch-action:manipulation}
+#settingsModal,#inviteModal,#leaderboardModal{z-index:100}
+#settingsModal .dash-modal-card,#inviteModal .dash-modal-card{max-height:88dvh;overflow-y:auto}
+#immersionFx .fx-noise{opacity:calc(.025 + var(--jam-strength,0)*.12)}
+#immersionFx .fx-scanlines{opacity:calc(.3 + var(--jam-strength,0)*.22)}
+body.fx-jammed #immersionFx{opacity:calc(.2 + var(--jam-strength,0)*.45)}
+body.fx-jammed .fx-flash{animation:jamFlash .2s steps(2) 1}
+@media(max-width:760px){
+ #menu.launch-dashboard{display:block;padding:8px}
+ #menu.launch-dashboard .dashboard-shell{width:100%;height:auto;max-height:none;min-height:0;grid-template-columns:minmax(0,1fr);gap:9px;margin:0 auto}
+ #menu.launch-dashboard .city-map-panel{min-height:0}
+ #menu.launch-dashboard #launchMapPreview{height:clamp(130px,23vh,205px);max-height:205px;min-height:120px}
+ #menu.launch-dashboard .mission-panel{overflow:visible;padding:12px}
+ #menu.launch-dashboard .mission-brand .title{font-size:clamp(24px,6vw,34px)}
+ #menu.launch-dashboard .dashboard-top-actions{justify-content:stretch}
+ #menu.launch-dashboard .dash-action{flex:1;justify-content:center;flex-direction:row}
+ #menu.launch-dashboard .dashboard-foot{font-size:9px}
+}
+@media(max-height:560px) and (min-width:761px){
+ #menu.launch-dashboard .dashboard-shell{height:94dvh;max-height:94dvh}
+ #menu.launch-dashboard #launchMapPreview{height:22vh;max-height:180px;min-height:110px}
+ #menu.launch-dashboard .mission-brand .title{font-size:clamp(21px,4.5vh,30px);margin:3px 0 5px}
+ #menu.launch-dashboard .mission-objective{padding:8px}
+ #menu.launch-dashboard .objective-tags{margin-top:5px}
+ #menu.launch-dashboard .start-shift{min-height:36px}
+}
