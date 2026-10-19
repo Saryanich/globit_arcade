@@ -175,31 +175,6 @@
     .restart-btn { background: #e52521; color: white; border: 2px solid #fff; }
     .menu-btn { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); }
     
-    .leaderboard-modal {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.95); backdrop-filter: blur(20px);
-      z-index: 500; display: flex; align-items: center; justify-content: center;
-    }
-    .leaderboard-modal.hidden { display: none; }
-    .leaderboard-card {
-      background: rgba(10,20,45,0.95); border-radius: 30px; width: 90%; max-width: 450px;
-      padding: 1.5rem; border: 1px solid #e52521;
-    }
-    .leaderboard-card h2 { text-align: center; color: #fbd000; margin-bottom: 1rem; font-size: 1.2rem; }
-    .leaderboard-list { max-height: 350px; overflow-y: auto; }
-    .rank-item { 
-      display: flex; justify-content: space-between; padding: 10px; 
-      margin: 4px 0; background: rgba(255,255,255,0.05); border-radius: 15px; 
-      color: white; font-size: 0.9rem; 
-    }
-    .rank-num { font-weight: bold; color: #fbd000; width: 40px; }
-    .rank-name { flex: 1; }
-    .rank-score { font-weight: bold; color: #88ff88; }
-    .close-leaderboard { 
-      width: 100%; padding: 10px; margin-top: 15px; background: #e52521; 
-      border: none; border-radius: 30px; color: white; font-weight: bold; cursor: pointer; 
-    }
-    
     .secret-popup {
       position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
       background: rgba(0,0,0,0.9); color: #fbd000; padding: 15px 25px;
@@ -221,6 +196,16 @@
     @keyframes flashFade {
       0% { opacity: 1; }
       100% { opacity: 0; }
+    }
+  
+    /* Полировка управления и изображения */
+    canvas { image-rendering: auto; }
+    .ctrl-btn, button, .menu-btn { -webkit-tap-highlight-color: transparent; user-select: none; }
+    .ctrl-btn { touch-action: none; transition: transform .08s ease, filter .12s ease, box-shadow .12s ease; }
+    .ctrl-btn:active { transform: scale(.92); filter: brightness(1.25); }
+    button:focus-visible, .ctrl-btn:focus-visible { outline: 2px solid #00e676; outline-offset: 3px; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
@@ -254,7 +239,6 @@
       </div>
       
       <button class="play-button" id="playButton">▶ ИГРАТЬ</button>
-      <button class="menu-rating-btn" id="menuRatingBtn">🏆 ТАБЛИЦА РЕКОРДОВ</button>
     </div>
 
     <div id="gameUI" class="hidden">
@@ -294,16 +278,7 @@
       <div id="authMsg" class="message"></div>
     </div>
   </div>
-
-  <div id="leaderboardModal" class="leaderboard-modal hidden">
-    <div class="leaderboard-card">
-      <h2>🏆 ТАБЛИЦА РЕКОРДОВ MARIO</h2>
-      <div id="leaderboardList" class="leaderboard-list">Загрузка...</div>
-      <button class="close-leaderboard" id="closeLeaderboardBtn">Закрыть</button>
-    </div>
-  </div>
-
-  <script>
+<script>
     // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyA6GGJxAiao77U7_9mBUEjftmS_FnSWbIw",
@@ -316,6 +291,8 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+    // Используем ту же локальную Firebase-сессию, что и GloBIT Arcade.
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.warn);
     
     let currentUser = null;
     let isGuest = false;
@@ -441,27 +418,6 @@
           }
         }
       } catch (e) { console.error('Ошибка сохранения рекорда:', e); }
-    }
-    
-    async function showLeaderboard(){
-      document.getElementById('leaderboardList').innerHTML = 'Загрузка...';
-      document.getElementById('leaderboardModal').classList.remove('hidden');
-      try{
-        const snapshot = await db.collection('score').doc('mario').collection('records').orderBy('score', 'desc').limit(20).get();
-        const listDiv = document.getElementById('leaderboardList');
-        if(snapshot.empty){ listDiv.innerHTML = '<div style="color: #aaa; text-align: center; padding: 20px;">Нет рекордов</div>'; return; }
-        let html = ''; let rank = 1;
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const name = data.displayName || data.globalId || 'Аноним';
-          const score = data.score || 0;
-          const isCurrentUser = currentUser && !isGuest && data.globalId === (currentUser.email?.split('@')[0]);
-          html += `<div class="rank-item" style="${isCurrentUser ? 'background: rgba(251,208,0,0.2); border: 1px solid #fbd000;' : ''}">
-            <span class="rank-num">${rank}</span><span class="rank-name">${name}${isCurrentUser ? ' 👈' : ''}</span><span class="rank-score">${score}</span></div>`;
-          rank++;
-        });
-        listDiv.innerHTML = html;
-      } catch(e){ document.getElementById('leaderboardList').innerHTML = '<div style="color: #e52521; text-align: center; padding: 20px;">Ошибка загрузки</div>'; }
     }
     
     const SoundEngine = {
@@ -1445,11 +1401,8 @@
     };
     
     document.getElementById('playButton').onclick = startGame;
-    document.getElementById('menuRatingBtn').onclick = showLeaderboard;
     document.getElementById('restartFromOver').onclick = startGame;
     document.getElementById('menuFromOver').onclick = showMenu;
-    document.getElementById('closeLeaderboardBtn').onclick = () => document.getElementById('leaderboardModal').classList.add('hidden');
-    
     // Mobile controls
     document.getElementById('jumpBtn').addEventListener('pointerdown', (e) => { e.preventDefault(); jump(); });
     document.getElementById('duckBtn').addEventListener('pointerdown', (e) => { e.preventDefault(); duck(true); });
