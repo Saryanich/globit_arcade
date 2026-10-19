@@ -443,6 +443,7 @@
       gameOver() { this.play(100, 'square', 0.5, 0.2); }
     };
     SoundEngine.init();
+    SoundEngine.enabled = true;
     window.addEventListener('touchstart', ()=>{ SoundEngine.unlock(); }, { once: true });
     window.addEventListener('click', ()=>{ if(SoundEngine.enabled) SoundEngine.unlock(); });
     
