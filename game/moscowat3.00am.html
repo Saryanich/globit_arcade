@@ -405,7 +405,7 @@ function addUiStyle() {
     '#launchMapPreview{width:100%;height:185px;display:block;border-radius:7px;background:#061410;border:1px solid #355b41}',
     '@media(max-width:760px){.sim-map{width:136px;left:7px;top:100px}.sim-status{left:7px;bottom:135px;max-width:145px;font-size:8px}.sim-actions{right:7px;top:96px}.sim-btn{min-width:78px;padding:8px 7px;font-size:9px}.sim-brand{font-size:8px;padding:7px}.sim-stats{gap:4px}.sim-stat{min-width:53px;padding:6px}.sim-label{font-size:7px}.sim-value{font-size:13px}.sim-bottom{left:7px;right:7px;bottom:7px}.sim-joystick{width:clamp(76px,21vw,105px);height:clamp(76px,21vw,105px)}.sim-bottom-hint{display:none}}',
     '@media(max-height:490px){.sim-joystick{width:78px;height:78px}.sim-bottom{bottom:5px}.sim-status{bottom:104px}.sim-map{width:116px;top:75px}.sim-actions{top:75px}.sim-card,.sim-brand{padding:6px 8px}.sim-btn{padding:6px 7px}.sim-bottom-hint{font-size:7px}}',
-    '@media(orientation:portrait) and (max-width:760px){.sim-map{top:108px;width:122px}.sim-status{left:7px;bottom:150px}.sim-bottom{align-items:flex-end}.sim-actions{top:100px}}',
+    '@media(orientation:portrait) and (max-width:760px){#menu{display:grid!important}#flightUI{visibility:visible!important}.sim-map{top:108px;width:122px}.sim-status{left:7px;bottom:150px}.sim-bottom{align-items:flex-end}.sim-actions{top:100px}}',
     '@media(prefers-reduced-motion:reduce){.sim-joystick,.sim-btn{transition:none}}',
     '#menu .sim-launch-card{grid-column:1/-1}.sim-launch-layout{display:grid;grid-template-columns:1fr minmax(190px,.8fr);gap:12px;align-items:start}.sim-launch-card .small{margin:3px 0 8px}',
     '@media(max-width:650px){.sim-launch-layout{grid-template-columns:1fr}#launchMapPreview{height:145px}}'
@@ -1230,7 +1230,7 @@ function addStreetLightsAndTraffic() {
   }
 }
 
-function setup3D() {
+setup3D = function setup3DOverhaul() {
   if (scene && renderer) return;
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x030b12);
@@ -1271,7 +1271,7 @@ function setup3D() {
   camera.lookAt(initial.x,12,initial.z - 55);
   window.addEventListener('resize',resize,{passive:true});
   toast('ГОРОД ГОТОВ · РАЙОНЫ МОСКВЫ ЗАГРУЖЕНЫ');
-}
+};
 
 function resize() {
   if (!renderer || !camera) return;
@@ -1315,7 +1315,7 @@ function buildPlayerMissile() {
 
 function resetPlayerAtLaunch() {
   const startLoc = MOSCOW_LOCATIONS[selectedLocation] || MOSCOW_LOCATIONS.tverskaya;
-  if (!flight.missile) buildPlayerMissile();
+  if (!flight.missile || flight.missile.userData.rocketType !== selectedRocket) buildPlayerMissile();
   const missile = flight.missile;
   missile.position.set(startLoc.x,Math.max(14,startLoc.z * 0 + 22),startLoc.z);
   missile.rotation.set(0,0,0);
@@ -1393,7 +1393,7 @@ function pause() {
   toast(state.paused ? 'ПАУЗА' : 'ПОЛЁТ ПРОДОЛЖЕН');
 }
 
-function start() {
+start = function startOverhaul() {
   mountFlightUI();
   try {
     if (!scene || !renderer) setup3D();
@@ -1431,7 +1431,7 @@ function start() {
   $('cameraToggle').textContent = '◉ ВНЕШНЯЯ КАМЕРА';
   $('cameraToggle').classList.remove('active');
   drawTacticalMap();
-}
+};
 
 function returnToHangar() {
   state.running = false;
@@ -1561,6 +1561,8 @@ createTarget = function(type, bossName) {
     15 + Math.random() * 65,
     clampValue(targetPoint.z * .38 + (Math.random() - .5) * 170,-edge,edge)
   );
+  target.maxHealth = type === 'boss' ? 100 + state.level * 5 : type === 'rocket' ? 3 : type === 'shahed' ? 2 : 1;
+  target.health = target.maxHealth;
   target.group.position.copy(spawn);
   target.group.rotation.order = 'YXZ';
   target.ai = {
@@ -1576,6 +1578,22 @@ createTarget = function(type, bossName) {
   };
   target.speed = target.ai.baseSpeed;
   return target;
+};
+
+spawnWave = function spawnWaveOverhaul() {
+  state.targets.forEach(target => { if (target.group) scene.remove(target.group); });
+  state.targets = [];
+  state.bosses = [];
+  state.spawned = 0;
+  state.total = state.multiplayer
+    ? clampValue(10 + (state.level - 50) * 1.1,10,24)
+    : clampValue(Math.round(8 + state.level * 1.15),8,24);
+  state.total = Math.round(state.total);
+  WORLD.spawnInterval = Math.max(520,1180 - state.level * 8);
+  WORLD.nextSpawnAt = performance.now() + 300;
+  lastSpawn = performance.now();
+  toast('ВОЛНА ' + state.level + ' · ЦЕЛЕЙ: ' + state.total);
+  ui();
 };
 
 function updateTargetAI(target, dt, now) {
@@ -1737,7 +1755,6 @@ function updateFlight(dt) {
     if (missile.position.distanceTo(target.group.position) < (target.boss ? 4.5 : 3.1)) {
       const targetPos = target.group.position.clone();
       kill(target);
-      spawnExplosion(targetPos,target.boss);
       finishFlight('ЦЕЛЬ ПЕРЕХВАЧЕНА','Прямое попадание. Возвращайся в ангар или запусти следующий перехват.');
       return;
     }
@@ -1839,13 +1856,26 @@ function updateEffects(dt) {
   WORLD.debris = WORLD.debris.filter(piece => piece.life > 0);
 }
 
-function animate() {
+animate = function animateOverhaul() {
   if (!renderer || !scene || !camera) return;
   const dt = Math.min(clock ? clock.getDelta() : .016,.035);
   const now = performance.now();
 
   if (state.running && !state.paused) {
     if (flight.mode === 'manual') updateFlight(dt);
+    if (state.running && state.spawned < state.total && now >= WORLD.nextSpawnAt) {
+      const index = state.spawned;
+      let type;
+      if (state.level >= 50 && index === state.total - 1) type = 'boss';
+      else {
+        const roll = Math.random();
+        type = roll < .48 ? 'drone' : roll < .82 ? 'shahed' : 'rocket';
+      }
+      createTarget(type,type === 'boss' ? (Math.random() > .5 ? 'Движухалит' : 'Потужнолит') : undefined);
+      state.spawned++;
+      WORLD.nextSpawnAt = now + WORLD.spawnInterval;
+      ui();
+    }
     for (const target of state.targets) updateTargetAI(target,dt,now);
     updateDecorativeTraffic(dt);
     updateEffects(dt);
@@ -1874,7 +1904,7 @@ function animate() {
     if (child.userData && child.userData.billboard && camera) child.quaternion.copy(camera.quaternion);
   }
   renderer.render(scene,camera);
-}
+};
 
 function installKeyboardControls() {
   window.addEventListener('keydown', event => {
