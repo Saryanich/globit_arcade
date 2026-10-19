@@ -406,7 +406,8 @@ function addUiStyle() {
     '#launchMapPreview{width:100%;height:185px;display:block;border-radius:7px;background:#061410;border:1px solid #355b41}',
     '@media(max-width:760px){.sim-map{width:136px;left:7px;top:100px}.sim-status{left:7px;bottom:135px;max-width:145px;font-size:8px}.sim-actions{right:7px;top:96px}.sim-btn{min-width:78px;padding:8px 7px;font-size:9px}.sim-brand{font-size:8px;padding:7px}.sim-stats{gap:4px}.sim-stat{min-width:53px;padding:6px}.sim-label{font-size:7px}.sim-value{font-size:13px}.sim-bottom{left:7px;right:7px;bottom:7px}.sim-joystick{width:clamp(76px,21vw,105px);height:clamp(76px,21vw,105px)}.sim-bottom-hint{display:none}}',
     '@media(max-height:490px){.sim-joystick{width:78px;height:78px}.sim-bottom{bottom:5px}.sim-status{bottom:104px}.sim-map{width:116px;top:75px}.sim-actions{top:75px}.sim-card,.sim-brand{padding:6px 8px}.sim-btn{padding:6px 7px}.sim-bottom-hint{font-size:7px}}',
-    '@media(orientation:portrait) and (max-width:760px){#menu{display:grid!important}#flightUI{visibility:visible!important}.sim-map{top:108px;width:122px}.sim-status{left:7px;bottom:150px}.sim-bottom{align-items:flex-end}.sim-actions{top:100px}}',
+    '@media(orientation:portrait) and (max-width:800px){#menu{display:grid!important}#flightUI{visibility:visible!important}#orientWarning{display:none!important}}',
+    '@media(orientation:portrait) and (max-width:760px){.sim-map{top:108px;width:122px}.sim-status{left:7px;bottom:150px}.sim-bottom{align-items:flex-end}.sim-actions{top:100px}}',
     '@media(prefers-reduced-motion:reduce){.sim-joystick,.sim-btn{transition:none}}',
     '#menu .sim-launch-card{grid-column:1/-1}.sim-launch-layout{display:grid;grid-template-columns:1fr minmax(190px,.8fr);gap:12px;align-items:start}.sim-launch-card .small{margin:3px 0 8px}',
     '@media(max-width:650px){.sim-launch-layout{grid-template-columns:1fr}#launchMapPreview{height:145px}}'
@@ -753,6 +754,7 @@ function makeInstancedBox(geometry, material, transforms, colors) {
   if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
   mesh.castShadow = false;
   mesh.receiveShadow = true;
+  mesh.frustumCulled = false;
   scene.add(mesh);
   return mesh;
 }
@@ -876,6 +878,7 @@ function makeCityDistrict() {
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     mesh.castShadow = WORLD.quality === 'high';
     mesh.receiveShadow = true;
+    mesh.frustumCulled = false;
     scene.add(mesh);
     WORLD.buildingMeshes.push(mesh);
   }
