@@ -252,6 +252,42 @@ function updateFlight(dt){
 }
 const animateBaseV3=animate;animate=function(){if(state.running&&!state.paused){airTrafficV3();for(const t of state.targets){if(!t.dead&&t.group.position.z>8){const pos=t.group.position.clone();t.dead=true;scene.remove(t.group);const buildings=city.filter(b=>b.userData&&b.userData.building&&!b.userData.destroyed).sort((a,b)=>a.position.distanceTo(pos)-b.position.distanceTo(pos));if(buildings.length&&buildings[0].position.distanceTo(pos)<34){damageBuildingV3(buildings[0],buildings[0].position.clone());state.hp=Math.max(0,state.hp-3)}else state.hp=Math.max(0,state.hp-5)}}}animateBaseV3();for(const e of state.effects){if(e.explosion&&e.mesh.isGroup){e.life-=.016;e.mesh.scale.multiplyScalar(1.012);e.mesh.children.forEach(p=>{p.position.addScaledVector(p.userData.v||new THREE.Vector3(),.012);p.material.opacity=Math.max(0,e.life/2.6)});if(e.life<=0)scene.remove(e.mesh)}}state.effects=state.effects.filter(e=>!e.explosion||e.life>0)};
 
+
+/* STABILITY PATCH: explicit launch button, auth persistence and real city-impact events */
+try{if(auth)auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});}catch(e){}
+const launchControl=$('flightFire');
+if(launchControl){
+ launchControl.style.display='block';launchControl.style.visibility='visible';launchControl.style.pointerEvents='auto';
+ launchControl.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(!state.running){toast('СНАЧАЛА НАЖМИ «НАЧАТЬ СМЕНУ»');return;}launchIntercept();});
+ launchControl.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();},{passive:false});
+}
+function applyTargetImpact(t){
+ if(!t||t.dead)return;
+ const pos=t.group.position.clone();
+ t.dead=true;scene.remove(t.group);
+ const buildings=city.filter(b=>b.userData&&b.userData.building&&!b.userData.destroyed);
+ let closest=null,dist=Infinity;
+ for(const b of buildings){const d=b.position.distanceTo(pos);if(d<dist){dist=d;closest=b;}}
+ if(closest&&dist<48){damageBuildingV3(closest,pos);state.hp=Math.max(0,state.hp-(t.boss?18:4));toast('УДАР ПО ГОРОДУ · ЗДАНИЕ ПОВРЕЖДЕНО');}
+ else{explodeV3(pos,t.boss);state.hp=Math.max(0,state.hp-(t.boss?18:4));}
+ if(state.hp<=0){state.running=false;$('menu').classList.remove('hide');$('menuNotice').textContent='Оборона прорвана. Улучши систему и попробуй снова.';}
+ ui();
+}
+function randomPathTargets(){
+ for(const t of state.targets){
+  if(t.dead)continue;
+  if(!t.flightPath)t.flightPath={phase:Math.random()*6.28,amp:1.4+Math.random()*3.6,goal:new THREE.Vector3((Math.random()-.5)*70,4+Math.random()*22,-20-Math.random()*100),change:performance.now()+1800+Math.random()*2600};
+  const p=performance.now(),f=t.flightPath;
+  if(p>f.change||t.group.position.distanceTo(f.goal)<5){f.goal.set((Math.random()-.5)*70,3+Math.random()*24,-15-Math.random()*115);f.change=p+1700+Math.random()*3000;}
+  const dir=f.goal.clone().sub(t.group.position).normalize();
+  t.group.position.addScaledVector(dir,t.speed*2.8*(1/60));
+  t.group.rotation.y=Math.atan2(dir.x,dir.z);
+  t.group.position.y+=Math.sin(p*.002+f.phase)*.009;
+  if(t.group.userData.prop)t.group.userData.prop.rotation.z+=.45;
+  t.group.traverse(o=>{if(o.userData.rotor)o.rotation.y+=.6});
+ }
+}
+
 loadSave();ui();
 })();
 </script>
