@@ -375,10 +375,34 @@
             grid.innerHTML = '<div class="no-games">Загрузка игр...</div>';
             try {
                 const snap = await db.collection('arcade_games').get();
-                allGames = snap.docs
+                const remoteGames = snap.docs
                     .map(d => ({ id: d.id, ...d.data() }))
                     .filter(g => g.hidden !== true && (g.url || g.gameUrl || g.link))
-                    .map(g => ({ ...g, name: g.name || g.title || 'Без названия', url: g.url || g.gameUrl || g.link, icon: g.icon || g.image || g.thumbnail || '', genre: g.genre || g.category || 'Аркада', ageRating: g.ageRating || g.age || '3+', description: g.description || g.desc || '' }));
+                    .map(g => {
+                        let url = g.url || g.gameUrl || g.link;
+                        // Поддерживаем старые записи каталога после переноса HTML-файлов в /game.
+                        const movedPaths = {
+                            'mario_run.html': 'game/mario_run.html',
+                            'nitro_rush.html': 'game/nitro_rush.html',
+                            'run_casino.html': 'game/run_casino.html'
+                        };
+                        if (movedPaths[url]) url = movedPaths[url];
+                        if (typeof url === 'string' && url.startsWith('/') && movedPaths[url.slice(1)]) url = '/' + movedPaths[url.slice(1)];
+                        return { ...g, name: g.name || g.title || 'Без названия', url, icon: g.icon || g.image || g.thumbnail || '', genre: g.genre || g.category || 'Аркада', ageRating: g.ageRating || g.age || '3+', description: g.description || g.desc || '' };
+                    });
+                // Локальная карточка гарантирует доступ к игре даже до добавления записи в Firestore.
+                const moscowGame = {
+                    id: 'moscowat3am-local',
+                    name: 'Москва в 3 часа ночи',
+                    url: 'game/moscowat3.00am.html',
+                    icon: '🌃',
+                    genre: 'Экшн',
+                    ageRating: '12+',
+                    description: 'Ночная 3D-оборона Москвы: волны целей, улучшения и режим Global ID.',
+                    rating: 0,
+                    localGame: true
+                };
+                allGames = [moscowGame, ...remoteGames.filter(g => g.id !== moscowGame.id)];
                 if (allGames.length === 0) {
                     grid.innerHTML = '<div class="no-games">Нет доступных игр. Добавьте игры через админ-панель.</div>';
                 } else {
