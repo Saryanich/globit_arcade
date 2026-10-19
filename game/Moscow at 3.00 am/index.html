@@ -17,7 +17,7 @@
   <div class="hud-top">
     <div class="brand-mini">GLOBIT ARCADE <span>• МОСКВА / 03:00</span></div>
     <div class="hud-stats"><div><small>УРОВЕНЬ</small><b id="levelValue">1</b></div><div><small>₽</small><b id="coinValue">0</b></div><div><small>ЦЕЛИ</small><b id="targetValue">0</b></div><div><small>ЦЕЛОСТНОСТЬ</small><b id="healthValue">100%</b></div></div>
-    <button id="pauseBtn" class="icon-btn" aria-label="Пауза">Ⅱ</button>
+    <button id="upgradeOpen" class="icon-btn" aria-label="Улучшения">⚙</button><button id="pauseBtn" class="icon-btn" aria-label="Пауза">Ⅱ</button>
   </div>
   <div class="camera-tag"><span class="live-dot"></span><span id="cameraMode">КАМЕРА РАКЕТЫ · IR</span><span id="rangeValue">ДАЛЬНОСТЬ —</span></div>
   <div class="reticle"><i></i><b></b></div>
@@ -56,6 +56,13 @@
 </div>
 
 <div id="panelLayer" class="panel-layer hidden">
+  <section id="upgradesPanel" class="modal-panel hidden"><header><div><small>MISSILE SYSTEM</small><h2>Улучшения</h2></div><button class="close-panel">✕</button></header>
+    <p>Постоянные улучшения сохраняются на этом устройстве.</p>
+    <div class="rating-line"><span>Скорость ракеты · ур. <b id="speedUpgradeLevel">1</b></span><button id="buySpeed" class="secondary">1500 ₽</button></div>
+    <div class="rating-line"><span>Мощность перехвата · ур. <b id="powerUpgradeLevel">1</b></span><button id="buyPower" class="secondary">2000 ₽</button></div>
+    <div class="rating-line"><span>Управляемость · ур. <b id="controlUpgradeLevel">1</b></span><button id="buyControl" class="secondary">2500 ₽</button></div>
+    <div id="upgradeMessage" class="menu-message"></div>
+  </section>
   <section id="settingsPanel" class="modal-panel hidden"><header><div><small>PERSONAL CONTROL</small><h2>Настройки</h2></div><button class="close-panel">✕</button></header>
     <label class="setting-label">Чувствительность <b id="sensitivityText">100%</b></label><input id="sensitivity" type="range" min="40" max="180" value="100">
     <label class="setting-label">Графика<select id="quality" class="field"><option value="high">Высокая</option><option value="medium">Средняя</option><option value="low">Производительная</option></select></label>
