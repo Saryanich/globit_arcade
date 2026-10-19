@@ -170,6 +170,22 @@
             box-shadow: 0 12px 28px rgba(0, 230, 118, 0.5);
         }
 
+        .btn:disabled { opacity: .7; cursor: wait; transform: none; }
+        input::placeholder { color: rgba(210, 225, 240, .42); }
+        .glass-card { animation: card-enter .45s ease-out both; }
+        @keyframes card-enter {
+            from { opacity: 0; transform: translateY(12px) scale(.985); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @media (max-width: 480px) {
+            body { padding: .75rem; }
+            .glass-card { padding: 2rem 1.25rem; border-radius: 22px; }
+            h1 { font-size: 1.9rem; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+        }
+
         .btn-danger {
             background: linear-gradient(135deg, #ff1744, #d50000);
             color: white;
@@ -448,38 +464,24 @@
                     email = snap.docs[0].data().email;
                 }
 
+                // Сохраняем авторизацию на этом устройстве, как в Global ID и Iceberg.
+                // Firebase хранит refresh token и восстанавливает сессию при следующем открытии.
+                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
                 const userCred = await auth.signInWithEmailAndPassword(email, password);
                 await ensureUserDocument(userCred.user.uid, email);
 
                 await db.collection('users').doc(userCred.user.uid).update({
                     arcadeAccess: true,
-                    arcadeLastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                    arcadeLastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                    online: true,
+                    lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                    currentIP,
+                    currentDevice: deviceFingerprint
                 });
 
-                if (await isDeviceKnown(userCred.user.uid)) {
-                    await db.collection('users').doc(userCred.user.uid).update({
-                        online: true,
-                        lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
-                        currentIP,
-                        currentDevice: deviceFingerprint
-                    });
-                    loginBtn.disabled = false;
-                    loginBtn.textContent = '🚀 Войти';
-                    await showRoleScreen(userCred.user);
-                } else {
-                    pendingUser = userCred.user;
-                    const code = Math.floor(1000 + Math.random() * 9000).toString();
-                    await db.collection('users').doc(userCred.user.uid).update({
-                        twoFactorCode: code,
-                        twoFactorCodeExpires: new Date(Date.now() + 5 * 60000)
-                    });
-                    console.log('🔑 2FA код (в Global ID):', code);
-                    document.getElementById('loginScreen').classList.add('hidden');
-                    document.getElementById('twoFactorScreen').classList.remove('hidden');
-                    document.getElementById('code1').focus();
-                    loginBtn.disabled = false;
-                    loginBtn.textContent = '🚀 Войти';
-                }
+                loginBtn.disabled = false;
+                loginBtn.textContent = '🚀 Войти';
+                await showRoleScreen(userCred.user);
             } catch (error) {
                 console.error('Ошибка входа:', error);
                 loginBtn.disabled = false;
