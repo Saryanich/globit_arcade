@@ -809,52 +809,48 @@
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
         }
-    </style>
+    .start-menu{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;overflow-y:auto;padding:16px;background:radial-gradient(ellipse at top,#193e50 0%,#090d1c 65%,#05070d 100%)}
+.start-menu-card{width:min(100%,440px);max-height:calc(100dvh - 32px);overflow-y:auto;padding:22px;text-align:center;border-radius:24px;background:rgba(15,25,45,.94);border:1px solid rgba(0,230,118,.32);box-shadow:0 20px 60px #000a,0 0 30px #00e67612}
+.start-logo{width:64px;height:64px;object-fit:cover;border-radius:16px}
+.start-menu-card h1{margin:8px 0;color:#ffd700;font-size:clamp(24px,6vw,34px)}
+.start-subtitle{color:#aab6cf;margin:0 0 18px;font-size:13px}
+.start-label{color:#c4d2e8;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:14px 0 10px}
+.start-characters{display:flex;gap:10px;margin-bottom:14px}
+.casino-character{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;align-items:center;padding:12px 5px;color:#fff;background:#ffffff0b;border:1px solid #ffffff20;border-radius:14px;font-size:27px;cursor:pointer}
+.casino-character span{font-size:12px}
+.casino-character.selected{border-color:#00e676;background:#00e67620;box-shadow:0 0 16px #00e67622}
+.start-menu-btn{width:100%;padding:12px;margin-top:9px;border:1px solid #ffffff20;border-radius:12px;color:#fff;background:linear-gradient(135deg,#253854,#182238);font-weight:800;cursor:pointer}
+.start-menu-btn.primary{color:#08150d;background:linear-gradient(135deg,#69f0ae,#00c853);border:0;font-size:16px}
+.casino-leaderboard{margin-top:10px;max-height:23vh;overflow:auto;padding:8px 12px;text-align:left;background:#0004;border-radius:12px}
+#casinoLeaderboardContent{color:#fff;font-size:13px;line-height:1.8}
+#casinoLeaderboardContent .leader-row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #ffffff20;padding:4px 0}
+.start-note{margin-top:12px;color:#8090aa;font-size:11px;line-height:1.5}
+@media(max-height:650px){.start-menu{align-items:flex-start}.start-menu-card{padding:14px}.start-label{margin:8px 0}.start-menu-btn{padding:9px}}
+</style>
 </head>
 <body>
     <div id="particles-js"></div>
+<div id="startMenu" class="start-menu">
+  <div class="start-menu-card">
+    <img src="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg" alt="GloBIT Arcade" class="start-logo">
+    <h1>🎰 RUN CASINO</h1>
+    <p class="start-subtitle">Выбери персонажа, настрой звук и начинай игру</p>
+    <div class="start-label">👤 Выбери персонажа</div>
+    <div class="start-characters" id="casinoCharacterSelector">
+      <button type="button" class="casino-character selected" data-character="0">🧑‍🚀<span>Игрок</span></button>
+      <button type="button" class="casino-character" data-character="1">🦊<span>Лис</span></button>
+      <button type="button" class="casino-character" data-character="2">🤖<span>Робот</span></button>
+    </div>
+    <button type="button" class="start-menu-btn" id="casinoSoundToggle">🔊 Звук: ВКЛ</button>
+    <button type="button" class="start-menu-btn" id="casinoLeaderboardToggle">🏆 Таблица лидеров</button>
+    <div id="casinoLeaderboardPanel" class="casino-leaderboard hidden"><div class="start-label">🏆 Лучшие игроки</div><div id="casinoLeaderboardContent">Нажмите, чтобы загрузить таблицу</div></div>
+    <button type="button" class="start-menu-btn primary" id="casinoStartButton">▶ НАЧАТЬ ИГРУ</button>
+    <div class="start-note">Вход не требуется. Если GloBIT Arcade уже авторизовал вас, аккаунт будет использован автоматически.</div>
+  </div>
+</div>
 
     <div class="app-container">
-        <!-- ЭКРАН ВХОДА -->
-        <div id="loginScreen" class="screen active">
-            <div class="logo-container">
-                <img src="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg" alt="Logo" class="logo">
-            </div>
-            <h1>Run Casino</h1>
-            <div class="subtitle">🎰 Войдите через Global ID</div>
-            <div class="input-group">
-                <label>Email или Global ID</label>
-                <input type="text" id="loginIdentifier" placeholder="email@example.com" autocomplete="email">
-            </div>
-            <div class="input-group">
-                <label>Пароль</label>
-                <input type="password" id="loginPassword" placeholder="········" autocomplete="current-password">
-            </div>
-            <button class="btn btn-primary" onclick="login()">🚀 Войти</button>
-            <div id="authMessage" class="message"></div>
-        </div>
-
-        <!-- 2FA -->
-        <div id="twoFactorScreen" class="screen">
-            <div class="logo-container"><span style="font-size:3rem;">🔐</span></div>
-            <h2 style="text-align:center;font-size:1.2rem;">Новое устройство</h2>
-            <p style="text-align:center;color:#8899bb;margin:0.5rem 0;">Код в <strong>Global ID</strong></p>
-            <div class="twofa-code">
-                <input type="text" id="code1" maxlength="1" oninput="moveNext(this,'code2')">
-                <input type="text" id="code2" maxlength="1" oninput="moveNext(this,'code3')">
-                <input type="text" id="code3" maxlength="1" oninput="moveNext(this,'code4')">
-                <input type="text" id="code4" maxlength="1">
-            </div>
-            <div class="checkbox-group">
-                <input type="checkbox" id="trustDevice">
-                <label for="trustDevice">Запомнить</label>
-            </div>
-            <button class="btn btn-primary" onclick="verify2FA()">✅ Подтвердить</button>
-            <button class="btn btn-danger" onclick="cancel2FA()">❌ Отмена</button>
-            <div id="twoFactorMessage" class="message"></div>
-        </div>
-
-        <!-- ИГРА -->
+<!-- ИГРА -->
         <div id="gameScreen" class="screen">
             <div class="user-info">
                 <span>👤 <strong id="displayName">Игрок</strong></span>
@@ -987,7 +983,7 @@
         }, { once: true });
 
         function playTone(frequency, duration, type = 'sine', volume = 0.3) {
-            if (!audioCtx || audioCtx.state !== 'running') return;
+            if (!audioEnabled || !audioCtx || audioCtx.state !== 'running') return;
             try {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
@@ -1486,7 +1482,7 @@
             updateUI();
             initAudio();
 
-            setTimeout(() => checkMegaGameEligibility(), 500);
+            // Проверка супер-режима отложена до начала игры.
         }
 
         function setupBetSelector() {
@@ -2059,15 +2055,59 @@
             const defaultBet = document.querySelector('.bet-option[data-bet="10"]');
             if (defaultBet) defaultBet.classList.add('selected');
         }
-
-        document.addEventListener('keydown', e => { if (e.key === 'Enter' && document.getElementById('loginScreen')
-                .classList.contains('active')) login(); });
-        auth.onAuthStateChanged(async u => { if (u && document.getElementById('gameScreen').classList.contains(
-                'active') === false && document.getElementById('twoFactorScreen').classList.contains('active') ===
-                false && document.getElementById('loginScreen').classList.contains('active')) await loadGame(u); });
-
+        let menuInitialized = false;
+        async function initGuestCasino() {
+            if (menuInitialized) return;
+            menuInitialized = true;
+            currentGlobalId = null;
+            gameBalance = 1000;
+            document.getElementById('displayName').textContent = 'Гость';
+            document.getElementById('globalIdDisplay').textContent = 'Гость';
+            document.getElementById('balanceDisplay').textContent = gameBalance;
+            initGrid();
+            setupBetSelector();
+            updateUI();
+        }
+        auth.onAuthStateChanged(async user => {
+            if (user) {
+                try { await loadGame(user); menuInitialized = true; }
+                catch (e) { console.warn('Аккаунт недоступен, гостевой режим:', e); await initGuestCasino(); }
+            } else { await initGuestCasino(); }
+        });
+        let casinoSoundOn = true;
+        document.getElementById('casinoSoundToggle').addEventListener('click', () => {
+            casinoSoundOn = !casinoSoundOn;
+            audioEnabled = casinoSoundOn;
+            document.getElementById('casinoSoundToggle').textContent = casinoSoundOn ? '🔊 Звук: ВКЛ' : '🔇 Звук: ВЫКЛ';
+            if (casinoSoundOn) initAudio();
+            else if (audioCtx && audioCtx.state === 'running') audioCtx.suspend().catch(() => {});
+        });
+        document.querySelectorAll('#casinoCharacterSelector .casino-character').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#casinoCharacterSelector .casino-character').forEach(x => x.classList.remove('selected'));
+                btn.classList.add('selected');
+            });
+        });
+        document.getElementById('casinoStartButton').addEventListener('click', () => {
+            if (!menuInitialized) initGuestCasino();
+            document.getElementById('startMenu').style.display = 'none';
+            showScreen('gameScreen');
+            if (casinoSoundOn) initAudio();
+        });
+        document.getElementById('casinoLeaderboardToggle').addEventListener('click', async () => {
+            const panel = document.getElementById('casinoLeaderboardPanel');
+            panel.classList.toggle('hidden');
+            if (panel.classList.contains('hidden')) return;
+            const out = document.getElementById('casinoLeaderboardContent');
+            out.textContent = 'Загрузка...';
+            try {
+                const snap = await db.collection('score').doc('runcasino').collection('records').orderBy('score','desc').limit(10).get();
+                if (snap.empty) { out.textContent = 'Пока нет результатов'; return; }
+                out.innerHTML = snap.docs.map((d,i) => '<div class="leader-row"><span>'+(i+1)+'. '+String(d.data().displayName||d.data().globalId||'Игрок').replace(/[&<>"]/g,'')+'</span><b>'+Number(d.data().score||0).toLocaleString()+'</b></div>').join('');
+            } catch (e) { out.textContent = 'Таблица недоступна: проверьте правила Firestore для score/runcasino/records.'; }
+        });
         document.body.addEventListener('click', function firstClick() {
-            initAudio();
+            if (casinoSoundOn) initAudio();
             document.body.removeEventListener('click', firstClick);
         }, { once: true });
     </script>
