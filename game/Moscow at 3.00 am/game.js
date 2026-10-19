@@ -1410,6 +1410,7 @@ start = function startOverhaul() {
   ui();
   updatePauseOverlay();
   sound('alarm');
+  if(window.GloBitBossAudio)window.GloBitBossAudio.start();
   $('flightTitle').textContent = ROCKETS[selectedRocket].name.toUpperCase() + ' · РУЧНОЙ ПОЛЁТ';
   $('flightStatus').innerHTML = '<b>РАКЕТА ЗАПУЩЕНА</b><br>ЛЕВЫЙ: курс и тяга · ПРАВЫЙ: тангаж и крен.<br>Автонаведение выключено.';
   $('cameraToggle').textContent = '◉ ВНЕШНЯЯ КАМЕРА';
