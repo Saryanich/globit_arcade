@@ -63,6 +63,7 @@
         }
 
         .header-user { color: #ccc; font-size: 0.85rem; }
+        .hidden { display: none !important; }
 
         .btn-icon {
             background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);
@@ -236,14 +237,6 @@
             }
         }
 
-        .leaderboard {
-            margin-top: 2rem; background: rgba(15,25,45,0.6); backdrop-filter: blur(20px);
-            border-radius: 20px; padding: 1.5rem; border: 1px solid rgba(0,230,118,0.15);
-        }
-        .leaderboard h3 { margin-bottom: 1rem; color: #69f0ae; }
-        .leaderboard table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        .leaderboard th, .leaderboard td { padding: 0.6rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .leaderboard th { color: #90caf9; font-weight: 500; }
 
         .no-games { text-align: center; color: var(--text-secondary); padding: 3rem; font-size: 1.1rem; grid-column: 1 / -1; }
     </style>
@@ -303,19 +296,10 @@
                         <button class="modal-close" onclick="closeModal()">✕</button>
                     </div>
                 </div>
-                <iframe class="modal-iframe" id="gameIframe" allowfullscreen></iframe>
+                <iframe class="modal-iframe" id="gameIframe" title="Игра" allow="autoplay; fullscreen; gamepad; accelerometer; gyroscope" allowfullscreen></iframe>
             </div>
         </div>
 
-        <div class="leaderboard">
-            <h3>🏆 Таблица лидеров</h3>
-            <table>
-                <thead><tr><th>Игрок</th><th>Баллы</th><th>Время (мин)</th></tr></thead>
-                <tbody id="leaderboardBody">
-                    <tr><td colspan="3" style="text-align:center; color:#8899bb;">Загрузка...</td></tr>
-                </tbody>
-            </table>
-        </div>
     </div>
 
     <script>
@@ -368,7 +352,6 @@
             }
             await loadUserRatings();
             loadGames();
-            loadLeaderboard();
         });
 
         async function loadUserRatings() {
@@ -391,8 +374,11 @@
             const grid = document.getElementById('gamesGrid');
             grid.innerHTML = '<div class="no-games">Загрузка игр...</div>';
             try {
-                const snap = await db.collection('arcade_games').where('hidden', '==', false).get();
-                allGames = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                const snap = await db.collection('arcade_games').get();
+                allGames = snap.docs
+                    .map(d => ({ id: d.id, ...d.data() }))
+                    .filter(g => g.hidden !== true && (g.url || g.gameUrl || g.link))
+                    .map(g => ({ ...g, name: g.name || g.title || 'Без названия', url: g.url || g.gameUrl || g.link, icon: g.icon || g.image || g.thumbnail || '', genre: g.genre || g.category || 'Аркада', ageRating: g.ageRating || g.age || '3+', description: g.description || g.desc || '' }));
                 if (allGames.length === 0) {
                     grid.innerHTML = '<div class="no-games">Нет доступных игр. Добавьте игры через админ-панель.</div>';
                 } else {
@@ -400,7 +386,7 @@
                 }
             } catch (e) {
                 console.error('Ошибка загрузки игр:', e);
-                grid.innerHTML = '<div class="no-games">Ошибка загрузки игр</div>';
+                grid.innerHTML = `<div class="no-games">Не удалось загрузить игры.<br><small>${escapeHtml(e.code || e.message || 'Проверьте правила Firestore')}</small></div>`;
             }
         }
 
@@ -453,7 +439,7 @@
                             ${userRating > 0 ? ' • Ваша: ' + userRating + '★' : ''}
                         </div>
                     </div>
-                    <button class="btn-play" onclick="playGame('${g.id}', '${escapeHtml(g.name)}')">🎮 Играть</button>
+                    <button class="btn-play" onclick="playGame('${g.id}')">🎮 Играть</button>
                 </div>
                 `;
             }).join('');
@@ -526,11 +512,11 @@
             }
         };
 
-        window.playGame = function(gameId, gameName) {
+        window.playGame = function(gameId) {
             const game = allGames.find(g => g.id === gameId);
             if (!game || !game.url) return alert('Ссылка на игру отсутствует');
             
-            currentGameName = gameName || game.name || 'Игра';
+            currentGameName = game.name || 'Игра';
             document.getElementById('modalGameTitle').textContent = currentGameName;
             document.getElementById('gameIframe').src = game.url;
             document.getElementById('gameModal').classList.add('active');
@@ -570,24 +556,6 @@
                 }
             }
         });
-
-        async function loadLeaderboard() {
-            const tbody = document.getElementById('leaderboardBody');
-            try {
-                const snap = await db.collection('arcade_players').orderBy('score', 'desc').limit(10).get();
-                if (snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#8899bb;">Нет данных</td></tr>';
-                    return;
-                }
-                tbody.innerHTML = snap.docs.map((d, i) => {
-                    const p = d.data();
-                    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
-                    return `<tr><td>${medal} ${escapeHtml(p.displayName || 'Игрок')}</td><td>${p.score || 0}</td><td>${p.playTime || 0}</td></tr>`;
-                }).join('');
-            } catch (e) {
-                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#8899bb;">Ошибка загрузки</td></tr>';
-            }
-        }
 
         document.getElementById('searchInput').addEventListener('input', renderGames);
         document.getElementById('genreFilter').addEventListener('change', renderGames);
