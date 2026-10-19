@@ -28,6 +28,32 @@ button,input{font:inherit}button{cursor:pointer;color:#eaffdf;background:linear-
 #mobileFire{display:none;position:absolute;right:18px;bottom:170px;width:76px;height:76px;border-radius:50%;background:#d6ffb0;color:#07110a;border:3px solid #ecffd9;box-shadow:0 0 25px #9eff6d55}
 @media(max-width:650px){.topbar{left:8px;right:8px;top:8px}.brand{font-size:9px;padding:8px}.stat{font-size:10px;padding:7px}.stat b{font-size:12px}.scan{left:8px;bottom:8px;width:165px;font-size:9px;padding:8px}.controls{right:8px;bottom:8px}.controls button{padding:8px;font-size:10px}.menu-grid{grid-template-columns:1fr}.menu-card{max-height:96vh}#mobileFire{display:block}.crosshair{top:45%}}
 </style>
+<style>
+/* V2 flight cockpit */
+#flightUI{position:fixed;inset:0;z-index:6;pointer-events:none;color:#dfffe7;font-family:system-ui,sans-serif;text-shadow:0 0 9px #70ff9b}
+#cockpitTop{position:absolute;left:2.5%;right:2.5%;top:2%;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.cockpitCard{background:linear-gradient(135deg,#06160ee8,#06110de0);border:1px solid #7cff9b65;box-shadow:0 0 24px #31ff7120,inset 0 0 20px #8cff9b08;border-radius:10px;padding:10px 14px;backdrop-filter:blur(8px)}
+.cockpitLabel{font-size:9px;letter-spacing:.2em;color:#9cdbac}.cockpitValue{font-size:clamp(14px,2vw,22px);font-weight:900}
+#flightTitle{font-size:clamp(11px,1.6vw,16px);letter-spacing:.12em;font-weight:900}
+#flightReadouts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+#flightReadouts .cockpitCard{min-width:82px;text-align:center}
+#flightBottom{position:absolute;left:2.5%;right:2.5%;bottom:2%;display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+#flightStatus{max-width:260px;font-size:10px;line-height:1.65}
+#flightControls{display:flex;gap:10px;align-items:flex-end;pointer-events:auto}
+.joyWrap{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:9px;letter-spacing:.16em;color:#c8ffd3}
+.joystick{width:clamp(88px,13vw,132px);height:clamp(88px,13vw,132px);border-radius:50%;position:relative;touch-action:none;pointer-events:auto;background:radial-gradient(circle,#102c1b 0,#07150d 55%,#040a07 70%);border:1px solid #9bffad8a;box-shadow:inset 0 0 22px #55ff7730,0 0 24px #46ff671c}
+.joystick:before{content:"";position:absolute;inset:20%;border:1px dashed #7eff9970;border-radius:50%}
+.stick{position:absolute;width:38%;height:38%;left:31%;top:31%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#e7ffe7,#4ecb78 40%,#174a2c 100%);border:2px solid #c9ffd2;box-shadow:0 0 18px #68ff8a70;transform:translate(0,0)}
+.flightButton{pointer-events:auto;border:1px solid #8cff9d80;background:linear-gradient(145deg,#163a24,#07120b);border-radius:9px;color:#e7ffeb;font-weight:900;padding:13px 15px;min-width:80px;box-shadow:0 0 18px #6aff8b18}
+.flightButton.fire{background:linear-gradient(145deg,#b9ffb8,#2b9b51);color:#051208;border:1px solid #d4ffd8;min-height:64px}
+#orientWarning{position:fixed;z-index:100;inset:0;background:#020805f8;color:#e8ffeb;display:none;place-items:center;text-align:center;padding:24px;font-family:system-ui}
+#orientWarning .warningBox{max-width:380px;border:1px solid #91ffa3;padding:28px;border-radius:18px;background:#0b1a10}
+#orientWarning .phoneIcon{font-size:58px;display:block;animation:turnPhone 1.8s ease-in-out infinite}
+@keyframes turnPhone{0%,100%{transform:rotate(0)}50%{transform:rotate(90deg)}}
+#menu{z-index:20}
+@media(orientation:portrait) and (max-width:800px){#orientWarning{display:grid}#menu{display:none!important}#flightUI{visibility:hidden}}
+@media(max-height:500px){.joystick{width:82px;height:82px}.cockpitCard{padding:6px 9px}#flightBottom{bottom:1.5%}.flightButton{padding:8px 11px;min-height:42px}}
+</style>
 </head>
 <body>
 <canvas id="scene"></canvas>
@@ -91,7 +117,92 @@ document.querySelectorAll('.skin').forEach(b=>b.onclick=()=>{const k=+b.dataset.
 $('findFriend').onclick=async()=>{const id=$('friendId').value.trim();$('friendResult').textContent='Ищем Global ID…';$('inviteFriend').disabled=true;if(!/^[0-9a-zA-Z]{22}$/.test(id)){$('friendResult').textContent='Global ID должен содержать 22 латинских буквы/цифры.';return;}try{if(!db)throw Error('Firebase недоступен');const doc=await db.collection('global_ids').doc(id).get();if(!doc.exists){$('friendResult').textContent='Игрок не найден.';return;}state.partner={id,...doc.data()};$('friendResult').textContent='Найден игрок · '+(doc.data().displayName||'Оператор');$('inviteFriend').disabled=false;}catch(e){$('friendResult').textContent='Не удалось найти: '+(e.code||e.message)+' — проверь чтение global_ids в правилах.'}};
 $('inviteFriend').onclick=async()=>{if(!user||!globalId){$('inviteStatus').textContent='Сначала войди в GloBIT Arcade и привяжи Global ID.';return;}if(!state.partner||!db)return;try{const ref=await db.collection('arcade_groups').add({hostUid:user.uid,hostGlobalId:globalId,guestGlobalId:state.partner.id,guestUid:state.partner.uid||null,status:'invited',createdAt:firebase.firestore.FieldValue.serverTimestamp(),mode:'moscow3am',levels:[50,65]});state.inviteDoc=ref.id;$('inviteStatus').textContent='Приглашение отправлено! Ждём принятия группы…';listenInvite(ref.id);}catch(e){$('inviteStatus').textContent='Firebase запретил создание группы ('+(e.code||e.message)+'). Нужны правила arcade_groups.'}};
 function listenInvite(id){db.collection('arcade_groups').doc(id).onSnapshot(doc=>{if(!doc.exists)return;const d=doc.data();if(d.status==='accepted'){ $('inviteStatus').textContent='Принято! Старт через 5 секунд…';setTimeout(()=>{state.multiplayer=true;state.level=50;start();},5000);}});}
-window.addEventListener('pointermove',e=>{pointer.x=e.clientX/innerWidth*2-1;pointer.y=-(e.clientY/innerHeight)*2+1;if(scene&&camera){raycaster.setFromCamera(new THREE.Vector2(pointer.x,pointer.y),camera);raycaster.ray.intersectPlane(aimPlane,aimPoint)}});window.addEventListener('pointerdown',e=>{if(e.target.closest('button,.menu-card'))return;mouseDown=true;shoot()});window.addEventListener('pointerup',()=>mouseDown=false);$('mobileFire').addEventListener('pointerdown',e=>{e.preventDefault();mouseDown=true;shoot()});$('mobileFire').addEventListener('pointerup',()=>mouseDown=false);window.addEventListener('keydown',e=>{if(e.key==='Escape')pause();if(e.code==='Space'){e.preventDefault();shoot()}});loadSave();ui();
+window.addEventListener('pointermove',e=>{pointer.x=e.clientX/innerWidth*2-1;pointer.y=-(e.clientY/innerHeight)*2+1;if(scene&&camera){raycaster.setFromCamera(new THREE.Vector2(pointer.x,pointer.y),camera);raycaster.ray.intersectPlane(aimPlane,aimPoint)}});window.addEventListener('pointerdown',e=>{if(e.target.closest('button,.menu-card'))return;mouseDown=true;shoot()});window.addEventListener('pointerup',()=>mouseDown=false);$('mobileFire').addEventListener('pointerdown',e=>{e.preventDefault();mouseDown=true;shoot()});$('mobileFire').addEventListener('pointerup',()=>mouseDown=false);window.addEventListener('keydown',e=>{if(e.key==='Escape')pause();if(e.code==='Space'){e.preventDefault();shoot()}});
+/* === FLIGHT-CONTROL COCKPIT V2 === */
+const flight={steerX:0,steerY:0,roll:0,throttle:.65,heading:0,pitch:0,speed:24,fuel:100,missile:null,missileTrail:[],launchCooldown:0,lock:0};
+function buildPlayerMissile(){
+ const g=new THREE.Group();
+ const shell=new THREE.Mesh(new THREE.CylinderGeometry(.24,.34,3.2,12),new THREE.MeshStandardMaterial({color:0x65766b,metalness:.75,roughness:.28}));
+ shell.rotation.x=Math.PI/2;g.add(shell);
+ const nose=new THREE.Mesh(new THREE.ConeGeometry(.24,.9,12),new THREE.MeshStandardMaterial({color:0xcbd6c8,metalness:.7,roughness:.22}));
+ nose.rotation.x=-Math.PI/2;nose.position.z=-2.02;g.add(nose);
+ const nozzle=new THREE.Mesh(new THREE.CylinderGeometry(.25,.38,.45,12),new THREE.MeshStandardMaterial({color:0x222a25,metalness:.8,roughness:.3}));
+ nozzle.rotation.x=Math.PI/2;nozzle.position.z=1.75;g.add(nozzle);
+ for(let i=0;i<4;i++){const fin=new THREE.Mesh(new THREE.BoxGeometry(.72,.08,.58),new THREE.MeshStandardMaterial({color:0x3a5141,metalness:.35,roughness:.45}));fin.position.z=1.15;fin.rotation.z=i*Math.PI/2;g.add(fin)}
+ const flame=new THREE.Mesh(new THREE.ConeGeometry(.27,1.35,10),new THREE.MeshBasicMaterial({color:0x83ffb1,transparent:true,opacity:.9}));
+ flame.rotation.x=Math.PI/2;flame.position.z=2.45;g.add(flame);g.userData.flame=flame;g.userData.playerMissile=true;
+ g.position.set(0,4,8);scene.add(g);flight.missile=g;return g;
+}
+function makeNoiseTexture(colorA,colorB){const cv=document.createElement('canvas');cv.width=64;cv.height=64;const cx=cv.getContext('2d');cx.fillStyle=colorA;cx.fillRect(0,0,64,64);for(let i=0;i<180;i++){cx.fillStyle=Math.random()>.5?colorB:colorA;cx.globalAlpha=Math.random()*.65;cx.fillRect(Math.random()*64,Math.random()*64,2+Math.random()*9,1+Math.random()*3)}return new THREE.CanvasTexture(cv)}
+function detailedTarget(type,bossName){
+ const boss=type==='boss',root=new THREE.Group(),olive=new THREE.MeshStandardMaterial({color:0x535d49,metalness:.48,roughness:.43}),dark=new THREE.MeshStandardMaterial({color:0x202a23,metalness:.65,roughness:.3}),wingMat=new THREE.MeshStandardMaterial({color:0x4b5848,metalness:.42,roughness:.5}),hot=new THREE.MeshBasicMaterial({color:boss?0xff704d:0xffb86b});
+ if(boss){
+  // Satirical stylised human-like boss avatar; intentionally a game character, not a photorealistic replica.
+  const jacket=new THREE.Mesh(new THREE.BoxGeometry(1.35,1.75,.75),new THREE.MeshStandardMaterial({color:bossName==='Потужнолит'?0x283d35:0x182743,roughness:.8}));jacket.position.y=1.45;root.add(jacket);
+  const neck=new THREE.Mesh(new THREE.CylinderGeometry(.18,.2,.35,10),mat(0xb98d72));neck.position.y=2.45;root.add(neck);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.52,20,16),new THREE.MeshStandardMaterial({color:0xc69a7c,roughness:.92}));head.position.y=2.9;root.add(head);
+  const hair=new THREE.Mesh(new THREE.SphereGeometry(.53,16,10,0,Math.PI*2,0,Math.PI*.47),mat(bossName==='Потужнолит'?0x27221d:0xaaa18e));hair.position.y=3.08;root.add(hair);
+  const eyeMat=new THREE.MeshBasicMaterial({color:0xffe2ac});for(let x of [-.18,.18]){const eye=new THREE.Mesh(new THREE.SphereGeometry(.055,8,8),eyeMat);eye.position.set(x,2.98,.46);root.add(eye)}
+  const tie=new THREE.Mesh(new THREE.ConeGeometry(.13,.72,4),mat(0x9e2e2a));tie.position.set(0,1.55,.4);root.add(tie);
+  for(let x of [-.83,.83]){const arm=new THREE.Mesh(new THREE.CapsuleGeometry(.16,.8,4,8),jacket.material);arm.position.set(x,1.55,.02);arm.rotation.z=x<0?-.3:.3;root.add(arm)}
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(1.05,.035,8,32),new THREE.MeshBasicMaterial({color:bossName==='Потужнолит'?0xff795f:0x78aaff}));ring.position.y=3.4;root.add(ring);root.userData.bossName=bossName;
+ } else if(type==='drone'){
+  // Four-rotor reconnaissance quadcopter, with visible arms, motors, camera and rotor discs.
+  const core=new THREE.Mesh(new THREE.BoxGeometry(.72,.28,.9),dark);root.add(core);
+  for(const x of [-1,1])for(const z of [-1,1]){const arm=new THREE.Mesh(new THREE.CylinderGeometry(.055,.075,1.25,8),olive);arm.position.set(x*.52,.02,z*.48);arm.rotation.z=Math.PI/2;arm.rotation.y=x*z*.35;root.add(arm);const motor=new THREE.Mesh(new THREE.CylinderGeometry(.17,.19,.13,12),dark);motor.position.set(x*1.05,.1,z*.86);root.add(motor);const rotor=new THREE.Mesh(new THREE.BoxGeometry(.85,.025,.08),new THREE.MeshBasicMaterial({color:0x8bffab,transparent:true,opacity:.65}));rotor.position.set(x*1.05,.19,z*.86);rotor.userData.rotor=true;root.add(rotor)}
+  const cam=new THREE.Mesh(new THREE.SphereGeometry(.14,10,8),hot);cam.position.set(0,-.18,-.45);root.add(cam);
+ }else if(type==='shahed'){
+  // Long delta-wing loitering-munition silhouette with rear propeller and tail.
+  const fus=new THREE.Mesh(new THREE.CylinderGeometry(.18,.28,2.5,12),olive);fus.rotation.x=Math.PI/2;root.add(fus);
+  const wing=new THREE.Mesh(new THREE.BufferGeometry(),wingMat);const verts=new Float32Array([-2,0,.35,2,0,.35,.42,0,-.7,-2,0,.35,.42,0,-.7,-.55,0,-1.15]);wing.geometry.setAttribute('position',new THREE.BufferAttribute(verts,3));wing.geometry.computeVertexNormals();root.add(wing);
+  const tail=new THREE.Mesh(new THREE.BoxGeometry(.85,.07,.4),dark);tail.position.z=1.05;root.add(tail);
+  const prop=new THREE.Group();for(let i=0;i<2;i++){const blade=new THREE.Mesh(new THREE.BoxGeometry(.09,.85,.04),dark);blade.rotation.z=i*Math.PI/2;prop.add(blade)}prop.position.z=1.42;root.add(prop);root.userData.prop=prop;
+  const nose=new THREE.Mesh(new THREE.ConeGeometry(.18,.55,10),dark);nose.rotation.x=-Math.PI/2;nose.position.z=-1.45;root.add(nose);
+ }else{
+  // A slender rocket body with four stabilising fins and bright exhaust.
+  const fus=new THREE.Mesh(new THREE.CylinderGeometry(.16,.23,2.6,12),new THREE.MeshStandardMaterial({color:0x9ca89a,metalness:.72,roughness:.28}));fus.rotation.x=Math.PI/2;root.add(fus);
+  const tip=new THREE.Mesh(new THREE.ConeGeometry(.16,.58,12),dark);tip.rotation.x=-Math.PI/2;tip.position.z=-1.58;root.add(tip);
+  for(let i=0;i<4;i++){const fin=new THREE.Mesh(new THREE.BoxGeometry(.48,.06,.5),olive);fin.position.z=.9;fin.rotation.z=i*Math.PI/2;root.add(fin)}
+  const exhaust=new THREE.Mesh(new THREE.ConeGeometry(.16,.75,10),hot);exhaust.rotation.x=Math.PI/2;exhaust.position.z=1.65;root.add(exhaust);root.userData.exhaust=exhaust;
+ }
+ root.position.set((Math.random()-.5)*28,3+Math.random()*13,-45-Math.random()*50);root.traverse(o=>{if(o.isMesh)o.castShadow=true});scene.add(root);
+ const max=(boss?100+state.level*5:type==='rocket'?3:type==='shahed'?2:1)*state.power;
+ const t={group:root,type,boss,bossName,health:max,maxHealth:max,dead:false,speed:(boss?.5:type==='rocket'?1.35:type==='shahed'?.8:1.05+state.level*.012)*(state.multiplayer?1.2:1),value:boss?50000:type==='drone'?500:type==='shahed'?1000:5000,fireAt:performance.now()+2400+Math.random()*3500,noise:0};state.targets.push(t);
+ if(boss){state.bosses.push(t);$('bossbar').style.display='block';$('bossname').textContent='БОСС: '+bossName.toUpperCase();sound('boss')}ui();return t;
+}
+createTarget=detailedTarget;
+function setupFlightJoysticks(){
+ const attach=(id,fn)=>{const el=$(id),knob=el.querySelector('.stick');let pid=null;const move=e=>{if(pid!==e.pointerId)return;const r=el.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=e.clientX-cx,dy=e.clientY-cy,lim=r.width*.31,len=Math.hypot(dx,dy)||1,x=dx/len*Math.min(lim,len),y=dy/len*Math.min(lim,len);knob.style.transform='translate('+x+'px,'+y+'px)';fn(x/lim,y/lim)};el.addEventListener('pointerdown',e=>{pid=e.pointerId;el.setPointerCapture(pid);move(e);e.preventDefault()});el.addEventListener('pointermove',move);const end=e=>{if(pid!==e.pointerId)return;pid=null;knob.style.transform='translate(0,0)';fn(0,0)};el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end)};
+ attach('joySteer',(x,y)=>{flight.steerX=x;flight.steerY=y});
+ attach('joyThrottle',(x,y)=>{flight.roll=x;flight.throttle=Math.max(.15,Math.min(1,.65-y*.35))});
+ $('flightFire').addEventListener('pointerdown',e=>{e.preventDefault();launchIntercept()});
+}
+function launchIntercept(){
+ if(!state.running||state.paused)return;
+ const now=performance.now();if(now-flight.launchCooldown<650)return;flight.launchCooldown=now;sound('shot');flight.fuel=Math.max(0,flight.fuel-1.5);
+ const alive=state.targets.filter(t=>!t.dead);if(!alive.length){toast('ПОИСК ЦЕЛИ · СЕКТОР ПУСТ');return}
+ let nearest=null,score=1e9;for(const t of alive){const d=flight.missile.position.distanceTo(t.group.position);const aim=t.group.position.clone().sub(flight.missile.position).normalize(),forward=new THREE.Vector3(0,0,-1).applyQuaternion(flight.missile.quaternion);const angle=forward.angleTo(aim);const v=d+angle*18;if(v<score){score=v;nearest=t}}
+ if(nearest){const dir=nearest.group.position.clone().sub(flight.missile.position).normalize();flight.missile.userData.lockTarget=nearest;flight.missile.userData.lockUntil=now+2400;toast('ЗАХВАТ: '+(nearest.boss?nearest.bossName:nearest.type.toUpperCase()));flight.lock=1;setTimeout(()=>{if(!nearest.dead&&flight.missile){const distance=flight.missile.position.distanceTo(nearest.group.position);if(distance<28||flight.missile.userData.lockTarget===nearest){nearest.health-=Math.max(1,state.power*2.4);sound('hit');if(nearest.health<=0)kill(nearest);else if(nearest.boss)$('bosshp').style.width=(100*nearest.health/nearest.maxHealth)+'%';}flight.lock=0}},850)}
+}
+function updateFlight(dt){
+ if(!flight.missile||!state.running||state.paused)return;
+ const m=flight.missile;flight.heading+=flight.steerX*dt*.95;flight.pitch=Math.max(-.7,Math.min(.7,flight.pitch-flight.steerY*dt*.7));flight.speed=15+flight.throttle*28;
+ const target=m.userData.lockTarget;if(target&&!target.dead&&performance.now()<m.userData.lockUntil){const wanted=target.group.position.clone().sub(m.position).normalize();const forward=new THREE.Vector3(0,0,-1).applyQuaternion(m.quaternion);forward.lerp(wanted,Math.min(1,dt*1.8)).normalize();m.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,-1),forward);m.position.addScaledVector(forward,flight.speed*dt);if(m.position.distanceTo(target.group.position)<2.8){target.health-=Math.max(1,state.power*2);if(target.health<=0)kill(target);m.userData.lockTarget=null;}}
+ else{m.rotation.order='YXZ';m.rotation.y=flight.heading;m.rotation.x=flight.pitch;m.rotation.z=-flight.roll*.35;m.translateZ(-flight.speed*dt);}
+ // Soft arena bounds and a forward-following chase camera: the player is the missile.
+ m.position.x=Math.max(-42,Math.min(42,m.position.x));m.position.y=Math.max(1,Math.min(24,m.position.y));m.position.z=Math.max(-125,Math.min(18,m.position.z));
+ const forward=new THREE.Vector3(0,0,-1).applyQuaternion(m.quaternion);const desired=m.position.clone().addScaledVector(forward,-8);desired.y+=2.3;camera.position.lerp(desired,Math.min(1,dt*2.8));camera.quaternion.slerp(m.quaternion,Math.min(1,dt*1.6));camera.lookAt(m.position.clone().addScaledVector(forward,28));
+ m.userData.flame.scale.y=.7+Math.random()*.65;m.userData.flame.material.opacity=.65+Math.random()*.35;
+ $('speedRead').textContent=Math.round(flight.speed*12)+' км/ч';$('altitudeRead').textContent=Math.round(m.position.y*90)+' м';$('fuelRead').textContent=Math.round(flight.fuel)+'%';
+ $('flightStatus').innerHTML='<b>'+(flight.lock?'ЗАХВАТ ЦЕЛИ':'РУЧНОЕ УПРАВЛЕНИЕ')+'</b><br>ЛЕВЫЙ ДЖОЙСТИК — КУРС / ТАНГАЖ<br>ПРАВЫЙ ДЖОЙСТИК — КРЕН / ТЯГА<br>'+(flight.lock?'РАКЕТА СЛЕДУЕТ К ЦЕЛИ':'НАЖМИ «ЗАХВАТ / ПУСК» ДЛЯ ПЕРЕХВАТА');
+}
+const originalStart=start;
+start=function(){originalStart();if(!flight.missile)buildPlayerMissile();flight.missile.position.set(0,4,8);flight.heading=0;flight.pitch=0;flight.fuel=100;camera.position.set(0,6,17);setupFlightJoysticks();};
+const originalAnimate=animate;
+animate=function(){if(renderer&&flight.missile&&state.running&&!state.paused){const dt=Math.min(clock.getDelta(),.04);updateFlight(dt);originalAnimate();return;}originalAnimate();};
+window.addEventListener('deviceorientation',()=>{const portrait=innerHeight>innerWidth&&innerWidth<900;$('orientWarning').style.display=portrait?'grid':'none';});
+
+loadSave();ui();
 })();
 </script>
 </body></html>
