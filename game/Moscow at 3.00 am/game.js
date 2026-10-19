@@ -125,7 +125,7 @@ function launchIntercept(){
 }
 function updateFlight(dt){
  if(!flight.missile||!state.running||state.paused)return;
- const m=flight.missile;flight.heading+=flight.steerX*dt*.95;flight.pitch=Math.max(-.7,Math.min(.7,flight.pitch-flight.steerY*dt*.7));flight.speed=15+flight.throttle*28;
+ const m=flight.missile;const sensitivity=Number(WORLD.sensitivity||1);const steerY=Number.isFinite(flight.pitchInput)?flight.pitchInput:flight.steerY;const throttleInput=Number.isFinite(flight.throttleInput)?flight.throttleInput:0;flight.throttle=Math.max(.15,Math.min(1,flight.throttle+throttleInput*dt*.65));flight.heading+=flight.steerX*dt*.95*sensitivity;flight.pitch=Math.max(-.7,Math.min(.7,flight.pitch-steerY*dt*.7*sensitivity));flight.speed=15+flight.throttle*28;flight.roll=Math.max(-1,Math.min(1,flight.roll));if(window.__globitVibration&&navigator.vibrate&&performance.now()-(flight.lastVibe||0)>320){navigator.vibrate(9);flight.lastVibe=performance.now();}
  const target=m.userData.lockTarget;if(target&&!target.dead&&performance.now()<m.userData.lockUntil){const wanted=target.group.position.clone().sub(m.position).normalize();const forward=new THREE.Vector3(0,0,-1).applyQuaternion(m.quaternion);forward.lerp(wanted,Math.min(1,dt*1.8)).normalize();m.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,-1),forward);m.position.addScaledVector(forward,flight.speed*dt);if(m.position.distanceTo(target.group.position)<2.8){target.health-=Math.max(1,state.power*2);if(target.health<=0)kill(target);m.userData.lockTarget=null;}}
  else{m.rotation.order='YXZ';m.rotation.y=flight.heading;m.rotation.x=flight.pitch;m.rotation.z=-flight.roll*.35;m.translateZ(-flight.speed*dt);}
  // Soft arena bounds and a forward-following chase camera: the player is the missile.
@@ -1636,7 +1636,7 @@ function updateTargetAI(target, dt, now) {
 
   if (direction.lengthSq() < .0001) return;
   direction.normalize();
-  const speed = ai.baseSpeed * (ai.state === 'evasive' ? 1.25 : 1);
+  const speed = ai.baseSpeed * (ai.state === 'evasive' ? 1.8 : 1.55) * (target.type === 'rocket' ? 1.35 : 1);
   const desiredVelocity = direction.multiplyScalar(speed);
   if (!target.ai.velocity) target.ai.velocity = desiredVelocity.clone();
   target.ai.velocity.lerp(desiredVelocity,clampValue(dt * .75,.01,.2));
@@ -1973,8 +1973,30 @@ try {
   console.warn('Auth persistence could not be set:',error);
 }
 
+
 mountFlightUI();
 installMissionUI();
+(function installDashboardControls(){
+ const byId=id=>document.getElementById(id),show=id=>byId(id)?.classList.remove('hidden'),hide=id=>byId(id)?.classList.add('hidden');
+ byId('inviteOpen')?.addEventListener('click',()=>show('inviteModal'));byId('inviteClose')?.addEventListener('click',()=>hide('inviteModal'));byId('ratingOpen')?.addEventListener('click',openLeaderboard);byId('settingsOpen')?.addEventListener('click',()=>show('settingsModal'));byId('settingsClose')?.addEventListener('click',()=>hide('settingsModal'));
+ byId('settingsDone')?.addEventListener('click',()=>{hide('settingsModal');try{localStorage.setItem('moscow3_settings',JSON.stringify({sensitivity:WORLD.sensitivity,gyro:!!byId('gyroToggle').checked,joystick:!!byId('joystickToggle').checked,vibration:!!byId('vibrationToggle').checked,graphics:byId('settingGraphics').value}));}catch(e){}toast('НАСТРОЙКИ СОХРАНЕНЫ');});
+ byId('settingSensitivity')?.addEventListener('input',e=>{WORLD.sensitivity=Number(e.target.value)/100;byId('sensitivityLabel').textContent=e.target.value+'%';if(byId('sensitivityRange')){byId('sensitivityRange').value=e.target.value;byId('sensitivityValue').textContent=e.target.value+'%';}});
+ byId('settingGraphics')?.addEventListener('change',e=>applyGraphicsQuality(e.target.value));
+ byId('joystickToggle')?.addEventListener('change',e=>document.querySelectorAll('#flightUI .sim-joy-wrap').forEach(el=>el.style.display=e.target.checked?'flex':'none'));
+ byId('vibrationToggle')?.addEventListener('change',e=>{window.__globitVibration=e.target.checked;if(!e.target.checked&&navigator.vibrate)navigator.vibrate(0);});
+ byId('gyroToggle')?.addEventListener('change',async e=>{if(!e.target.checked){window.__globitGyro=false;if(window.__globitGyroHandler)window.removeEventListener('deviceorientation',window.__globitGyroHandler);return;}try{if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){const permission=await DeviceOrientationEvent.requestPermission();if(permission!=='granted')throw Error('Доступ к гироскопу запрещён');}window.__globitGyro=true;window.__globitGyroHandler=event=>{if(!window.__globitGyro||!state.running||state.paused||!flight.missile)return;if(event.gamma!==null)flight.steerX=Math.max(-1,Math.min(1,event.gamma/28));if(event.beta!==null)flight.pitchInput=Math.max(-1,Math.min(1,(event.beta-45)/35));};window.addEventListener('deviceorientation',window.__globitGyroHandler);toast('ГИРОСКОП ВКЛЮЧЁН');}catch(err){e.target.checked=false;toast('ГИРОСКОП НЕДОСТУПЕН: '+(err.message||'нет разрешения'));}});
+ try{const saved=JSON.parse(localStorage.getItem('moscow3_settings')||'null');if(saved){if(Number.isFinite(saved.sensitivity)){WORLD.sensitivity=saved.sensitivity;byId('settingSensitivity').value=Math.round(saved.sensitivity*100);byId('sensitivityLabel').textContent=Math.round(saved.sensitivity*100)+'%';}byId('gyroToggle').checked=!!saved.gyro;byId('joystickToggle').checked=saved.joystick!==false;byId('vibrationToggle').checked=saved.vibration!==false;window.__globitVibration=saved.vibration!==false;byId('settingGraphics').value=saved.graphics||'high';if(saved.graphics)applyGraphicsQuality(saved.graphics);if(saved.joystick===false)document.querySelectorAll('#flightUI .sim-joy-wrap').forEach(el=>el.style.display='none');}}catch(e){}
+ byId('inviteModal')?.addEventListener('click',e=>{if(e.target===byId('inviteModal'))hide('inviteModal');});byId('settingsModal')?.addEventListener('click',e=>{if(e.target===byId('settingsModal'))hide('settingsModal');});
+ const oldDrawLaunchMap=drawLaunchMap;drawLaunchMap=function(){oldDrawLaunchMap();drawDashboardThreats();};
+ function drawDashboardThreats(){const canvas=byId('launchMapPreview');if(!canvas||!canvas.getContext)return;const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height,playerX=flight.missile?flight.missile.position.x:MOSCOW_LOCATIONS[selectedLocation].x,playerZ=flight.missile?flight.missile.position.z:MOSCOW_LOCATIONS[selectedLocation].z,span=WORLD.half*2,px=x=>(x+WORLD.half)/span*w,py=z=>(z+WORLD.half)/span*h;
+  ctx.save();ctx.strokeStyle='#224b31';ctx.lineWidth=2;for(let x=-WORLD.half;x<=WORLD.half;x+=WORLD.roadStep){ctx.beginPath();ctx.moveTo(px(x),0);ctx.lineTo(px(x),h);ctx.stroke();}for(let z=-WORLD.half;z<=WORLD.half;z+=WORLD.roadStep){ctx.beginPath();ctx.moveTo(0,py(z));ctx.lineTo(w,py(z));ctx.stroke();}
+  ctx.strokeStyle='#237e8a';ctx.lineWidth=5;ctx.beginPath();for(let i=0;i<=30;i++){const x=-WORLD.half+i*WORLD.half*2/30,z=x*.22+30;i?ctx.lineTo(px(x),py(z)):ctx.moveTo(px(x),py(z));}ctx.stroke();
+  Object.entries(MOSCOW_LOCATIONS).forEach(([key,loc])=>{ctx.fillStyle=key==='kremlin'?'#f4d27a':'#679ac0';ctx.beginPath();ctx.arc(px(loc.x),py(loc.z),key==='kremlin'?8:5,0,Math.PI*2);ctx.fill();});
+  if(state.running)state.targets.filter(t=>!t.dead).forEach(t=>{const x=px(t.group.position.x),y=py(t.group.position.z);ctx.fillStyle=t.boss?'#ff9d45':'#ff6464';ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=10;ctx.beginPath();ctx.moveTo(x,y-8);ctx.lineTo(x+6,y+5);ctx.lineTo(x-6,y+5);ctx.closePath();ctx.fill();});
+  ctx.shadowBlur=0;const x=px(playerX),y=py(playerZ);ctx.fillStyle='#a8ff8c';ctx.shadowColor='#a8ff8c';ctx.shadowBlur=14;ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#eaffdf';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,13,0,Math.PI*2);ctx.stroke();ctx.restore();}
+ setInterval(()=>{if(byId('menu')&&!byId('menu').classList.contains('hide'))drawDashboardThreats();},500);
+})();
+
 shoot = function noAutoAimDuringFlight() {
   if (flight.mode === 'manual') return;
   return undefined;
