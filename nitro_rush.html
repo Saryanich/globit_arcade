@@ -96,7 +96,12 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
     }
-  </style>
+  
+     .menu-secondary { background: linear-gradient(135deg,#293e73,#172448); border:1px solid rgba(255,255,255,.2); color:#fff; }
+     #leaderboardContent { font-size:13px; line-height:1.8; color:#fff; }
+     #leaderboardContent .leader-row { display:flex; justify-content:space-between; gap:12px; border-bottom:1px solid #ffffff20; padding:4px 0; }
+     @media (max-height:720px) { #menuScreen { overflow:auto; justify-content:flex-start; } .menu-section { padding:12px; } }
+   </style>
   <script type="importmap">
     { "imports": { "three": "https://unpkg.com/three@0.128.0/build/three.module.js" } }
   </script>
@@ -106,21 +111,7 @@
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
-  
-  <div id="authOverlay">
-    <div class="auth-container">
-      <img src="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg" class="auth-logo" alt="logo">
-      <div class="auth-title">NITRO RUSH</div>
-      <div class="auth-sub">🏎️ Войдите или играйте как гость</div>
-      <input type="text" id="loginEmail" class="input-field" placeholder="Email или Global ID">
-      <input type="password" id="loginPass" class="input-field" placeholder="Пароль">
-      <button class="btn-auth btn-primary" id="doLoginBtn">🚀 Войти</button>
-      <button class="btn-auth btn-secondary" id="guestBtn">🎮 Играть как гость</button>
-      <div id="authMsg" class="message"></div>
-    </div>
-  </div>
-  
-  <div id="menuScreen" class="hidden">
+<div id="menuScreen">
     <div class="menu-title">🏎️ NITRO RUSH</div>
     <div class="menu-subtitle">Бесконечное шоссе</div>
     
@@ -142,7 +133,13 @@
       </div>
     </div>
     
-    <button class="play-button" id="playButton">▶ ИГРАТЬ</button>
+    <button class="play-button" id="playButton">▶ НАЧАТЬ ИГРУ</button>
+       <button class="play-button menu-secondary" id="soundToggleBtn" type="button">🔊 Звук: ВКЛ</button>
+       <button class="play-button menu-secondary" id="leaderboardToggleBtn" type="button">🏆 Таблица лидеров</button>
+       <div id="leaderboardPanel" class="menu-section hidden" style="max-height:24vh;overflow:auto;">
+         <div class="section-label">🏆 Лучшие игроки</div>
+         <div id="leaderboardContent">Нажмите, чтобы загрузить таблицу</div>
+       </div>
   </div>
 
   <div id="gameUI" class="hidden">
@@ -265,10 +262,7 @@
         }
       }
       unlock() { 
-        if(this.ctx && this.ctx.state !== 'running'){ 
-          this.ctx.resume(); 
-          this.enabled = true; 
-        }
+        if(this.enabled && this.ctx && this.ctx.state !== 'running'){ this.ctx.resume(); }
       }
       playCoin() { if(!this.enabled || !this.ctx) return; const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain(); osc.connect(gain); gain.connect(this.ctx.destination); gain.gain.value = 0.2; osc.frequency.value = 880; gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime+0.3); osc.start(); osc.stop(this.ctx.currentTime+0.4); }
       playBoost() { if(!this.enabled || !this.ctx) return; const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain(); osc.connect(gain); gain.connect(this.ctx.destination); gain.gain.value = 0.3; osc.frequency.value = 440; gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime+0.8); osc.start(); osc.stop(this.ctx.currentTime+0.9); }
@@ -276,8 +270,8 @@
       playScore() { if(!this.enabled || !this.ctx || Math.random()>0.3) return; const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain(); osc.connect(gain); gain.connect(this.ctx.destination); gain.gain.value = 0.15; osc.frequency.value = 660; gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime+0.2); osc.start(); osc.stop(this.ctx.currentTime+0.25); }
     }
     const sound = new SoundEngine();
-    window.addEventListener('touchstart', ()=>{ sound.unlock(); }, { once: true });
-    window.addEventListener('click', ()=>{ if(sound.ctx && sound.ctx.state !== 'running') sound.unlock(); });
+    window.addEventListener('touchstart', ()=>{ if(sound.enabled) sound.unlock(); }, { once: true });
+    window.addEventListener('click', ()=>{ if(sound.enabled && sound.ctx && sound.ctx.state !== 'running') sound.unlock(); });
     
     function getLaneX(lane) { return (lane - 1) * LANE_WIDTH; }
     
@@ -696,49 +690,6 @@
     });
     
     // AUTH
-    document.getElementById('doLoginBtn').onclick = async () => {
-      const ident = document.getElementById('loginEmail').value.trim();
-      const pwd = document.getElementById('loginPass').value;
-      if(!ident || !pwd){ 
-        document.getElementById('authMsg').innerText='Введите данные'; 
-        return; 
-      }
-      let email = ident;
-      if(!ident.includes('@')){
-        try{ 
-          const q = await db.collection('users').where('globalId','==',ident).get(); 
-          if(q.empty){ 
-            document.getElementById('authMsg').innerText='Global ID не найден'; 
-            return; 
-          } 
-          email = q.docs[0].data().email; 
-        } catch(e){ 
-          document.getElementById('authMsg').innerText='Ошибка поиска'; 
-          return; 
-        }
-      }
-      try{
-        const cred = await auth.signInWithEmailAndPassword(email, pwd);
-        await ensureUserDoc(cred.user.uid, email);
-        currentUser = cred.user;
-        isGuest = false;
-        document.getElementById('authOverlay').classList.add('hidden');
-        document.getElementById('menuScreen').classList.remove('hidden');
-        document.getElementById('authMsg').innerText = '';
-        document.getElementById('loginEmail').value = '';
-        document.getElementById('loginPass').value = '';
-      } catch(e){ 
-        document.getElementById('authMsg').innerHTML = 'Ошибка: ' + e.message;
-      }
-    };
-    
-    document.getElementById('guestBtn').onclick = () => {
-      isGuest = true;
-      currentUser = null;
-      document.getElementById('authOverlay').classList.add('hidden');
-      document.getElementById('menuScreen').classList.remove('hidden');
-      document.getElementById('authMsg').innerText = '';
-    };
     
     document.getElementById('playButton').onclick = () => {
       console.log('Play button clicked');
@@ -814,15 +765,31 @@
     document.getElementById('mobileControls').style.display = isMobileDevice ? 'flex' : 'none';
     
     // Auth state observer
-    auth.onAuthStateChanged(async(user) => {
-      if(user && !currentUser && !isGuest){
-        currentUser = user;
-        isGuest = false;
-        await ensureUserDoc(user.uid, user.email);
-        document.getElementById('authOverlay').classList.add('hidden');
-        document.getElementById('menuScreen').classList.remove('hidden');
-      }
-    });
+     auth.onAuthStateChanged(async user => {
+       if (user) {
+         currentUser = user; isGuest = false;
+         try { await ensureUserDoc(user.uid, user.email); } catch (e) { console.warn('Профиль недоступен:', e); }
+       } else { currentUser = null; isGuest = true; }
+     });
+     let soundOn = true;
+     document.getElementById('soundToggleBtn').onclick = () => {
+       soundOn = !soundOn;
+       sound.enabled = soundOn;
+       if (soundOn) sound.unlock();
+       document.getElementById('soundToggleBtn').textContent = soundOn ? '🔊 Звук: ВКЛ' : '🔇 Звук: ВЫКЛ';
+     };
+     document.getElementById('leaderboardToggleBtn').onclick = async () => {
+       const panel = document.getElementById('leaderboardPanel');
+       panel.classList.toggle('hidden');
+       if (panel.classList.contains('hidden')) return;
+       const out = document.getElementById('leaderboardContent');
+       out.textContent = 'Загрузка...';
+       try {
+         const snap = await db.collection('score').doc('nitrorush').collection('records').orderBy('score','desc').limit(10).get();
+         if (snap.empty) { out.textContent = 'Пока нет результатов'; return; }
+         out.innerHTML = snap.docs.map((d,i)=>'<div class="leader-row"><span>'+(i+1)+'. '+String(d.data().displayName||d.data().globalId||'Игрок').replace(/[&<>"]/g,'')+'</span><b>'+Number(d.data().score||0).toLocaleString()+'</b></div>').join('');
+       } catch(e) { out.textContent = 'Таблица недоступна: проверьте правила Firestore для score/nitrorush/records.'; }
+     };
     
     console.log('Game fully loaded and ready');
   </script>
