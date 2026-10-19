@@ -21,16 +21,34 @@
  <div class="controls"><button id="pauseBtn">Ⅱ ПАУЗА</button><button id="upgradeBtn">⚙ УЛУЧШЕНИЯ</button><button id="menuBtn">☰ МЕНЮ</button></div>
  <button id="mobileFire">ОГОНЬ</button>
 </div>
-<div id="menu"><div class="menu-card panel">
- <div class="kicker">GLOBIT ARCADE PRESENTS / SURVIVAL SIMULATOR</div><div class="title">МОСКВА<br>В <span>3 ЧАСА</span><br>НОЧИ</div>
- <p class="sub">Ночной перехват над Москвой. Управляй ракетой вручную, перехватывай цели и защищай город.</p>
- <div class="menu-grid">
-  <section class="box"><h3>ПРОФИЛЬ ЗАЩИТНИКА</h3><div class="small">Автоматический вход через GloBIT Arcade. Прогресс и рекорды синхронизируются с Firebase при доступных правилах доступа.</div>
-<h3 style="margin-top:18px">СИСТЕМА</h3><div class="row"><button id="soundBtn">🔊 ЗВУК: ВКЛ</button><button id="leaderBtn">🏆 ТАБЛИЦА ЛИДЕРОВ</button></div><div class="small">ПК: WASD / стрелки и мышь · Телефон: экранные джойстики и кнопка перехвата.</div></section>
-  <section class="box"><h3>АРСЕНАЛ / УЛУЧШЕНИЯ</h3><div class="shopline"><span>Скорострельность</span><b id="rateLv">УР. 1</b></div><button class="wide" id="buyRate">УЛУЧШИТЬ · 1 500 ₽</button><div class="shopline"><span>Мощность</span><b id="powerLv">УР. 1</b></div><button class="wide" id="buyPower">УЛУЧШИТЬ · 2 000 ₽</button><div class="shopline"><span>Залп / уровень</span><b id="ammoLv">УР. 1</b></div><button class="wide" id="buyAmmo">УЛУЧШИТЬ · 2 500 ₽</button><div class="small" style="margin-top:9px">Награды: дрон — 500 ₽ · Shahed — 1 000 ₽ · ракета — 5 000 ₽ · босс — 50 000 ₽.</div></section>
-  <section class="box"><h3>СЕТЕВАЯ ИГРА · GLOBAL ID</h3><div class="small">Войдите в GloBIT Arcade в соседней вкладке, затем укажите Global ID друга.</div><input id="friendId" class="field" placeholder="Global ID друга (22 символа)" maxlength="22"><button id="findFriend" class="wide">НАЙТИ ДРУГА</button><div id="friendResult" class="small"></div><button id="inviteFriend" class="wide" disabled>ПРИГЛАСИТЬ В ГРУППУ</button><div id="inviteStatus" class="notice"></div><div class="small">Приглашение и совместные уровни 50–65 требуют разрешающих правил Firestore для коллекций групп. Если правила закрыты, одиночная игра всё равно работает.</div></section>
-  <section class="box"><h3>МИССИЯ</h3><label for="locationSelect" class="small">ВЫБЕРИ ЛОКАЦИЮ</label><select id="locationSelect" class="field"><option value="moscow">Москва · Кремль и центр</option><option value="village">Подмосковье · деревня и шоссе</option><option value="river">Москва-река · набережная</option><option value="industrial">Промзона · ночные заводы</option></select><div class="mission-card"><div class="mission-icon">◈</div><div><b id="missionTitle">Оборона Москвы</b><p id="objectiveText">Сбить: 5 дронов · 2 Shahed · 1 ракету</p></div></div><div class="shopline"><span>Босс</span><b>С 50 УРОВНЯ</b></div><button class="primary wide" id="startBtn">▶ НАЧАТЬ СМЕНУ</button><button class="wide" id="resumeBtn">ПРОДОЛЖИТЬ / ЗАКРЫТЬ МЕНЮ</button></section>
- </div><div class="notice" id="menuNotice"></div></div></div>
+<div id="menu" class="launch-dashboard">
+ <div class="dashboard-shell">
+  <section class="city-map-panel panel">
+   <div class="dash-panel-head"><div><span class="dash-kicker">TACTICAL DISPLAY / 03:00</span><h2>КАРТА ГОРОДА</h2></div><span class="live-pill"><i></i> LIVE</span></div>
+   <canvas id="launchMapPreview" width="720" height="720" aria-label="Тактическая карта города"></canvas>
+   <div class="map-legend"><span><i class="legend-player"></i> ИГРОК</span><span><i class="legend-enemy"></i> ВОЗДУШНЫЕ ЦЕЛИ</span><span><i class="legend-location"></i> ОБЪЕКТЫ</span></div>
+   <label class="location-label" for="locationSelect">РАЙОН ОПЕРАЦИИ</label>
+   <select id="locationSelect" class="field"><option value="moscow">Москва · Кремль и центр</option><option value="village">Подмосковье · деревня и шоссе</option><option value="river">Москва-река · набережная</option><option value="industrial">Промзона · ночные заводы</option></select>
+  </section>
+  <section class="mission-panel">
+   <header class="dashboard-top-actions"><button id="inviteOpen" class="dash-action"><span>♧</span><b>Друг</b></button><button id="ratingOpen" class="dash-action"><span>♜</span><b>Рейтинг</b></button><button id="settingsOpen" class="dash-action"><span>⚙</span><b>Настройки</b></button></header>
+   <div class="mission-brand"><span class="dash-kicker">GLOBIT ARCADE / NIGHT DEFENCE</span><div class="title">МОСКВА <em>В 3 ЧАСА</em> НОЧИ</div><p>Ночная смена ПВО. Найди цели на тактической карте и перехвати их вручную.</p></div>
+   <div class="mission-objective"><div class="objective-head"><span>ЗАДАЧА СМЕНЫ</span><span id="missionLevel">УРОВЕНЬ 1</span></div><h2 id="missionTitle">Оборона Москвы</h2><p id="objectiveText">Сбить 5 дронов, 2 Shahed и 1 ракету</p><div class="objective-tags"><span>✦ Ручной перехват</span><span>◉ Ночное видение</span><span>⌁ 3D-город</span></div></div>
+   <div class="dash-stats"><div><small>УРОВЕНЬ</small><b id="level">1</b></div><div><small>МОНЕТЫ</small><b><span id="coins">0</span> ₽</b></div><div><small>ЗДОРОВЬЕ</small><b id="hp">100%</b></div></div>
+   <button class="primary start-shift" id="startBtn">▶ НАЧАТЬ СМЕНУ <span>→</span></button>
+   <div class="dashboard-foot"><span>ПК: WASD / мышь</span><span>Телефон: экранные джойстики</span></div><div id="menuNotice" class="notice"></div>
+  </section>
+ </div><button id="resumeBtn" hidden aria-hidden="true" tabindex="-1"></button>
+</div>
+<div id="settingsModal" class="dash-modal hidden"><div class="dash-modal-card"><header><div><span class="dash-kicker">PERSONAL CONTROL</span><h2>Настройки управления</h2></div><button id="settingsClose" class="modal-close">✕</button></header>
+ <div class="setting-row"><div><b>Чувствительность</b><small>Скорость реакции ракеты на управление</small></div><strong id="sensitivityLabel">100%</strong></div><input id="settingSensitivity" type="range" min="40" max="180" value="100" class="setting-range">
+ <div class="setting-row"><div><b>Экранные джойстики</b><small>Два виртуальных стика во время полёта</small></div><input id="joystickToggle" type="checkbox" checked></div>
+ <div class="setting-row"><div><b>Гироскоп телефона</b><small>Наклоняй устройство, чтобы менять курс</small></div><input id="gyroToggle" type="checkbox"></div>
+ <div class="setting-row"><div><b>Отдача / вибрация</b><small>Короткая тактильная отдача во время полёта, если поддерживается устройством</small></div><input id="vibrationToggle" type="checkbox" checked></div>
+ <div class="setting-row"><div><b>Графика</b><small>Влияет на плавность на телефонах</small></div><select id="settingGraphics" class="field"><option value="high">Высокая</option><option value="medium">Средняя</option><option value="low">Производительная</option></select></div>
+ <p class="settings-note">Гироскоп включается после разрешения браузера, если устройство требует разрешение на motion sensors.</p><button id="settingsDone" class="primary wide">СОХРАНИТЬ НАСТРОЙКИ</button>
+</div></div>
+<div id="inviteModal" class="dash-modal hidden"><div class="dash-modal-card invite-card"><header><div><span class="dash-kicker">GLOBIT NETWORK</span><h2>Пригласить друга</h2></div><button id="inviteClose" class="modal-close">✕</button></header><p>Укажи Global ID друга, чтобы найти профиль и подготовить приглашение.</p><input id="friendId" class="field" placeholder="Global ID друга (22 символа)" maxlength="22"><button id="findFriend" class="primary wide">НАЙТИ ДРУГА</button><div id="friendResult" class="small"></div><button id="inviteFriend" class="wide" disabled>ПРИГЛАСИТЬ В ГРУППУ</button><div id="inviteStatus" class="notice"></div></div></div>
 <div class="toast" id="toast"></div>
 <div id="leaderboardModal" class="modal hidden"><div class="modal-card"><button id="closeLeaderboard" class="modal-close">✕</button><h2>🏆 ТАБЛИЦА ЛИДЕРОВ</h2><p class="small">Рейтинг по монетам, уровню и времени в игре</p><div id="leaderboardRows" class="leaderboard-rows">Загрузка рекордов…</div></div></div>
 <div id="orientWarning"><div class="warningBox"><span class="phoneIcon">📱</span><h2>Поверни устройство</h2><p>Симулятор рассчитан на горизонтальный экран. Поверни телефон боком для удобного управления и полного обзора.</p></div></div>
