@@ -202,6 +202,56 @@ const originalAnimate=animate;
 animate=function(){if(renderer&&flight.missile&&state.running&&!state.paused){const dt=Math.min(clock.getDelta(),.04);updateFlight(dt);originalAnimate();return;}originalAnimate();};
 window.addEventListener('deviceorientation',()=>{const portrait=innerHeight>innerWidth&&innerWidth<900;$('orientWarning').style.display=portrait?'grid':'none';});
 
+
+/* MANUAL MISSILE FLIGHT + CITY DETAILS + RANDOM AIR TRAFFIC */
+flight.mode='idle';flight.missileSpeed=0;
+$('flightFire').innerHTML='🚀 ЗАПУСТИТЬ<br>РАКЕТУ';
+$('flightStatus').innerHTML='<b>ГОТОВ К ПУСКУ</b><br>Нажми «ЗАПУСТИТЬ РАКЕТУ», затем управляй ракетой обоими джойстиками. Для перехвата нужно физически попасть в цель.';
+function decorateCityV3(){
+ const originals=city.slice();
+ for(const b of originals){
+  if(!b.geometry||b.geometry.type!=='BoxGeometry'||!b.geometry.parameters||b.position.y<2)continue;
+  const p=b.geometry.parameters,w=p.width||4,h=p.height||8,d=p.depth||4,g=new THREE.Group();g.position.set(b.position.x,0,b.position.z);
+  const frame=mat(0x303b32),glass=new THREE.MeshStandardMaterial({color:0x293c38,emissive:0x213b31,emissiveIntensity:.55,roughness:.25}),lit=new THREE.MeshStandardMaterial({color:0xffdca0,emissive:0x8a5a27,emissiveIntensity:.6});
+  const floors=Math.max(2,Math.floor(h/2.1)),cols=Math.max(2,Math.floor(w/1.25));
+  for(const side of [-1,1])for(let fl=0;fl<floors;fl++)for(let col=0;col<cols;col++){
+   const xx=-w/2+(col+.5)*w/cols,yy=1.1+fl*2.05;if(yy>h-.3)continue;
+   const pane=new THREE.Mesh(new THREE.PlaneGeometry(Math.min(.65,w/cols*.7),.72),Math.random()<.22?lit:glass);pane.position.set(xx,yy,side*(d/2+.035));if(side<0)pane.rotation.y=Math.PI;g.add(pane);
+   const sill=new THREE.Mesh(new THREE.BoxGeometry(Math.min(.8,w/cols*.8),.07,.13),frame);sill.position.set(xx,yy-.4,side*(d/2+.06));g.add(sill);
+  }
+  const door=new THREE.Mesh(new THREE.BoxGeometry(.9,1.6,.08),mat(0x45372a));door.position.set(0,.8,d/2+.06);g.add(door);
+  const canopy=new THREE.Mesh(new THREE.BoxGeometry(1.35,.1,.32),frame);canopy.position.set(0,1.65,d/2+.12);g.add(canopy);
+  const roof=new THREE.Mesh(new THREE.BoxGeometry(w+.2,.18,d+.2),mat(0x51584b));roof.position.y=h+.05;g.add(roof);
+  g.userData={building:true,hp:100,base:b,destroyed:false};scene.add(g);city.push(g);b.userData.detail=g;
+ }
+}
+const setup3DBaseV3=setup3D;setup3D=function(){setup3DBaseV3();decorateCityV3()};
+function airTrafficV3(){for(const t of state.targets){if(t.dead)continue;if(!t.flightPath)t.flightPath={phase:Math.random()*6.28,amp:1+Math.random()*3,turn:Math.random()};const f=t.flightPath,s=performance.now()*.001;t.group.position.x+=Math.sin(s*.75+f.phase)*f.amp*.035;t.group.position.y+=Math.cos(s*.9+f.phase)*.018;t.group.rotation.y=Math.sin(s*.65+f.phase)*.3;if(t.group.userData.prop)t.group.userData.prop.rotation.z+=.55;t.group.traverse(o=>{if(o.userData.rotor)o.rotation.y+=.8})}}
+function explodeV3(pos,big=false){const g=new THREE.Group(),cols=[0xffe7a1,0xff8b32,0xd94b20,0x62665f];for(let i=0;i<(big?32:16);i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.12+Math.random()*.35,7,6),new THREE.MeshBasicMaterial({color:cols[i%4],transparent:true}));m.userData.v=new THREE.Vector3((Math.random()-.5)*8,Math.random()*6,(Math.random()-.5)*8);g.add(m)}g.position.copy(pos);scene.add(g);state.effects.push({mesh:g,life:big?2.6:1.5,explosion:true})}
+function damageBuildingV3(b,pos){if(!b||b.userData.destroyed)return;b.userData.hp-=55;explodeV3(pos,b.userData.hp<=0);if(b.userData.hp<=0){b.userData.destroyed=true;b.scale.y=.6;b.position.y=-.2;b.children.forEach(o=>{if(o.material&&o.material.color){o.material=o.material.clone();o.material.color.multiplyScalar(.25)}});toast('ЗДАНИЕ ПОВРЕЖДЕНО');}}
+function launchIntercept(){
+ if(!state.running||state.paused)return;
+ if(flight.mode!=='manual'){
+  if(!flight.missile)buildPlayerMissile();
+  const m=flight.missile;m.position.copy(camera.position).add(new THREE.Vector3(0,-.4,-2).applyQuaternion(camera.quaternion));m.quaternion.copy(camera.quaternion);
+  flight.mode='manual';flight.heading=0;flight.pitch=0;flight.fuel=100;flight.lock=0;
+  $('flightFire').innerHTML='↩ ВЕРНУТЬСЯ';$('flightTitle').textContent='КАМЕРА РАКЕТЫ · РУЧНОЙ ПОЛЁТ';sound('shot');
+  $('flightStatus').innerHTML='<b>РАКЕТА ЗАПУЩЕНА</b><br>ЛЕВЫЙ ДЖОЙСТИК — КУРС / ТАНГАЖ<br>ПРАВЫЙ — КРЕН / ТЯГА<br>ПОПАДИ В ЦЕЛЬ САМОСТОЯТЕЛЬНО';return;
+ }
+ flight.mode='idle';$('flightFire').innerHTML='🚀 ЗАПУСТИТЬ<br>РАКЕТУ';$('flightTitle').textContent='ПЕРЕХВАТЧИК · NIGHTHAWK-03';camera.position.set(0,6,17);camera.lookAt(0,3,-35);toast('ВОЗВРАТ К ПУСКОВОЙ ПОЗИЦИИ');
+}
+function updateFlight(dt){
+ if(!flight.missile||!state.running||state.paused||flight.mode!=='manual')return;
+ const m=flight.missile;flight.heading-=flight.steerX*dt*1.5;flight.pitch=Math.max(-1,Math.min(1,flight.pitch-flight.steerY*dt*1.2));flight.speed=18+flight.throttle*42;flight.fuel-=dt*(.6+flight.throttle*.8);
+ m.rotation.order='YXZ';m.rotation.y=flight.heading;m.rotation.x=flight.pitch;m.rotation.z=-flight.roll*.5;m.translateZ(-flight.speed*dt);
+ const fwd=new THREE.Vector3(0,0,-1).applyQuaternion(m.quaternion),cam=m.position.clone().addScaledVector(fwd,-5.5);cam.y+=1.1;camera.position.lerp(cam,Math.min(1,dt*8));camera.quaternion.slerp(m.quaternion,Math.min(1,dt*7));
+ for(const t of state.targets){if(t.dead)continue;const r=t.boss?2.1:1.15;if(m.position.distanceTo(t.group.position)<r+.5){const p=t.group.position.clone();kill(t);explodeV3(p,t.boss);flight.mode='idle';$('flightFire').innerHTML='🚀 ЗАПУСТИТЬ<br>РАКЕТУ';camera.position.set(0,6,17);camera.lookAt(0,3,-35);toast('ПРЯМОЕ ПОПАДАНИЕ · +'+t.value+' ₽');return}}
+ for(const b of city){if(!b.userData||!b.userData.building||b.userData.destroyed)continue;const base=b.userData.base,par=base.geometry.parameters;if(Math.abs(m.position.x-b.position.x)<(par.width||4)*.55&&Math.abs(m.position.z-b.position.z)<(par.depth||4)*.55&&m.position.y<(par.height||8)+1){damageBuildingV3(b,m.position.clone());flight.mode='idle';$('flightFire').innerHTML='🚀 ЗАПУСТИТЬ<br>РАКЕТУ';camera.position.set(0,6,17);camera.lookAt(0,3,-35);return}}
+ if(flight.fuel<=0||m.position.length()>220){flight.mode='idle';$('flightFire').innerHTML='🚀 ЗАПУСТИТЬ<br>РАКЕТУ';camera.position.set(0,6,17);camera.lookAt(0,3,-35);toast('РАКЕТА ПОТЕРЯНА');return}
+ $('speedRead').textContent=Math.round(flight.speed*12)+' км/ч';$('altitudeRead').textContent=Math.round(m.position.y*90)+' м';$('fuelRead').textContent=Math.max(0,Math.round(flight.fuel))+'%';
+}
+const animateBaseV3=animate;animate=function(){if(state.running&&!state.paused){airTrafficV3();for(const t of state.targets){if(!t.dead&&t.group.position.z>8){const pos=t.group.position.clone();t.dead=true;scene.remove(t.group);const buildings=city.filter(b=>b.userData&&b.userData.building&&!b.userData.destroyed).sort((a,b)=>a.position.distanceTo(pos)-b.position.distanceTo(pos));if(buildings.length&&buildings[0].position.distanceTo(pos)<34){damageBuildingV3(buildings[0],buildings[0].position.clone());state.hp=Math.max(0,state.hp-3)}else state.hp=Math.max(0,state.hp-5)}}}animateBaseV3();for(const e of state.effects){if(e.explosion&&e.mesh.isGroup){e.life-=.016;e.mesh.scale.multiplyScalar(1.012);e.mesh.children.forEach(p=>{p.position.addScaledVector(p.userData.v||new THREE.Vector3(),.012);p.material.opacity=Math.max(0,e.life/2.6)});if(e.life<=0)scene.remove(e.mesh)}}state.effects=state.effects.filter(e=>!e.explosion||e.life>0)};
+
 loadSave();ui();
 })();
 </script>
