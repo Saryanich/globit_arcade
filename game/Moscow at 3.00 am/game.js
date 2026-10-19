@@ -1864,6 +1864,7 @@ animate = function animateOverhaul() {
   if (!renderer || !scene || !camera) return;
   const dt = Math.min(clock ? clock.getDelta() : .016,.035);
   const now = performance.now();
+  if (window.GloBitBossAudio && flight) window.GloBitBossAudio.setFlightSpeed(state.running && !state.paused && flight.missile ? Math.min(1,(flight.speed||24)/120) : 0);
 
   if (state.running && !state.paused) {
     if (flight.mode === 'manual') updateFlight(dt);
