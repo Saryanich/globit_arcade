@@ -449,6 +449,7 @@ function mountFlightUI() {
         '<div class="sim-card sim-stat"><div class="sim-label">СКОРОСТЬ</div><div class="sim-value" id="speedRead">0 км/ч</div></div>',
         '<div class="sim-card sim-stat"><div class="sim-label">ВЫСОТА</div><div class="sim-value" id="altitudeRead">0 м</div></div>',
         '<div class="sim-card sim-stat"><div class="sim-label">ТОПЛИВО</div><div class="sim-value" id="fuelRead">100%</div></div>',
+        '<div class="sim-card sim-stat"><div class="sim-label">ЗАЩИТА ГОРОДА</div><div class="sim-value" id="flightCityHp">100%</div></div>',
         '<div class="sim-card sim-stat"><div class="sim-label">БАЛАНС</div><div class="sim-value" id="flightCoins">0 ₽</div></div>',
       '</div>',
     '</div>',
@@ -464,7 +465,8 @@ function mountFlightUI() {
       '<b>УПРАВЛЕНИЕ И ГРАФИКА</b>',
       '<label for="sensitivityRange">Чувствительность: <span id="sensitivityValue">100%</span></label><input class="sim-range" id="sensitivityRange" type="range" min="40" max="180" value="100">',
       '<label for="graphicsSelect">Качество графики</label><select class="sim-select" id="graphicsSelect"><option value="high">Высокое</option><option value="medium">Среднее</option><option value="low">Производительное</option></select>',
-      '<button class="sim-btn" id="rebindKey">⌨ ПЕРЕНАЗНАЧИТЬ ПОВОРОТ ВЛЕВО</button>',
+      '<label for="rebindActionSelect">Действие для переназначения</label><select class="sim-select" id="rebindActionSelect"><option value="left">Поворот влево</option><option value="right">Поворот вправо</option><option value="forward">Увеличить тягу</option><option value="back">Снизить тягу</option><option value="pitchUp">Набор высоты</option><option value="pitchDown">Снижение</option><option value="rollLeft">Крен влево</option><option value="rollRight">Крен вправо</option><option value="camera">Смена камеры</option></select>',
+      '<button class="sim-btn" id="rebindKey">⌨ НАЗНАЧИТЬ КЛАВИШУ</button>',
       '<div id="keyHelp">W/S — тяга · A/D — курс · ↑/↓ — тангаж · Q/E — крен · C — камера</div>',
     '</div>',
     '<div class="sim-card sim-status" id="flightStatus"><b>ГОТОВ К ПУСКУ</b><br>Управление полностью ручное.</div>',
@@ -539,9 +541,9 @@ function mountFlightUI() {
   };
   $('graphicsSelect').onchange = e => applyGraphicsQuality(e.target.value);
   $('rebindKey').onclick = () => {
-    rebindAction = 'left';
-    $('rebindKey').textContent = 'НАЖМИ КЛАВИШУ ДЛЯ ПОВОРОТА ВЛЕВО…';
-    $('keyHelp').textContent = 'Нажми клавишу. Esc отменяет переназначение.';
+    rebindAction = $('rebindActionSelect').value;
+    $('rebindKey').textContent = 'НАЖМИ НОВУЮ КЛАВИШУ…';
+    $('keyHelp').textContent = 'Нажми клавишу для выбранного действия. Esc отменяет.';
   };
   launchMapCanvas.addEventListener('click', e => {
     const rect = launchMapCanvas.getBoundingClientRect();
@@ -1836,6 +1838,7 @@ function updateFlight(dt) {
   camera.updateProjectionMatrix();
 
   $('speedRead').textContent = Math.round(speed * WORLD.metresPerUnit * 3.6) + ' км/ч';
+  $('flightCityHp').textContent = Math.round(state.hp) + '%';
   $('altitudeRead').textContent = Math.round(missile.position.y * WORLD.metresPerUnit) + ' м';
   $('fuelRead').textContent = Math.round(flight.fuel / spec.fuel * 100) + '%';
   $('flightCoins').textContent = state.coins.toLocaleString('ru-RU') + ' ₽';
@@ -1929,7 +1932,12 @@ animate = function animateOverhaul() {
       WORLD.nextSpawnAt = now + WORLD.spawnInterval;
       ui();
     }
-    if (state.running) for (const target of state.targets) updateTargetAI(target,dt,now);
+    if (state.running) {
+      for (const target of state.targets) {
+        if (!state.running) break;
+        updateTargetAI(target,dt,now);
+      }
+    }
     updateDecorativeTraffic(dt);
     updateEffects(dt);
     if (WORLD.wavePending && now >= WORLD.waveAt && state.running) {
@@ -1965,10 +1973,11 @@ function installKeyboardControls() {
         event.preventDefault();
         return;
       }
-      keyBindings.left = key;
+      const actionName = rebindAction;
+      keyBindings[actionName] = key;
       rebindAction = null;
-      $('rebindKey').textContent = '⌨ ПОВОРОТ ВЛЕВО: ' + event.key.toUpperCase();
-      $('keyHelp').textContent = 'W/S — тяга · ' + keyBindings.left.toUpperCase() + '/' + keyBindings.right.toUpperCase() + ' — курс · ↑/↓ — тангаж · Q/E — крен · C — камера';
+      $('rebindKey').textContent = '⌨ НАЗНАЧЕНО: ' + event.key.toUpperCase();
+      $('keyHelp').textContent = 'A/D — курс · W/S — тяга · ↑/↓ — тангаж · Q/E — крен · C — камера. Используй список выше для переназначения.';
       event.preventDefault();
       event.stopImmediatePropagation();
       return;
