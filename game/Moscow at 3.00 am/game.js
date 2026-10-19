@@ -21,7 +21,7 @@ function ui(){$('level').textContent=state.level;$('coins').textContent=state.co
 function setup3D(){scene=new THREE.Scene();scene.background=new THREE.Color(0x020a07);scene.fog=new THREE.FogExp2(0x06130c,.012);camera=new THREE.PerspectiveCamera(66,innerWidth/innerHeight,.1,1000);camera.position.set(0,5.2,12);camera.lookAt(0,3,-35);renderer=new THREE.WebGLRenderer({canvas:$('scene'),antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputEncoding=THREE.sRGBEncoding;scene.add(new THREE.HemisphereLight(0x8aff9a,0x071008,1.25));const moon=new THREE.DirectionalLight(0xb7ffc0,1.5);moon.position.set(-25,50,20);moon.castShadow=true;scene.add(moon);const glow=new THREE.PointLight(0x3aff77,4,100);glow.position.set(0,8,8);scene.add(glow);
 const floor=new THREE.Mesh(new THREE.PlaneGeometry(400,400),mat(0x101a13));floor.rotation.x=-Math.PI/2;floor.position.y=-.1;floor.receiveShadow=true;scene.add(floor);const road=new THREE.Mesh(new THREE.PlaneGeometry(15,180),mat(0x101713));road.rotation.x=-Math.PI/2;road.position.set(0,.015,-50);scene.add(road);
 for(let z=5;z>-150;z-=7){for(let side of [-1,1]){let h=4+Math.random()*20,w=3+Math.random()*5,d=4+Math.random()*5;let b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat([0x17241a,0x1b2820,0x101a15][Math.floor(Math.random()*3)]));b.position.set(side*(12+Math.random()*22),h/2-0.05,z-Math.random()*4);b.castShadow=true;b.receiveShadow=true;scene.add(b);city.push(b);for(let y=1;y<h-1;y+=2.4)for(let x=-w/2+.7;x<w/2-.3;x+=1.2){if(Math.random()>.42){let win=new THREE.Mesh(new THREE.PlaneGeometry(.28,.45),new THREE.MeshBasicMaterial({color:Math.random()>.6?0x79ff86:0x253b2a}));win.position.set(b.position.x+x,y,b.position.z+d/2+.015);scene.add(win);}}}}
-buildKremlin();buildSearchlights();createReticle();clock=new THREE.Clock();window.addEventListener('resize',resize);renderer.setAnimationLoop(animate);}
+buildKremlin();if(window.GloBitCity)window.GloBitCity.build(scene,THREE,mat,localStorage.getItem('moscow3_location')||'moscow');buildSearchlights();createReticle();clock=new THREE.Clock();window.addEventListener('resize',resize);renderer.setAnimationLoop(animate);}
 function buildKremlin(){const wallMat=mat(0x4a5b3b),roofMat=mat(0x9a3023),stone=mat(0x6b765b);const wall=new THREE.Mesh(new THREE.BoxGeometry(44,5,2),wallMat);wall.position.set(0,2.5,-70);scene.add(wall);for(let x=-21;x<=21;x+=2){let cren=new THREE.Mesh(new THREE.BoxGeometry(1,1,2.2),stone);cren.position.set(x,5.4,-70);scene.add(cren)}for(const x of [-20,-10,0,10,20]){const tower=new THREE.Group();const base=new THREE.Mesh(new THREE.CylinderGeometry(2,2.5,9,8),stone);base.position.y=4.5;tower.add(base);const roof=new THREE.Mesh(new THREE.ConeGeometry(2.7,5,8),roofMat);roof.position.y=11.5;tower.add(roof);tower.position.set(x,0,-70);scene.add(tower);if(x===0){const star=new THREE.Mesh(new THREE.OctahedronGeometry(.9),mat(0xff392e,0.3,1.3));star.position.set(0,14,-70);scene.add(star)}}const hall=new THREE.Mesh(new THREE.BoxGeometry(18,11,10),mat(0x3c4c35));hall.position.set(0,5.5,-80);scene.add(hall);for(let i=-2;i<=2;i++){const col=new THREE.Mesh(new THREE.CylinderGeometry(.5,.6,7,10),mat(0x7a866b));col.position.set(i*2.8,3.5,-74.7);scene.add(col)}}
 function buildSearchlights(){for(let x of [-14,14]){const light=new THREE.SpotLight(0x8aff8e,3,100,.32,.5,1.2);light.position.set(x,10,4);light.target.position.set(x*-.6,3,-55);scene.add(light,light.target);const cone=new THREE.Mesh(new THREE.ConeGeometry(9,55,24,1,true),new THREE.MeshBasicMaterial({color:0x6bff7b,transparent:true,opacity:.035,side:THREE.DoubleSide,depthWrite:false}));cone.position.set(x*.3,6,-23);cone.rotation.x=Math.PI/2.4;scene.add(cone)}}
 function createReticle(){for(let i=0;i<4;i++){const m=new THREE.Mesh(new THREE.BoxGeometry(.025,.35,.025),mat(0x9dff85,0,1));m.position.set((i%2?1:-1)*.3,3,(i<2?-.3:.3));scene.add(m);}}
@@ -36,7 +36,7 @@ function spawnWave(){
  const rockets=level>=50?5:Math.min(1+Math.floor((level-1)*0.1),4);
  const manifest=[...Array(drones).fill('drone'),...Array(shaheds).fill('shahed'),...Array(rockets).fill('rocket')];
  for(let i=manifest.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[manifest[i],manifest[j]]=[manifest[j],manifest[i]];}
- state.total=manifest.length;state.waveManifest={drones,shaheds,rockets,boss:level>=50?'Потужнолит':null};
+ if(level>=50)manifest.push('boss');state.total=manifest.length;state.waveManifest={drones,shaheds,rockets,boss:level>=50?'Потужнолит':null,types:manifest.slice()};
  if(state.multiplayer){state.level=Math.min(65,Math.max(50,state.level));state.total=manifest.length;}
  const objective=$('objectiveText');if(objective)objective.textContent='Сбить: '+drones+' дронов · '+shaheds+' Shahed · '+rockets+' ракет'+((level>=50?' · БОСС: ПОТУЖНОЛИТ':'');
  manifest.forEach((type,i)=>setTimeout(()=>{if(!state.running)return;createTarget(type);state.spawned++;ui();},i*Math.max(150,600-state.level*7)));
@@ -1861,12 +1861,10 @@ animate = function animateOverhaul() {
     if (state.running && state.spawned < state.total && now >= WORLD.nextSpawnAt) {
       const index = state.spawned;
       let type;
-      if (state.level >= 50 && index === state.total - 1) type = 'boss';
-      else {
-        const roll = Math.random();
-        type = roll < .48 ? 'drone' : roll < .82 ? 'shahed' : 'rocket';
-      }
-      createTarget(type,type === 'boss' ? (Math.random() > .5 ? 'Движухалит' : 'Потужнолит') : undefined);
+      if (state.waveManifest && state.waveManifest.types && state.waveManifest.types[index]) type = state.waveManifest.types[index];
+      else { const roll=Math.random(); type=roll<.48?'drone':roll<.82?'shahed':'rocket'; }
+      const bossName = type==='boss' ? (state.level===50?'Потужнолит':(Math.random()>.5?'Движухалит':'Потужнолит')) : undefined;
+      createTarget(type,bossName);
       state.spawned++;
       WORLD.nextSpawnAt = now + WORLD.spawnInterval;
       ui();
@@ -1900,6 +1898,11 @@ animate = function animateOverhaul() {
   }
   renderer.render(scene,camera);
 };
+
+
+function openLeaderboard(){const modal=$('leaderboardModal');if(!modal)return;modal.classList.remove('hidden');const rows=$('leaderboardRows');rows.textContent='Загружаю таблицу…';if(!db){rows.textContent='Firebase недоступен. Локально: '+state.coins.toLocaleString('ru-RU')+' ₽ · уровень '+state.level;return;}db.collection('moscow_arcade_leaderboard').orderBy('coins','desc').limit(50).get().then(snapshot=>{if(snapshot.empty){rows.textContent='Пока нет рекордов. Сыграй первую смену!';return;}rows.innerHTML='';let rank=0;snapshot.forEach(doc=>{const d=doc.data()||{};rank++;const row=document.createElement('div');row.className='leaderboard-row';const name=document.createElement('div');name.innerHTML='<span class="rank">#'+rank+'</span>';const detail=document.createElement('div');const title=document.createElement('b');title.textContent=d.displayName||'Защитник';const sub=document.createElement('small');sub.textContent='Уровень '+(d.level||1)+' · В игре '+Math.floor((d.playSeconds||0)/60)+' мин';detail.append(title,sub);const score=document.createElement('div');score.className='score';score.textContent=Number(d.coins||0).toLocaleString('ru-RU')+' ₽';row.append(name,detail,score);rows.append(row);});}).catch(e=>{rows.textContent='Таблица недоступна: '+(e.code||'нет доступа к Firestore')+'. Проверь правила коллекции moscow_arcade_leaderboard.';});}
+function installMissionUI(){const select=$('locationSelect');if(select){select.value=localStorage.getItem('moscow3_location')||'moscow';const names={moscow:'Оборона Москвы',village:'Оборона Подмосковья',river:'Оборона набережной',industrial:'Оборона промзоны'};select.addEventListener('change',()=>{localStorage.setItem('moscow3_location',select.value);const title=$('missionTitle');if(title)title.textContent=names[select.value]||names.moscow;toast('Локация выбрана: '+(names[select.value]||names.moscow));});const title=$('missionTitle');if(title)title.textContent=names[select.value]||names.moscow;}
+const leader=$('leaderBtn');if(leader)leader.addEventListener('click',openLeaderboard);const close=$('closeLeaderboard');if(close)close.addEventListener('click',()=> $('leaderboardModal').classList.add('hidden'));const modal=$('leaderboardModal');if(modal)modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.add('hidden');});}
 
 function installKeyboardControls() {
   window.addEventListener('keydown', event => {
@@ -1960,6 +1963,7 @@ try {
 }
 
 mountFlightUI();
+installMissionUI();
 shoot = function noAutoAimDuringFlight() {
   if (flight.mode === 'manual') return;
   return undefined;
