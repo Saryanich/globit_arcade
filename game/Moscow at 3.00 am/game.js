@@ -1570,13 +1570,22 @@ spawnWave = function spawnWaveOverhaul() {
   state.targets = [];
   state.bosses = [];
   state.spawned = 0;
-  state.total = state.multiplayer
-    ? clampValue(10 + (state.level - 50) * 1.1,10,24)
-    : clampValue(Math.round(8 + state.level * 1.15),8,24);
-  state.total = Math.round(state.total);
-  WORLD.spawnInterval = Math.max(520,1180 - state.level * 8);
+  state.bossSpawned = false;
+  const level = state.level;
+  const drones = level >= 50 ? 15 : Math.min(5 + Math.floor((level - 1) * .22),14);
+  const shaheds = level >= 50 ? 10 : Math.min(2 + Math.floor((level - 1) * .16),9);
+  const rockets = level >= 50 ? 5 : Math.min(1 + Math.floor((level - 1) * .1),4);
+  const types = [...Array(drones).fill('drone'), ...Array(shaheds).fill('shahed'), ...Array(rockets).fill('rocket')];
+  for (let i=types.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [types[i],types[j]]=[types[j],types[i]]; }
+  if(level>=50) types.push('boss');
+  state.waveManifest={drones,shaheds,rockets,types,boss:level>=50?'Потужнолит':null};
+  state.total = types.length;
+  if(state.multiplayer) state.level=Math.min(65,Math.max(50,state.level));
+  WORLD.spawnInterval = Math.max(220,780 - state.level * 8);
   WORLD.nextSpawnAt = performance.now() + 300;
   lastSpawn = performance.now();
+  const objective=$('objectiveText');
+  if(objective) objective.textContent='Сбить: '+drones+' дронов · '+shaheds+' Shahed · '+rockets+' ракет'+(level>=50?' · БОСС: ПОТУЖНОЛИТ':'');
   toast('ВОЛНА ' + state.level + ' · ЦЕЛЕЙ: ' + state.total);
   ui();
 };
