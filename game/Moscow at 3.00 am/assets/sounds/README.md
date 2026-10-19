@@ -1,10 +1,11 @@
-# Audio assets / attribution
+# Audio assets
 
-The game currently has a Web Audio procedural engine loop and synthesized UI / impact cues in `audio.js`, so it works without third-party hosts and without an API key.
+Connected in `../audio.js`:
+- **Propeller Plane 01** — direct MP3 stream: https://sfxmint.com/dl/propeller-plane-01.mp3
+- Source page: https://sfxmint.com/sounds/propeller-plane-01
+- License: CC0 1.0 / public domain; SFXMint says direct hotlinking is allowed and no attribution is required.
+- The game also keeps a Web Audio synthesized engine fallback and procedural UI / impact cues.
 
-Optional realistic CC0 source candidates (downloaded assets are not bundled yet; the sites require direct download or provide external file URLs):
-- Breviceps, “Propeller plane” (CC0, WAV, 29.656 s): https://freesound.org/people/Breviceps/sounds/515293/
-- DylanTheFish, “Propeller.wav” (CC0, WAV, 22.732 s): https://freesound.org/people/DylanTheFish/sounds/457013/
-- Dj Lio, “Airplane, pass #4” (CC0, 11 s): https://bigsoundbank.com/airplane-pass-4-s3007.html
-
-Before bundling, verify the download endpoint and keep a copy of each source's license/attribution information. Freesound page links are not direct audio file URLs, and should not be used as `<audio src>`.
+Optional additional CC0 candidates:
+- Breviceps, “Propeller plane” (Freesound; download may require account): https://freesound.org/people/Breviceps/sounds/515293/
+- DylanTheFish, “Propeller.wav” (Freesound; download may require account): https://freesound.org/people/DylanTheFish/sounds/457013/
