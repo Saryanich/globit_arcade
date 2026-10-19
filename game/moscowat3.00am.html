@@ -325,6 +325,7 @@ const WORLD = {
   collisionClock: 0,
   trailClock: 0,
   traffic: [],
+  launchPad: null,
   buildingMeshes: [],
   roofMesh: null,
   windowMeshes: [],
@@ -499,9 +500,11 @@ function mountFlightUI() {
     selectedRocket = rocketSelect.value;
     if ($('rocketInfo')) $('rocketInfo').textContent = ROCKETS[selectedRocket].note;
     if (flight.missile && flight.mode === 'manual') toast('Новая модель будет выбрана при следующем запуске.');
+    else if (flight.missile && scene) { buildPlayerMissile(); updateLaunchPreview(); }
   });
   if (locationSelect) locationSelect.addEventListener('change', () => {
     selectedLocation = locationSelect.value;
+    updateLaunchPreview();
     drawLaunchMap();
   });
 
@@ -1272,13 +1275,22 @@ setup3D = function setup3DOverhaul() {
   makeCityDistrict();
   addMoscowLandmarks3D();
   addStreetLightsAndTraffic();
+  WORLD.launchPad = new THREE.Group();
+  scene.add(WORLD.launchPad);
+  makeFlatBox(22,.32,28,0x26382c,0,.14,0,WORLD.launchPad);
+  makeFlatBox(1.1,.08,18,0xc5d8b7,-8,.35,0,WORLD.launchPad);
+  makeFlatBox(1.1,.08,18,0xc5d8b7,8,.35,0,WORLD.launchPad);
+  for (const side of [-1,1]) {
+    const lamp = new THREE.Mesh(new THREE.SphereGeometry(.45,8,6),new THREE.MeshBasicMaterial({color:side < 0 ? 0x7aff9f : 0xffa36f}));
+    lamp.position.set(side * 10,.7,-11);
+    WORLD.launchPad.add(lamp);
+  }
+  buildPlayerMissile();
+  updateLaunchPreview();
 
   if (clock) clock.stop();
   clock = new THREE.Clock();
   resize();
-  const initial = MOSCOW_LOCATIONS[selectedLocation] || MOSCOW_LOCATIONS.tverskaya;
-  camera.position.set(initial.x,42,initial.z + 35);
-  camera.lookAt(initial.x,18,initial.z - 55);
   window.addEventListener('resize',resize,{passive:true});
   toast('ГОРОД ГОТОВ · РАЙОНЫ МОСКВЫ ЗАГРУЖЕНЫ');
 };
@@ -1321,6 +1333,22 @@ function buildPlayerMissile() {
   flight.missile = group;
   flight.velocity = new THREE.Vector3();
   return group;
+}
+
+function updateLaunchPreview() {
+  const loc = MOSCOW_LOCATIONS[selectedLocation] || MOSCOW_LOCATIONS.tverskaya;
+  if (WORLD.launchPad) WORLD.launchPad.position.set(loc.x,0,loc.z);
+  if (flight.missile && flight.mode !== 'manual') {
+    flight.missile.visible = true;
+    flight.missile.position.set(loc.x,6,loc.z + 3);
+    flight.missile.rotation.set(0,0,0);
+  }
+  if (camera) {
+    camera.position.set(loc.x + 19,31,loc.z + 66);
+    camera.lookAt(loc.x,7,loc.z);
+    camera.fov = 64;
+    camera.updateProjectionMatrix();
+  }
 }
 
 function resetPlayerAtLaunch() {
@@ -1450,8 +1478,9 @@ function returnToHangar() {
   state.paused = false;
   flight.mode = 'idle';
   heldKeys.clear();
-  if (flight.missile) flight.missile.visible = false;
+  if (flight.missile) flight.missile.visible = true;
   if (playerTrail) { scene.remove(playerTrail); playerTrail = null; }
+  updateLaunchPreview();
   $('flightUI').style.display = 'none';
   $('resultOverlay').style.display = 'none';
   $('pauseOverlay').style.display = 'none';
@@ -1908,11 +1937,6 @@ animate = function animateOverhaul() {
       checkWave();
     }
   } else {
-    if (flight.missile && flight.mode !== 'manual') {
-      const loc = MOSCOW_LOCATIONS[selectedLocation] || MOSCOW_LOCATIONS.tverskaya;
-      camera.position.lerp(new THREE.Vector3(loc.x,loc.z + 28,loc.z + 46),Math.min(1,dt * 1.2));
-      camera.lookAt(loc.x,16,loc.z - 55);
-    }
     updateEffects(dt);
   }
 
@@ -1992,6 +2016,13 @@ shoot = function noAutoAimDuringFlight() {
 
 loadSave();
 ui();
+try {
+  setup3D();
+  updateLaunchPreview();
+} catch (error) {
+  console.error('3D preview unavailable:',error);
+  $('menuNotice').textContent = '3D-графика недоступна: ' + (error && error.message ? error.message : error);
+}
 drawLaunchMap();
 
 })();
