@@ -377,7 +377,7 @@ function mountFlightUI() {
   if (grid) grid.appendChild(launchSection);
 
   const oldStart = $('startBtn');
-  if (oldStart) oldStart.textContent = '🚀 ЗАПУСТИТЬ РАКЕТУ';
+  if (oldStart) oldStart.innerHTML = '▶ НАЧАТЬ СМЕНУ <span>→</span>';
 
   const uiRoot = document.createElement('div');
   uiRoot.id = 'flightUI';
@@ -1637,7 +1637,7 @@ function updateTargetAI(target, dt, now) {
 
   if (direction.lengthSq() < .0001) return;
   direction.normalize();
-  const speed = ai.baseSpeed * (ai.state === 'evasive' ? 1.8 : 1.55) * (target.type === 'rocket' ? 1.35 : 1);
+  const speed = ai.baseSpeed * (ai.state === 'evasive' ? 2.35 : 2.0) * (target.type === 'rocket' ? 1.45 : 1);
   const desiredVelocity = direction.multiplyScalar(speed);
   if (!target.ai.velocity) target.ai.velocity = desiredVelocity.clone();
   target.ai.velocity.lerp(desiredVelocity,clampValue(dt * .75,.01,.2));
