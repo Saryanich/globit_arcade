@@ -1,5 +1,4 @@
-/* Procedural boss models for Moscow at 3:00 AM.
-   Built from Three.js geometry so no external 3D asset download is required. */
+
 (function(){
 'use strict';
 window.createBossModel = function(THREE, mat, bossName) {
