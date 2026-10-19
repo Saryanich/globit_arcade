@@ -38,7 +38,7 @@ function spawnWave(){
  for(let i=manifest.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[manifest[i],manifest[j]]=[manifest[j],manifest[i]];}
  if(level>=50)manifest.push('boss');state.total=manifest.length;state.waveManifest={drones,shaheds,rockets,boss:level>=50?'Потужнолит':null,types:manifest.slice()};
  if(state.multiplayer){state.level=Math.min(65,Math.max(50,state.level));state.total=manifest.length;}
- const objective=$('objectiveText');if(objective)objective.textContent='Сбить: '+drones+' дронов · '+shaheds+' Shahed · '+rockets+' ракет'+((level>=50?' · БОСС: ПОТУЖНОЛИТ':'');
+ const objective=$('objectiveText');if(objective)objective.textContent='Сбить: '+drones+' дронов · '+shaheds+' Shahed · '+rockets+' ракет'+(level>=50?' · БОСС: ПОТУЖНОЛИТ':'');
  manifest.forEach((type,i)=>setTimeout(()=>{if(!state.running)return;createTarget(type);state.spawned++;ui();},i*Math.max(150,600-state.level*7)));
  lastSpawn=performance.now();toast('ВОЛНА '+state.level+' · ЦЕЛЕЙ: '+state.total+(level>=50?' · ПОТУЖНОЛИТ':' '));ui();
 }
