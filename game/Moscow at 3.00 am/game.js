@@ -22,7 +22,7 @@ const mat=(c,rough=.9,em=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r
  byId('settingBrightness')?.addEventListener('input',e=>{brightness=Number(e.target.value)/100;byId('brightnessLabel').textContent=e.target.value+'%';const cv=byId('scene');if(cv)cv.style.filter='brightness('+brightness+') contrast('+(1+(brightness-1)*.18)+') saturate(1.1)';});
  try{const saved=JSON.parse(localStorage.getItem('moscow3_settings')||'{}');if(saved.brightness){brightness=saved.brightness;byId('settingBrightness').value=Math.round(brightness*100);byId('brightnessLabel').textContent=Math.round(brightness*100)+'%';const cv=byId('scene');if(cv)cv.style.filter='brightness('+brightness+') contrast('+(1+(brightness-1)*.18)+') saturate(1.1)';}}catch(e){}
  byId('settingsDone')?.addEventListener('click',()=>{try{const saved=JSON.parse(localStorage.getItem('moscow3_settings')||'{}');saved.brightness=brightness;localStorage.setItem('moscow3_settings',JSON.stringify(saved));}catch(e){}});
- function radar(){const cv=byId('radarCanvas');if(!cv||!cv.getContext)return;const c=cv.getContext('2d'),w=cv.width,h=cv.height,cx=w/2,cy=h/2,r=w*.43;c.clearRect(0,0,w,h);c.fillStyle='#04160c';c.fillRect(0,0,w,h);c.strokeStyle='#24683c';c.lineWidth=1;for(let k=1;k<=4;k++){c.beginPath();c.arc(cx,cy,r*k/4,0,Math.PI*2);c.stroke();}c.beginPath();c.moveTo(cx-r,cy);c.lineTo(cx+r,cy);c.moveTo(cx,cy-r);c.lineTo(cx,cy+r);c.stroke();const a=(angle++%360)*Math.PI/180;c.strokeStyle='#a8ff8c';c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);c.stroke();const targets=(state.targets||[]).filter(t=>!t.dead);targets.forEach(t=>{const p=t.group.position,tx=Math.max(-.9,Math.min(.9,p.x/45)),ty=Math.max(-.9,Math.min(.9,(p.z+35)/65));c.fillStyle=t.boss?'#ffb35b':'#ff6464';c.shadowColor=c.fillStyle;c.shadowBlur=7;c.beginPath();c.arc(cx+tx*r,cy+ty*r,t.boss?4:2.7,0,Math.PI*2);c.fill();});c.shadowBlur=0;c.fillStyle='#caffbc';c.beginPath();c.moveTo(cx,cy-6);c.lineTo(cx+4,cy+4);c.lineTo(cx-4,cy+4);c.closePath();c.fill();byId('radarTracks').textContent=String(targets.length).padStart(2,'0');byId('radarThreat').textContent=targets.length>8?'HIGH':targets.length>3?'MED':'LOW';byId('camLink').textContent='LINK '+Math.max(42,98-Math.floor((state.noise||0)*42))+'%';byId('camRange').textContent='RANGE '+(targets.length?Math.max(120,Math.round(1800/targets.length)):'--')+' m';byId('camMode').textContent=state.noise>.4?'SIGNAL JAMMED · IR':'THERMAL · NIGHT';document.body.classList.toggle('fx-jammed',state.noise>.42);}
+ function radar(){const cv=byId('radarCanvas');if(!cv||!cv.getContext)return;const c=cv.getContext('2d'),w=cv.width,h=cv.height,cx=w/2,cy=h/2,r=w*.43;c.clearRect(0,0,w,h);c.fillStyle='#04160c';c.fillRect(0,0,w,h);c.strokeStyle='#24683c';c.lineWidth=1;for(let k=1;k<=4;k++){c.beginPath();c.arc(cx,cy,r*k/4,0,Math.PI*2);c.stroke();}c.beginPath();c.moveTo(cx-r,cy);c.lineTo(cx+r,cy);c.moveTo(cx,cy-r);c.lineTo(cx,cy+r);c.stroke();const a=(angle++%360)*Math.PI/180;c.strokeStyle='#a8ff8c';c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);c.stroke();const targets=(state.targets||[]).filter(t=>!t.dead);targets.forEach(t=>{const p=t.group.position,tx=Math.max(-.9,Math.min(.9,p.x/45)),ty=Math.max(-.9,Math.min(.9,(p.z+35)/65));c.fillStyle=t.boss?'#ffb35b':'#ff6464';c.shadowColor=c.fillStyle;c.shadowBlur=7;c.beginPath();c.arc(cx+tx*r,cy+ty*r,t.boss?4:2.7,0,Math.PI*2);c.fill();});c.shadowBlur=0;c.fillStyle='#caffbc';c.beginPath();c.moveTo(cx,cy-6);c.lineTo(cx+4,cy+4);c.lineTo(cx-4,cy+4);c.closePath();c.fill();byId('radarTracks').textContent=String(targets.length).padStart(2,'0');byId('radarThreat').textContent=targets.length>8?'HIGH':targets.length>3?'MED':'LOW';byId('camLink').textContent='LINK '+Math.max(42,98-Math.floor((state.noise||0)*42))+'%';byId('camRange').textContent='RANGE '+(targets.length?Math.max(120,Math.round(1800/targets.length)):'--')+' m';byId('camMode').textContent=state.noise>.18?'SIGNAL DISTORTION · IR':'THERMAL · NIGHT';document.body.style.setProperty('--jam-strength',String(Math.max(0,Math.min(1,state.noise))));document.body.classList.toggle('fx-jammed',state.noise>.12);}
  setInterval(radar,100);window.addEventListener('beforeunload',stop);
 })();
 
@@ -63,7 +63,7 @@ function maybeBoss(){const alive=state.targets.filter(t=>!t.dead&&!t.boss).lengt
 function kill(t){if(t.dead)return;t.dead=true;scene.remove(t.group);if(window.GloBitBossAudio)window.GloBitBossAudio.droneSound(t.type==='babaYaga'?'babaYaga':t.type==='scout'?'scout':'drone',0);state.coins+=t.value;state.score+=t.value;sound('coin');for(let i=0;i<12;i++){const p=new THREE.Mesh(new THREE.SphereGeometry(.06,5,5),new THREE.MeshBasicMaterial({color:0x9dff85}));p.position.copy(t.group.position);scene.add(p);state.effects.push({mesh:p,life:1,velocity:new THREE.Vector3((Math.random()-.5)*.18,Math.random()*.15,(Math.random()-.5)*.18)});}toast('+'+t.value.toLocaleString('ru-RU')+' ₽ · ЦЕЛЬ ПЕРЕХВАЧЕНА');if(t.boss){state.bosses=state.bosses.filter(b=>b!==t);if(!state.bosses.length)$('bossbar').style.display='none';}persist();ui();checkWave();}
 function shoot(){if(!state.running||state.paused)return;const now=performance.now(),delay=Math.max(85,340-state.rate*35);if(now-state.shotAt<delay)return;state.shotAt=now;sound('shot');shake=.12;const alive=state.targets.filter(t=>!t.dead);if(!alive.length){toast('СЕКТОР ЧИСТ · ОЖИДАНИЕ ЦЕЛЕЙ');return;}let best=null,bestDist=1e9;for(const t of alive){const v=t.group.position.clone().project(camera);const d=Math.hypot(v.x-pointer.x,v.y+pointer.y);const dist=Math.hypot(t.group.position.x,t.group.position.y-3,t.group.position.z);const metric=d*20+dist*.006;if(metric<bestDist){bestDist=metric;best=t;}}if(best&&bestDist<2.8){best.health-=Math.max(1,state.power*1.4);sound('hit');best.group.scale.setScalar(1.06);setTimeout(()=>{if(best.group)best.group.scale.setScalar(1)},65);if(best.health<=0)kill(best);else if(best.boss){$('bosshp').style.width=(100*best.health/best.maxHealth)+'%';} }else{const flash=new THREE.PointLight(0xa8ff8c,2,5);flash.position.copy(aimPoint);scene.add(flash);setTimeout(()=>scene.remove(flash),70)}}
 function checkWave(){const alive=state.targets.some(t=>!t.dead);if(state.spawned>=state.total&&!alive&&!state.bosses.some(t=>!t.dead)){state.running=false;state.level++;if(state.multiplayer&&state.level>65){state.multiplayer=false;toast('МУЛЬТИПЛЕЕР ЗАВЕРШЁН · УРОВЕНЬ 65');}else toast('ВОЛНА ПРОЙДЕНА · УРОВЕНЬ '+state.level);persist();ui();$('menu').classList.remove('hide');$('menuNotice').textContent='Волна пройдена! Нажми «Начать смену», чтобы продолжить.';}}
-function animate(){if(!renderer)return;const dt=Math.min(clock.getDelta(),.04);frame++;if(typeof flight!=="undefined")updateFlight(dt);if(state.running&&!state.paused){state.playMs=(state.playMs||0)+dt*1000;if(state.playMs%5000<dt*1000)persist();if(performance.now()-lastSpawn>1800&&state.spawned<state.total&&state.targets.length===0)spawnWave();maybeBoss();for(const t of state.targets){if(t.dead)continue;t.group.position.z+=t.speed*dt;t.group.position.y+=Math.sin(performance.now()*.001+t.group.position.x)*dt*.25;t.group.rotation.y=Math.sin(performance.now()*.0007+t.group.position.z)*.15;if((t.type==='drone'||t.type==='scout'||t.type==='babaYaga')&&performance.now()>t.nextAudio&&window.GloBitBossAudio){window.GloBitBossAudio.droneSound(t.type==='babaYaga'?'babaYaga':t.type==='scout'?'scout':'drone',Math.max(.12,1-Math.abs(t.group.position.z)/90));t.nextAudio=performance.now()+650+Math.random()*700;}if(t.boss&&performance.now()>t.fireAt){state.hp=Math.max(0,state.hp-(state.level-48)*.15);t.fireAt=performance.now()+Math.max(800,3500-state.level*35);state.noise=Math.min(1,state.noise+.3);sound('alarm');if(state.hp<=0){state.running=false;$('menu').classList.remove('hide');$('menuNotice').textContent='Система повреждена. Перезапусти смену и улучши батарею.';}}if(t.group.position.z>10){t.dead=true;scene.remove(t.group);state.hp=Math.max(0,state.hp-(t.boss?20:5));if(state.hp<=0){state.running=false;$('menu').classList.remove('hide');$('menuNotice').textContent='Оборона прорвана. Улучши систему и попробуй снова.';}}}for(const e of state.effects){e.life-=dt;e.mesh.position.addScaledVector(e.velocity,dt);e.mesh.material.opacity=e.life;e.mesh.material.transparent=true;if(e.life<=0)scene.remove(e.mesh)}state.effects=state.effects.filter(e=>e.life>0);if(mouseDown)shoot();ui();}if(shake>0){camera.position.x=(Math.random()-.5)*shake;shake*=.88;}if(typeof flight==='undefined'||!flight.missile)camera.position.x+=(0-camera.position.x)*.1;if(typeof flight==='undefined'||!flight.missile)camera.lookAt(aimPoint.x*.15,3,-35);$('scanbar').style.width=(35+Math.sin(frame*.04)*18+state.noise*30)+'%';state.noise=Math.max(0,state.noise-dt*.025);$('sector').textContent=String(45+Math.round(pointer.x*30)).padStart(3,'0')+'°';renderer.render(scene,camera);}
+function animate(){if(!renderer)return;const dt=Math.min(clock.getDelta(),.04);frame++;if(typeof flight!=="undefined")updateFlight(dt);if(state.running&&!state.paused){state.playMs=(state.playMs||0)+dt*1000;if(state.playMs%5000<dt*1000)persist();if(performance.now()-lastSpawn>1800&&state.spawned<state.total&&state.targets.length===0)spawnWave();maybeBoss();for(const t of state.targets){if(t.dead)continue;t.group.position.z+=t.speed*dt;t.group.position.y+=Math.sin(performance.now()*.001+t.group.position.x)*dt*.25;t.group.rotation.y=Math.sin(performance.now()*.0007+t.group.position.z)*.15;if((t.type==='drone'||t.type==='scout'||t.type==='babaYaga')&&performance.now()>t.nextAudio&&window.GloBitBossAudio){window.GloBitBossAudio.droneSound(t.type==='babaYaga'?'babaYaga':t.type==='scout'?'scout':'drone',Math.max(.12,1-Math.abs(t.group.position.z)/90));t.nextAudio=performance.now()+650+Math.random()*700;}if(t.boss&&performance.now()>t.fireAt){state.hp=Math.max(0,state.hp-(state.level-48)*.15);t.fireAt=performance.now()+Math.max(800,3500-state.level*35);state.noise=Math.min(1,state.noise+.3);sound('alarm');if(state.hp<=0){state.running=false;$('menu').classList.remove('hide');$('menuNotice').textContent='Система повреждена. Перезапусти смену и улучши батарею.';}}if(t.group.position.z>10){t.dead=true;scene.remove(t.group);state.hp=Math.max(0,state.hp-(t.boss?20:5));if(state.hp<=0){state.running=false;$('menu').classList.remove('hide');$('menuNotice').textContent='Оборона прорвана. Улучши систему и попробуй снова.';}}}for(const e of state.effects){e.life-=dt;e.mesh.position.addScaledVector(e.velocity,dt);e.mesh.material.opacity=e.life;e.mesh.material.transparent=true;if(e.life<=0)scene.remove(e.mesh)}state.effects=state.effects.filter(e=>e.life>0);if(mouseDown)shoot();ui();}if(shake>0){camera.position.x=(Math.random()-.5)*shake;shake*=.88;}if(typeof flight==='undefined'||!flight.missile)camera.position.x+=(0-camera.position.x)*.1;if(typeof flight==='undefined'||!flight.missile)camera.lookAt(aimPoint.x*.15,3,-35);$('scanbar').style.width=(35+Math.sin(frame*.04)*18+state.noise*30)+'%';state.noise=Math.max(0,state.noise-dt*.62);$('sector').textContent=String(45+Math.round(pointer.x*30)).padStart(3,'0')+'°';renderer.render(scene,camera);}
 function start(){if(!scene)setup3D();$('menu').classList.add('hide');state.running=true;state.paused=false;state.hp=100;state.spawned=0;state.targets=[];state.bosses=[];state.total=0;lastSpawn=performance.now();spawnWave();ui();sound('alarm');if(window.GloBitBossAudio)window.GloBitBossAudio.start();}
 function pause(){state.paused=!state.paused;$('pauseBtn').textContent=state.paused?'▶ ПРОДОЛЖИТЬ':'Ⅱ ПАУЗА';toast(state.paused?'ПАУЗА':'СМЕНА ПРОДОЛЖЕНА');}
 function buy(k){const c=costs[k];if(state.coins<c){toast('НЕ ХВАТАЕТ МОНЕТ');return;}state.coins-=c;state[k]++;costs[k]=Math.round(c*1.7);persist();ui();toast('УЛУЧШЕНИЕ УСТАНОВЛЕНО');}
@@ -314,7 +314,7 @@ let mapCanvas = null;
 let launchMapCanvas = null;
 let rebindAction = null;
 const heldKeys = new Set();
-const keyBindings = {left:'a',right:'d',forward:'w',back:'s',pitchUp:'arrowup',pitchDown:'arrowdown',rollLeft:'q',rollRight:'e',camera:'c'};
+const keyBindings = {left:'a',right:'d',forward:'w',back:'s',pitchUp:'r',pitchDown:'f',rollLeft:'q',rollRight:'e',camera:'c'};
 let lastMapDraw = 0;
 let waveTransitionMessage = '';
 let playerEnded = false;
@@ -423,11 +423,11 @@ function mountFlightUI() {
       '<label for="graphicsSelect">Качество графики</label><select class="sim-select" id="graphicsSelect"><option value="high">Высокое</option><option value="medium">Среднее</option><option value="low">Производительное</option></select>',
       '<label for="rebindActionSelect">Действие для переназначения</label><select class="sim-select" id="rebindActionSelect"><option value="left">Поворот влево</option><option value="right">Поворот вправо</option><option value="forward">Увеличить тягу</option><option value="back">Снизить тягу</option><option value="pitchUp">Набор высоты</option><option value="pitchDown">Снижение</option><option value="rollLeft">Крен влево</option><option value="rollRight">Крен вправо</option><option value="camera">Смена камеры</option></select>',
       '<button class="sim-btn" id="rebindKey">⌨ НАЗНАЧИТЬ КЛАВИШУ</button>',
-      '<div id="keyHelp">W/S — тяга · A/D — курс · ↑/↓ — тангаж · Q/E — крен · C — камера</div>',
+      '<div id="keyHelp">W/S — вперёд/назад · A/D — поворот · R/F — высота · Q/E — крен · C — камера</div>',
     '</div>',
     '<div class="sim-card sim-status" id="flightStatus"><b>ГОТОВ К ПУСКУ</b><br>Управление полностью ручное.</div>',
     '<div class="sim-bottom">',
-      '<div class="sim-joy-wrap"><span>ЛЕВЫЙ · КУРС / ТЯГА</span><div class="sim-joystick" id="joySteer"><div class="sim-knob"></div></div><div class="sim-bottom-hint">Влево / вправо — курс<br>Вверх / вниз — тяга</div></div>',
+      '<div class="sim-joy-wrap"><span>ЛЕВЫЙ · КУРС / ТЯГА</span><div class="sim-joystick" id="joySteer"><div class="sim-knob"></div></div><div class="sim-bottom-hint">W/S — скорость · A/D — курс<br>R/F — высота</div></div>',
       '<div class="sim-bottom-hint">КАМЕРА НА НОСУ РАКЕТЫ<br>КУРС И ИМПУЛЬС ИМЕЮТ ИНЕРЦИЮ</div>',
       '<div class="sim-joy-wrap"><span>ПРАВЫЙ · ТАНГАЖ / КРЕН</span><div class="sim-joystick" id="joyThrottle"><div class="sim-knob"></div></div><div class="sim-bottom-hint">Вверх / вниз — высота<br>Влево / вправо — крен</div></div>',
     '</div>',
@@ -610,7 +610,10 @@ function drawTacticalMap() {
 }
 
 function drawLaunchMap() {
+  if (!launchMapCanvas || !launchMapCanvas.isConnected) launchMapCanvas = $('launchMapPreview');
+  if (!launchMapCanvas) return;
   drawMapOnCanvas(launchMapCanvas, false);
+  requestAnimationFrame(() => { if (launchMapCanvas && launchMapCanvas.isConnected) drawMapOnCanvas(launchMapCanvas, false); });
 }
 
 function setupFlightJoysticks() {
@@ -1740,6 +1743,18 @@ function updateFlight(dt) {
   missile.rotation.x = flight.pitch;
   missile.rotation.z = flight.roll * .48;
 
+  // Intermittent visual interference depends on in-game altitude and distance from the city centre.
+  const kremlin = MOSCOW_LOCATIONS.kremlin;
+  const distToCenter = distanceXZ(missile.position, kremlin);
+  const proximity = 1 - clampValue(distToCenter / 420, 0, 1);
+  const altitudeFactor = clampValue((missile.position.y - 5) / 16, 0, 1);
+  if (performance.now() > (flight.nextSignalPulse || 0)) {
+    const chance = dt * (0.035 + proximity * 0.22 + altitudeFactor * 0.11);
+    if (Math.random() < chance) {
+      state.noise = Math.max(state.noise, 0.12 + proximity * 0.25 + altitudeFactor * 0.2 + Math.random() * 0.12);
+      flight.nextSignalPulse = performance.now() + 350 + Math.random() * 1500;
+    }
+  }
   const forward = new THREE.Vector3(0,0,-1).applyQuaternion(missile.quaternion).normalize();
   const desiredVelocity = forward.multiplyScalar(flight.speed);
   if (!flight.velocity) flight.velocity = desiredVelocity.clone();
@@ -1940,7 +1955,7 @@ function installKeyboardControls() {
       if (key === 'escape') {
         rebindAction = null;
         $('rebindKey').textContent = '⌨ ПЕРЕНАЗНАЧИТЬ ПОВОРОТ ВЛЕВО';
-        $('keyHelp').textContent = 'W/S — тяга · A/D — курс · ↑/↓ — тангаж · Q/E — крен · C — камера';
+        $('keyHelp').textContent = 'W/S — вперёд/назад · A/D — поворот · R/F — высота · Q/E — крен · C — камера';
         event.preventDefault();
         return;
       }
@@ -1948,7 +1963,7 @@ function installKeyboardControls() {
       keyBindings[actionName] = key;
       rebindAction = null;
       $('rebindKey').textContent = '⌨ НАЗНАЧЕНО: ' + event.key.toUpperCase();
-      $('keyHelp').textContent = 'A/D — курс · W/S — тяга · ↑/↓ — тангаж · Q/E — крен · C — камера. Используй список выше для переназначения.';
+      $('keyHelp').textContent = 'W/S — вперёд/назад · A/D — поворот · R/F — высота · Q/E — крен · C — камера. Используй список выше для переназначения.';
       event.preventDefault();
       event.stopImmediatePropagation();
       return;
@@ -1997,6 +2012,8 @@ installMissionUI();
 (function installDashboardControls(){
  const byId=id=>document.getElementById(id),show=id=>byId(id)?.classList.remove('hidden'),hide=id=>byId(id)?.classList.add('hidden');
  byId('inviteOpen')?.addEventListener('click',()=>show('inviteModal'));byId('inviteClose')?.addEventListener('click',()=>hide('inviteModal'));byId('ratingOpen')?.addEventListener('click',openLeaderboard);byId('settingsOpen')?.addEventListener('click',()=>show('settingsModal'));byId('settingsClose')?.addEventListener('click',()=>hide('settingsModal'));
+ byId('inviteOpen').onclick=()=>show('inviteModal');byId('ratingOpen').onclick=openLeaderboard;byId('settingsOpen').onclick=()=>show('settingsModal');
+ ['inviteModal','settingsModal','leaderboardModal'].forEach(id=>{const modal=byId(id);if(modal)modal.addEventListener('click',e=>{if(e.target===modal)hide(id);});});
  byId('settingsDone')?.addEventListener('click',()=>{hide('settingsModal');try{localStorage.setItem('moscow3_settings',JSON.stringify({sensitivity:WORLD.sensitivity,gyro:!!byId('gyroToggle').checked,joystick:!!byId('joystickToggle').checked,vibration:!!byId('vibrationToggle').checked,graphics:byId('settingGraphics').value}));}catch(e){}toast('НАСТРОЙКИ СОХРАНЕНЫ');});
  byId('settingSensitivity')?.addEventListener('input',e=>{WORLD.sensitivity=Number(e.target.value)/100;byId('sensitivityLabel').textContent=e.target.value+'%';if(byId('sensitivityRange')){byId('sensitivityRange').value=e.target.value;byId('sensitivityValue').textContent=e.target.value+'%';}});
  byId('settingGraphics')?.addEventListener('change',e=>applyGraphicsQuality(e.target.value));
