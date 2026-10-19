@@ -17,3 +17,48 @@ button,input{font:inherit}button{cursor:pointer;color:#eaffdf;background:linear-
 .menu-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;margin-top:20px}.box{padding:15px;border-radius:12px;background:#0b1711;border:1px solid #b1ff8c26}.box h3{font-size:11px;letter-spacing:.16em;color:#a8ff8c;margin:0 0 12px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.skin{flex:1;min-width:100px;text-align:center;padding:12px 7px}.skin.selected{border-color:#b7ff91;background:#19331e}.skin .emoji{display:block;font-size:27px;margin-bottom:6px}.small{font-size:11px;color:#9bb09c;line-height:1.5}.shopline{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid #ffffff0c;font-size:12px}.shopline:last-child{border:0}.wide{width:100%;margin-top:9px}.field{background:#030906;border:1px solid #6a9562;color:#eaffdf;border-radius:8px;padding:10px;min-width:0;width:100%;margin:4px 0 8px}.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}.tabs button{font-size:11px;padding:8px}.hide{display:none!important}.notice{font-size:12px;color:#ffd277;min-height:18px;margin-top:8px}.toast{position:fixed;z-index:20;top:80px;left:50%;transform:translateX(-50%);padding:10px 15px;background:#08150e;border:1px solid #a8ff8c70;border-radius:9px;display:none;pointer-events:none}.bossbar{position:absolute;top:85px;left:50%;transform:translateX(-50%);width:min(360px,80vw);display:none;padding:8px 12px}.bossbar b{font-size:11px;letter-spacing:.15em}.bossbar .bar{height:5px;background:#40201d;margin-top:6px}.bossbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff514f,#ffd277)}
 #mobileFire{display:none;position:absolute;right:18px;bottom:170px;width:76px;height:76px;border-radius:50%;background:#d6ffb0;color:#07110a;border:3px solid #ecffd9;box-shadow:0 0 25px #9eff6d55}
 @media(max-width:650px){.topbar{left:8px;right:8px;top:8px}.brand{font-size:9px;padding:8px}.stat{font-size:10px;padding:7px}.stat b{font-size:12px}.scan{left:8px;bottom:8px;width:165px;font-size:9px;padding:8px}.controls{right:8px;bottom:8px}.controls button{padding:8px;font-size:10px}.menu-grid{grid-template-columns:1fr}.menu-card{max-height:96vh}#mobileFire{display:block}.crosshair{top:45%}}
+
+
+/* Extracted legacy inline styles */
+
+/* V2 flight cockpit */
+#flightUI{position:fixed;inset:0;z-index:6;pointer-events:none;color:#dfffe7;font-family:system-ui,sans-serif;text-shadow:0 0 9px #70ff9b}
+#cockpitTop{position:absolute;left:2.5%;right:2.5%;top:2%;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.cockpitCard{background:linear-gradient(135deg,#06160ee8,#06110de0);border:1px solid #7cff9b65;box-shadow:0 0 24px #31ff7120,inset 0 0 20px #8cff9b08;border-radius:10px;padding:10px 14px;backdrop-filter:blur(8px)}
+.cockpitLabel{font-size:9px;letter-spacing:.2em;color:#9cdbac}.cockpitValue{font-size:clamp(14px,2vw,22px);font-weight:900}
+#flightTitle{font-size:clamp(11px,1.6vw,16px);letter-spacing:.12em;font-weight:900}
+#flightReadouts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+#flightReadouts .cockpitCard{min-width:82px;text-align:center}
+#flightBottom{position:absolute;left:2.5%;right:2.5%;bottom:2%;display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+#flightStatus{max-width:260px;font-size:10px;line-height:1.65}
+#flightControls{display:flex;gap:10px;align-items:flex-end;pointer-events:auto}
+.joyWrap{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:9px;letter-spacing:.16em;color:#c8ffd3}
+.joystick{width:clamp(88px,13vw,132px);height:clamp(88px,13vw,132px);border-radius:50%;position:relative;touch-action:none;pointer-events:auto;background:radial-gradient(circle,#102c1b 0,#07150d 55%,#040a07 70%);border:1px solid #9bffad8a;box-shadow:inset 0 0 22px #55ff7730,0 0 24px #46ff671c}
+.joystick:before{content:"";position:absolute;inset:20%;border:1px dashed #7eff9970;border-radius:50%}
+.stick{position:absolute;width:38%;height:38%;left:31%;top:31%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#e7ffe7,#4ecb78 40%,#174a2c 100%);border:2px solid #c9ffd2;box-shadow:0 0 18px #68ff8a70;transform:translate(0,0)}
+.flightButton{pointer-events:auto;border:1px solid #8cff9d80;background:linear-gradient(145deg,#163a24,#07120b);border-radius:9px;color:#e7ffeb;font-weight:900;padding:13px 15px;min-width:80px;box-shadow:0 0 18px #6aff8b18}
+.flightButton.fire{background:linear-gradient(145deg,#b9ffb8,#2b9b51);color:#051208;border:1px solid #d4ffd8;min-height:64px}
+#orientWarning{position:fixed;z-index:100;inset:0;background:#020805f8;color:#e8ffeb;display:none;place-items:center;text-align:center;padding:24px;font-family:system-ui}
+#orientWarning .warningBox{max-width:380px;border:1px solid #91ffa3;padding:28px;border-radius:18px;background:#0b1a10}
+#orientWarning .phoneIcon{font-size:58px;display:block;animation:turnPhone 1.8s ease-in-out infinite}
+@keyframes turnPhone{0%,100%{transform:rotate(0)}50%{transform:rotate(90deg)}}
+#menu{z-index:20}.hud .scan,.hud .crosshair,.hud .controls,#mobileFire{display:none!important}.hud .topbar{display:none!important}
+@media(orientation:portrait) and (max-width:800px){#orientWarning{display:grid}#menu{display:none!important}#flightUI{visibility:hidden}}
+@media(max-height:500px){.joystick{width:82px;height:82px}.cockpitCard{padding:6px 9px}#flightBottom{bottom:1.5%}.flightButton{padding:8px 11px;min-height:42px}}
+
+/* Mission selection, responsive profile and leaderboard */
+#menu .title{letter-spacing:-.055em;text-shadow:0 0 28px #8dff9c25}
+#menu .menu-card{max-height:94vh;overflow:auto;scrollbar-width:thin}
+#menu .box{background:linear-gradient(145deg,rgba(13,30,21,.94),rgba(4,12,9,.93));border:1px solid #87ff9a2e;border-radius:15px}
+#locationSelect.field{width:100%;margin:8px 0 12px;background:#09160f;color:#dfffe7;border:1px solid #8dffa34d;border-radius:10px;padding:12px;font:inherit}
+.mission-card{display:flex;gap:12px;align-items:center;padding:13px;border:1px solid #8dffa33d;background:linear-gradient(110deg,#183724aa,#0a130e);border-radius:12px;margin:10px 0}
+.mission-icon{font-size:30px;color:#a8ff8c;text-shadow:0 0 16px #a8ff8c75}
+.mission-card p{margin:5px 0 0;font-size:12px;line-height:1.5;color:#c3d9c6}
+#leaderboardModal{position:fixed;z-index:90;inset:0;background:#020805e8;display:grid;place-items:center;padding:18px}
+#leaderboardModal.hidden{display:none}
+.modal-card{width:min(620px,100%);max-height:85vh;overflow:auto;background:linear-gradient(150deg,#102419,#050c08);border:1px solid #8dffa36b;border-radius:18px;padding:24px;box-shadow:0 0 60px #50ff7520}
+.modal-card h2{margin:0 40px 8px 0;color:#c8ffc5}.modal-close{float:right;background:#14271a;color:#fff;border:1px solid #6dff8c70;border-radius:8px;padding:8px 12px}
+.leaderboard-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 4px;border-bottom:1px solid #8dffa322}
+.leaderboard-row .rank{font-weight:900;color:#a8ff8c}.leaderboard-row small{display:block;color:#9cb6a0;margin-top:4px}.leaderboard-row .score{text-align:right;font-weight:800;white-space:nowrap}
+#flightUI{user-select:none;-webkit-user-select:none}
+@media(max-width:800px){#menu .menu-card{padding:16px;width:96vw}#menu .menu-grid{grid-template-columns:1fr;gap:10px}#menu .title{font-size:clamp(34px,10vw,62px)}.modal-card{padding:17px}.leaderboard-row{grid-template-columns:25px minmax(0,1fr) auto}}
