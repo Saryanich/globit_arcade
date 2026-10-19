@@ -8,35 +8,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
-<link rel="stylesheet" href="./styles.css">
-
-<style>
-/* V2 flight cockpit */
-#flightUI{position:fixed;inset:0;z-index:6;pointer-events:none;color:#dfffe7;font-family:system-ui,sans-serif;text-shadow:0 0 9px #70ff9b}
-#cockpitTop{position:absolute;left:2.5%;right:2.5%;top:2%;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.cockpitCard{background:linear-gradient(135deg,#06160ee8,#06110de0);border:1px solid #7cff9b65;box-shadow:0 0 24px #31ff7120,inset 0 0 20px #8cff9b08;border-radius:10px;padding:10px 14px;backdrop-filter:blur(8px)}
-.cockpitLabel{font-size:9px;letter-spacing:.2em;color:#9cdbac}.cockpitValue{font-size:clamp(14px,2vw,22px);font-weight:900}
-#flightTitle{font-size:clamp(11px,1.6vw,16px);letter-spacing:.12em;font-weight:900}
-#flightReadouts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-#flightReadouts .cockpitCard{min-width:82px;text-align:center}
-#flightBottom{position:absolute;left:2.5%;right:2.5%;bottom:2%;display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
-#flightStatus{max-width:260px;font-size:10px;line-height:1.65}
-#flightControls{display:flex;gap:10px;align-items:flex-end;pointer-events:auto}
-.joyWrap{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:9px;letter-spacing:.16em;color:#c8ffd3}
-.joystick{width:clamp(88px,13vw,132px);height:clamp(88px,13vw,132px);border-radius:50%;position:relative;touch-action:none;pointer-events:auto;background:radial-gradient(circle,#102c1b 0,#07150d 55%,#040a07 70%);border:1px solid #9bffad8a;box-shadow:inset 0 0 22px #55ff7730,0 0 24px #46ff671c}
-.joystick:before{content:"";position:absolute;inset:20%;border:1px dashed #7eff9970;border-radius:50%}
-.stick{position:absolute;width:38%;height:38%;left:31%;top:31%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#e7ffe7,#4ecb78 40%,#174a2c 100%);border:2px solid #c9ffd2;box-shadow:0 0 18px #68ff8a70;transform:translate(0,0)}
-.flightButton{pointer-events:auto;border:1px solid #8cff9d80;background:linear-gradient(145deg,#163a24,#07120b);border-radius:9px;color:#e7ffeb;font-weight:900;padding:13px 15px;min-width:80px;box-shadow:0 0 18px #6aff8b18}
-.flightButton.fire{background:linear-gradient(145deg,#b9ffb8,#2b9b51);color:#051208;border:1px solid #d4ffd8;min-height:64px}
-#orientWarning{position:fixed;z-index:100;inset:0;background:#020805f8;color:#e8ffeb;display:none;place-items:center;text-align:center;padding:24px;font-family:system-ui}
-#orientWarning .warningBox{max-width:380px;border:1px solid #91ffa3;padding:28px;border-radius:18px;background:#0b1a10}
-#orientWarning .phoneIcon{font-size:58px;display:block;animation:turnPhone 1.8s ease-in-out infinite}
-@keyframes turnPhone{0%,100%{transform:rotate(0)}50%{transform:rotate(90deg)}}
-#menu{z-index:20}.hud .scan,.hud .crosshair,.hud .controls,#mobileFire{display:none!important}.hud .topbar{display:none!important}
-@media(orientation:portrait) and (max-width:800px){#orientWarning{display:grid}#menu{display:none!important}#flightUI{visibility:hidden}}
-@media(max-height:500px){.joystick{width:82px;height:82px}.cockpitCard{padding:6px 9px}#flightBottom{bottom:1.5%}.flightButton{padding:8px 11px;min-height:42px}}
-</style>
 <base href="./">
+<link rel="stylesheet" href="./styles.css">
 </head>
 <body>
 <canvas id="scene"></canvas>
@@ -52,14 +25,15 @@
  <div class="kicker">GLOBIT ARCADE PRESENTS / SURVIVAL SIMULATOR</div><div class="title">МОСКВА<br>В <span>3 ЧАСА</span><br>НОЧИ</div>
  <p class="sub">Ночной перехват над Москвой. Управляй ракетой вручную, перехватывай цели и защищай город.</p>
  <div class="menu-grid">
-  <section class="box"><h3>ВЫБЕРИ ОПЕРАТОРА</h3><div class="row" id="skins"><button class="skin selected" data-skin="0"><span class="emoji">🪖</span>Оператор</button><button class="skin" data-skin="1"><span class="emoji">🦊</span>Лис</button><button class="skin" data-skin="2"><span class="emoji">🤖</span>Робот</button></div><div class="small" id="skinInfo">Стандартный комплект ночного наблюдения.</div>
-  <h3 style="margin-top:18px">СИСТЕМА</h3><div class="row"><button id="soundBtn">🔊 ЗВУК: ВКЛ</button><button id="leaderBtn">🏆 РЕКОРДЫ</button></div><div class="small">W/S — тяга · A/D — курс · стрелки — тангаж · Q/E — крен · C — камера · Esc — пауза.</div></section>
+  <section class="box"><h3>ПРОФИЛЬ ЗАЩИТНИКА</h3><div class="small">Автоматический вход через GloBIT Arcade. Прогресс и рекорды синхронизируются с Firebase при доступных правилах доступа.</div>
+<h3 style="margin-top:18px">СИСТЕМА</h3><div class="row"><button id="soundBtn">🔊 ЗВУК: ВКЛ</button><button id="leaderBtn">🏆 ТАБЛИЦА ЛИДЕРОВ</button></div><div class="small">ПК: WASD / стрелки и мышь · Телефон: экранные джойстики и кнопка перехвата.</div></section>
   <section class="box"><h3>АРСЕНАЛ / УЛУЧШЕНИЯ</h3><div class="shopline"><span>Скорострельность</span><b id="rateLv">УР. 1</b></div><button class="wide" id="buyRate">УЛУЧШИТЬ · 1 500 ₽</button><div class="shopline"><span>Мощность</span><b id="powerLv">УР. 1</b></div><button class="wide" id="buyPower">УЛУЧШИТЬ · 2 000 ₽</button><div class="shopline"><span>Залп / уровень</span><b id="ammoLv">УР. 1</b></div><button class="wide" id="buyAmmo">УЛУЧШИТЬ · 2 500 ₽</button><div class="small" style="margin-top:9px">Награды: дрон — 500 ₽ · Shahed — 1 000 ₽ · ракета — 5 000 ₽ · босс — 50 000 ₽.</div></section>
   <section class="box"><h3>СЕТЕВАЯ ИГРА · GLOBAL ID</h3><div class="small">Войдите в GloBIT Arcade в соседней вкладке, затем укажите Global ID друга.</div><input id="friendId" class="field" placeholder="Global ID друга (22 символа)" maxlength="22"><button id="findFriend" class="wide">НАЙТИ ДРУГА</button><div id="friendResult" class="small"></div><button id="inviteFriend" class="wide" disabled>ПРИГЛАСИТЬ В ГРУППУ</button><div id="inviteStatus" class="notice"></div><div class="small">Приглашение и совместные уровни 50–65 требуют разрешающих правил Firestore для коллекций групп. Если правила закрыты, одиночная игра всё равно работает.</div></section>
-  <section class="box"><h3>ЗАДАЧА</h3><div class="shopline"><span>Локации</span><b>МОСКВА</b></div><div class="shopline"><span>Режим</span><b>ПЕРЕХВАТ</b></div><div class="shopline"><span>Боссы</span><b>С 50 УРОВНЯ</b></div><button class="primary wide" id="startBtn">▶ НАЧАТЬ СМЕНУ</button><button class="wide" id="resumeBtn">ПРОДОЛЖИТЬ / ЗАКРЫТЬ МЕНЮ</button></section>
+  <section class="box"><h3>МИССИЯ</h3><label for="locationSelect" class="small">ВЫБЕРИ ЛОКАЦИЮ</label><select id="locationSelect" class="field"><option value="moscow">Москва · Кремль и центр</option><option value="village">Подмосковье · деревня и шоссе</option><option value="river">Москва-река · набережная</option><option value="industrial">Промзона · ночные заводы</option></select><div class="mission-card"><div class="mission-icon">◈</div><div><b id="missionTitle">Оборона Москвы</b><p id="objectiveText">Сбить: 5 дронов · 2 Shahed · 1 ракету</p></div></div><div class="shopline"><span>Босс</span><b>С 50 УРОВНЯ</b></div><button class="primary wide" id="startBtn">▶ НАЧАТЬ СМЕНУ</button><button class="wide" id="resumeBtn">ПРОДОЛЖИТЬ / ЗАКРЫТЬ МЕНЮ</button></section>
  </div><div class="notice" id="menuNotice"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="./boss-models.js"></script>
+<script src="./city.js"></script>
 <script src="./audio.js"></script>
 <script src="./game.js"></script>
 
