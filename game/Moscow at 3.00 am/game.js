@@ -38,9 +38,9 @@ function spawnWave(){
  for(let i=manifest.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[manifest[i],manifest[j]]=[manifest[j],manifest[i]];}
  state.total=manifest.length;state.waveManifest={drones,shaheds,rockets,boss:level>=50?'Потужнолит':null};
  if(state.multiplayer){state.level=Math.min(65,Math.max(50,state.level));state.total=manifest.length;}
- const objective=$('objectiveText');if(objective)objective.textContent='Сбить: '+drones+' дронов · '+shaheds+' Shahed · '+rockets+' ракет'+(level>=50+' · БОСС: ПОТУЖНОЛИТ'?'':'');
+ const objective=$('objectiveText');if(objective)objective.textContent='Сбить: '+drones+' дронов · '+shaheds+' Shahed · '+rockets+' ракет'+((level>=50?' · БОСС: ПОТУЖНОЛИТ':'');
  manifest.forEach((type,i)=>setTimeout(()=>{if(!state.running)return;createTarget(type);state.spawned++;ui();},i*Math.max(150,600-state.level*7)));
- lastSpawn=performance.now();toast('ВОЛНА '+state.level+' · ЦЕЛЕЙ: '+state.total+(level>=50+' · ПОТУЖНОЛИТ'?'':' '));ui();
+ lastSpawn=performance.now();toast('ВОЛНА '+state.level+' · ЦЕЛЕЙ: '+state.total+(level>=50?' · ПОТУЖНОЛИТ':' '));ui();
 }
 function maybeBoss(){const alive=state.targets.filter(t=>!t.dead&&!t.boss).length;const pending=state.total-state.spawned;if(state.level>=50&&alive+pending<=5&&state.bosses.filter(b=>!b.dead).length===0&&!state.bossSpawned){state.bossSpawned=true;createTarget('boss',state.level===50?'Потужнолит':(Math.random()>.5?'Движухалит':'Потужнолит'));}}
 function kill(t){if(t.dead)return;t.dead=true;scene.remove(t.group);state.coins+=t.value;state.score+=t.value;sound('coin');for(let i=0;i<12;i++){const p=new THREE.Mesh(new THREE.SphereGeometry(.06,5,5),new THREE.MeshBasicMaterial({color:0x9dff85}));p.position.copy(t.group.position);scene.add(p);state.effects.push({mesh:p,life:1,velocity:new THREE.Vector3((Math.random()-.5)*.18,Math.random()*.15,(Math.random()-.5)*.18)});}toast('+'+t.value.toLocaleString('ru-RU')+' ₽ · ЦЕЛЬ ПЕРЕХВАЧЕНА');if(t.boss){state.bosses=state.bosses.filter(b=>b!==t);if(!state.bosses.length)$('bossbar').style.display='none';}persist();ui();checkWave();}
