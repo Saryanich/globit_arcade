@@ -70,7 +70,7 @@ button,input{font:inherit}button{cursor:pointer;color:#eaffdf;background:linear-
  <p class="sub">Ночной перехват над Москвой. Управляй ракетой вручную, перехватывай цели и защищай город.</p>
  <div class="menu-grid">
   <section class="box"><h3>ВЫБЕРИ ОПЕРАТОРА</h3><div class="row" id="skins"><button class="skin selected" data-skin="0"><span class="emoji">🪖</span>Оператор</button><button class="skin" data-skin="1"><span class="emoji">🦊</span>Лис</button><button class="skin" data-skin="2"><span class="emoji">🤖</span>Робот</button></div><div class="small" id="skinInfo">Стандартный комплект ночного наблюдения.</div>
-  <h3 style="margin-top:18px">СИСТЕМА</h3><div class="row"><button id="soundBtn">🔊 ЗВУК: ВКЛ</button><button id="leaderBtn">🏆 РЕКОРДЫ</button></div><div class="small">Клавиатура: мышь — прицел, клик — огонь, Esc — пауза.</div></section>
+  <h3 style="margin-top:18px">СИСТЕМА</h3><div class="row"><button id="soundBtn">🔊 ЗВУК: ВКЛ</button><button id="leaderBtn">🏆 РЕКОРДЫ</button></div><div class="small">W/S — тяга · A/D — курс · стрелки — тангаж · Q/E — крен · C — камера · Esc — пауза.</div></section>
   <section class="box"><h3>АРСЕНАЛ / УЛУЧШЕНИЯ</h3><div class="shopline"><span>Скорострельность</span><b id="rateLv">УР. 1</b></div><button class="wide" id="buyRate">УЛУЧШИТЬ · 1 500 ₽</button><div class="shopline"><span>Мощность</span><b id="powerLv">УР. 1</b></div><button class="wide" id="buyPower">УЛУЧШИТЬ · 2 000 ₽</button><div class="shopline"><span>Залп / уровень</span><b id="ammoLv">УР. 1</b></div><button class="wide" id="buyAmmo">УЛУЧШИТЬ · 2 500 ₽</button><div class="small" style="margin-top:9px">Награды: дрон — 500 ₽ · Shahed — 1 000 ₽ · ракета — 5 000 ₽ · босс — 50 000 ₽.</div></section>
   <section class="box"><h3>СЕТЕВАЯ ИГРА · GLOBAL ID</h3><div class="small">Войдите в GloBIT Arcade в соседней вкладке, затем укажите Global ID друга.</div><input id="friendId" class="field" placeholder="Global ID друга (22 символа)" maxlength="22"><button id="findFriend" class="wide">НАЙТИ ДРУГА</button><div id="friendResult" class="small"></div><button id="inviteFriend" class="wide" disabled>ПРИГЛАСИТЬ В ГРУППУ</button><div id="inviteStatus" class="notice"></div><div class="small">Приглашение и совместные уровни 50–65 требуют разрешающих правил Firestore для коллекций групп. Если правила закрыты, одиночная игра всё равно работает.</div></section>
   <section class="box"><h3>ЗАДАЧА</h3><div class="shopline"><span>Локации</span><b>МОСКВА</b></div><div class="shopline"><span>Режим</span><b>ПЕРЕХВАТ</b></div><div class="shopline"><span>Боссы</span><b>С 50 УРОВНЯ</b></div><button class="primary wide" id="startBtn">▶ НАЧАТЬ СМЕНУ</button><button class="wide" id="resumeBtn">ПРОДОЛЖИТЬ / ЗАКРЫТЬ МЕНЮ</button></section>
@@ -144,7 +144,7 @@ function detailedTarget(type,bossName){
   const hair=new THREE.Mesh(new THREE.SphereGeometry(.53,16,10,0,Math.PI*2,0,Math.PI*.47),mat(bossName==='Потужнолит'?0x27221d:0xaaa18e));hair.position.y=3.08;root.add(hair);
   const eyeMat=new THREE.MeshBasicMaterial({color:0xffe2ac});for(let x of [-.18,.18]){const eye=new THREE.Mesh(new THREE.SphereGeometry(.055,8,8),eyeMat);eye.position.set(x,2.98,.46);root.add(eye)}
   const tie=new THREE.Mesh(new THREE.ConeGeometry(.13,.72,4),mat(0x9e2e2a));tie.position.set(0,1.55,.4);root.add(tie);
-  for(let x of [-.83,.83]){const arm=new THREE.Mesh(new THREE.CapsuleGeometry(.16,.8,4,8),jacket.material);arm.position.set(x,1.55,.02);arm.rotation.z=x<0?-.3:.3;root.add(arm)}
+  for(let x of [-.83,.83]){const arm=new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,.8,8),jacket.material);arm.position.set(x,1.55,.02);arm.rotation.z=x<0?-.3:.3;root.add(arm)}
   const ring=new THREE.Mesh(new THREE.TorusGeometry(1.05,.035,8,32),new THREE.MeshBasicMaterial({color:bossName==='Потужнолит'?0xff795f:0x78aaff}));ring.position.y=3.4;root.add(ring);root.userData.bossName=bossName;
  } else if(type==='drone'){
   // Four-rotor reconnaissance quadcopter, with visible arms, motors, camera and rotor discs.
@@ -549,6 +549,13 @@ function mountFlightUI() {
   });
 
   setupFlightJoysticks();
+  if (!$('orientWarning')) {
+    const orientationNotice = document.createElement('div');
+    orientationNotice.id = 'orientWarning';
+    orientationNotice.style.display = 'none';
+    orientationNotice.textContent = 'Управление доступно в портретной и альбомной ориентации.';
+    document.body.appendChild(orientationNotice);
+  }
   drawLaunchMap();
   updatePauseOverlay();
 }
@@ -711,6 +718,7 @@ function isParkZone(x, z) {
 function isLandmarkZone(x, z) {
   return (Math.abs(x + 38) < 58 && Math.abs(z + 26) < 54) ||
     (Math.abs(x - 145) < 50 && Math.abs(z + 112) < 55) ||
+    (Math.abs(x - 8) < 28 && Math.abs(z + 5) < 24) ||
     Math.hypot(x - 18, z + 267) < 19 ||
     Math.hypot(x + 165, z - 112) < 34 ||
     (Math.abs(x - 405) < 82 && Math.abs(z - 355) < 72) ||
@@ -773,9 +781,11 @@ function makeCityDistrict() {
 
   for (let x = -WORLD.half + 22; x < WORLD.half - 18; x += WORLD.buildingStep) {
     for (let z = -WORLD.half + 22; z < WORLD.half - 18; z += WORLD.buildingStep) {
-      const roadX = Math.abs(((x + WORLD.half) % WORLD.roadStep) - WORLD.roadStep / 2);
-      const roadZ = Math.abs(((z + WORLD.half) % WORLD.roadStep) - WORLD.roadStep / 2);
-      if (roadX < 13 || roadZ < 13) continue;
+      const modX = (x + WORLD.half) % WORLD.roadStep;
+      const modZ = (z + WORLD.half) % WORLD.roadStep;
+      const roadX = Math.min(modX, WORLD.roadStep - modX);
+      const roadZ = Math.min(modZ, WORLD.roadStep - modZ);
+      if (roadX < 14 || roadZ < 14) continue;
       if (isParkZone(x, z) || isLandmarkZone(x, z)) continue;
       if (x > 320 && x < 500 && z > 265 && z < 450) continue;
 
@@ -1267,8 +1277,8 @@ setup3D = function setup3DOverhaul() {
   clock = new THREE.Clock();
   resize();
   const initial = MOSCOW_LOCATIONS[selectedLocation] || MOSCOW_LOCATIONS.tverskaya;
-  camera.position.set(initial.x,initial.z + 25,initial.z + 35);
-  camera.lookAt(initial.x,12,initial.z - 55);
+  camera.position.set(initial.x,42,initial.z + 35);
+  camera.lookAt(initial.x,18,initial.z - 55);
   window.addEventListener('resize',resize,{passive:true});
   toast('ГОРОД ГОТОВ · РАЙОНЫ МОСКВЫ ЗАГРУЖЕНЫ');
 };
@@ -1317,7 +1327,9 @@ function resetPlayerAtLaunch() {
   const startLoc = MOSCOW_LOCATIONS[selectedLocation] || MOSCOW_LOCATIONS.tverskaya;
   if (!flight.missile || flight.missile.userData.rocketType !== selectedRocket) buildPlayerMissile();
   const missile = flight.missile;
-  missile.position.set(startLoc.x,Math.max(14,startLoc.z * 0 + 22),startLoc.z);
+  const nearby = closestBuilding(startLoc.x,startLoc.z).building;
+  const launchAltitude = Math.min(132,Math.max(30,(nearby ? nearby.h : 18) + 12));
+  missile.position.set(startLoc.x,launchAltitude,startLoc.z);
   missile.rotation.set(0,0,0);
   missile.visible = true;
   flight.heading = 0;
@@ -1341,8 +1353,8 @@ function resetPlayerAtLaunch() {
   playerEnded = false;
   if (playerTrail) { scene.remove(playerTrail); playerTrail = null; }
   const loc = MOSCOW_LOCATIONS[selectedLocation];
-  camera.position.set(loc.x,loc.z + 28,loc.z + 46);
-  camera.lookAt(loc.x,22,loc.z - 70);
+  camera.position.set(loc.x,launchAltitude + 9,loc.z + 46);
+  camera.lookAt(loc.x,launchAltitude,loc.z - 70);
   camera.fov = 76;
   camera.updateProjectionMatrix();
 }
@@ -1835,8 +1847,17 @@ function updateEffects(dt) {
     }
     if (effect.life <= 0 && effect.mesh) {
       scene.remove(effect.mesh);
-      if (effect.mesh.geometry) effect.mesh.geometry.dispose();
-      if (effect.mesh.material && !Array.isArray(effect.mesh.material)) effect.mesh.material.dispose();
+      if (effect.mesh.isGroup) effect.mesh.traverse(piece => {
+        if (piece.geometry) piece.geometry.dispose();
+        if (piece.material) {
+          if (Array.isArray(piece.material)) piece.material.forEach(material => material.dispose());
+          else piece.material.dispose();
+        }
+      });
+      else {
+        if (effect.mesh.geometry) effect.mesh.geometry.dispose();
+        if (effect.mesh.material && !Array.isArray(effect.mesh.material)) effect.mesh.material.dispose();
+      }
     }
   }
   state.effects = state.effects.filter(effect => effect.life > 0);
@@ -1876,7 +1897,7 @@ animate = function animateOverhaul() {
       WORLD.nextSpawnAt = now + WORLD.spawnInterval;
       ui();
     }
-    for (const target of state.targets) updateTargetAI(target,dt,now);
+    if (state.running) for (const target of state.targets) updateTargetAI(target,dt,now);
     updateDecorativeTraffic(dt);
     updateEffects(dt);
     if (WORLD.wavePending && now >= WORLD.waveAt && state.running) {
@@ -1927,6 +1948,8 @@ function installKeyboardControls() {
     }
     if (key === 'escape') {
       if (state.running) pause();
+      event.preventDefault();
+      event.stopImmediatePropagation();
       return;
     }
     if (key === keyBindings.camera && state.running && !state.paused) {
@@ -1962,6 +1985,11 @@ try {
 }
 
 mountFlightUI();
+shoot = function noAutoAimDuringFlight() {
+  if (flight.mode === 'manual') return;
+  return undefined;
+};
+
 loadSave();
 ui();
 drawLaunchMap();
