@@ -454,14 +454,23 @@
                 let email = identifier;
 
                 if (!identifier.includes('@')) {
-                    const q = db.collection('users').where('globalId', '==', identifier);
-                    const snap = await q.get();
-                    if (snap.empty) {
+                    // Как в Global ID и Iceberg: сначала читаем точный публичный
+                    // mapping global_ids/{GlobalID}. Не запрашиваем коллекцию users
+                    // до входа — Firestore Rules обычно запрещают такой запрос.
+                    const globalId = identifier.trim();
+                    if (!/^[0-9a-zA-Z]{22}$/.test(globalId)) {
                         loginBtn.disabled = false;
                         loginBtn.textContent = '🚀 Войти';
-                        return showMessage('authMessage', 'Global ID не найден', true);
+                        return showMessage('authMessage', 'Global ID должен содержать 22 латинские буквы или цифры', true);
                     }
-                    email = snap.docs[0].data().email;
+
+                    const mappingDoc = await db.collection('global_ids').doc(globalId).get();
+                    if (!mappingDoc.exists || typeof mappingDoc.data()?.email !== 'string' || !mappingDoc.data().email.includes('@')) {
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = '🚀 Войти';
+                        return showMessage('authMessage', 'Global ID не найден или не привязан к email', true);
+                    }
+                    email = mappingDoc.data().email.trim();
                 }
 
                 // Сохраняем авторизацию на этом устройстве, как в Global ID и Iceberg.
@@ -490,6 +499,8 @@
                     showMessage('authMessage', 'Неверный email или пароль', true);
                 } else if (error.code === 'auth/invalid-email') {
                     showMessage('authMessage', 'Некорректный email', true);
+                } else if (error.code === 'permission-denied' || error.code === 'firestore/permission-denied') {
+                    showMessage('authMessage', 'Firestore запретил чтение global_ids. Разрешите публичное чтение только документа global_ids/{GlobalID} в правилах Firestore.', true);
                 } else {
                     showMessage('authMessage', 'Ошибка: ' + error.message, true);
                 }
