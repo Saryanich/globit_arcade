@@ -1143,6 +1143,18 @@
                         updatedAt: new Date()
                     });
                 }
+                try {
+                    const user = auth.currentUser;
+                    if (user) {
+                        await db.collection('arcade_leaderboards').doc('runcasino').collection('entries').doc(globalId).set({
+                            uid: user.uid,
+                            globalId,
+                            displayName: document.getElementById('displayName').textContent || globalId,
+                            score: newBalance,
+                            updatedAt: new Date()
+                        }, { merge: true });
+                    }
+                } catch (boardError) { console.warn('Не удалось обновить публичную таблицу:', boardError); }
                 console.log(`💾 Баланс сохранен в score для ${globalId}: ${newBalance}`);
             } catch (e) {
                 console.error('❌ Ошибка сохранения баланса в score:', e);
@@ -1388,6 +1400,13 @@
             }
 
             document.getElementById('balanceDisplay').textContent = gameBalance;
+            try {
+                await db.collection('arcade_leaderboards').doc('runcasino').collection('entries').doc(currentGlobalId).set({
+                    uid: user.uid, globalId: currentGlobalId,
+                    displayName: data.displayName || user.email?.split('@')[0] || 'Игрок',
+                    score: gameBalance, updatedAt: new Date()
+                }, { merge: true });
+            } catch (boardError) { console.warn('Не удалось синхронизировать таблицу:', boardError); }
             showScreen('gameScreen');
             initGrid();
             setupBetSelector();
@@ -2013,7 +2032,7 @@
             const out = document.getElementById('casinoLeaderboardContent');
             out.textContent = 'Загрузка...';
             try {
-                const snap = await db.collection('score').doc('runcasino').collection('records').orderBy('score','desc').limit(10).get();
+                const snap = await db.collection('arcade_leaderboards').doc('runcasino').collection('entries').orderBy('score','desc').limit(10).get();
                 if (snap.empty) { out.textContent = 'Пока нет результатов'; return; }
                 out.innerHTML = snap.docs.map((d,i) => '<div class="leader-row"><span>'+(i+1)+'. '+String(d.data().displayName||d.data().globalId||'Игрок').replace(/[&<>"]/g,'')+'</span><b>'+Number(d.data().score||0).toLocaleString()+'</b></div>').join('');
             } catch (e) { out.textContent = 'Таблица недоступна: проверьте правила Firestore для score/runcasino/records.'; }
