@@ -1,4 +1,4 @@
-/* Procedural audio fallback for the boss propeller; no external assets or tracking. */
+
 (function(){
 'use strict';
 let ctx, osc, gain, noise, noiseGain, realEngine, sirenOsc, sirenGain, sirenTimer, sirenClip; const droneVoices=new Map();
