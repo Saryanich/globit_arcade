@@ -787,43 +787,6 @@
             }
         }
 
-        .leaderboard {
-            margin-top: 0.8rem;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 16px;
-            padding: 0.6rem;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-        }
-        .leaderboard h4 {
-            color: var(--accent-gold);
-            text-align: center;
-            margin-bottom: 0.4rem;
-            font-size: 0.8rem;
-        }
-        .leaderboard-list {
-            font-size: 0.7rem;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-        .leaderboard-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.2rem 0.4rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .leaderboard-rank {
-            color: var(--accent-gold);
-            width: 25px;
-        }
-        .leaderboard-name {
-            flex: 1;
-            text-align: left;
-        }
-        .leaderboard-score {
-            color: #69f0ae;
-            font-weight: bold;
-        }
-
         @media (max-width: 400px) {
             .slot-cell {
                 font-size: 1.5rem;
@@ -837,6 +800,14 @@
             .screen {
                 padding: 1.2rem 0.8rem;
             }
+        }
+    
+        button, .bet-option, .slot-cell { -webkit-tap-highlight-color: transparent; user-select: none; }
+        button:focus-visible { outline: 2px solid #00e676; outline-offset: 3px; }
+        button { transition: transform .1s ease, filter .12s ease, box-shadow .15s ease; }
+        button:active { transform: scale(.97); filter: brightness(1.12); }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
         }
     </style>
 </head>
@@ -888,7 +859,6 @@
             <div class="user-info">
                 <span>👤 <strong id="displayName">Игрок</strong></span>
                 <span>🆔 <strong id="globalIdDisplay">—</strong></span>
-                <button class="btn-leader" onclick="showLeaderboard()" style="background:none;border:none;color:#ffd700;cursor:pointer;">🏆 Топ</button>
             </div>
             <div class="game-title">🎰 RUN CASINO</div>
             <div class="super-mode-indicator" id="superIndicator">💥 СУПЕР-ИГРА! 💥</div>
@@ -916,14 +886,7 @@
                 <span class="super-balance-label">💥 Супер-депозит</span>
                 <span class="super-balance-amount" id="superBalanceAmount">150000</span>
             </div>
-
-            <!-- Таблица лидеров -->
-            <div id="leaderboardPanel" class="leaderboard" style="display:none;">
-                <h4>🏆 ТОП ИГРОКИ 🏆</h4>
-                <div id="leaderboardList" class="leaderboard-list">Загрузка...</div>
-            </div>
-
-            <div class="bet-selector" id="betSelector">
+<div class="bet-selector" id="betSelector">
                 <div class="bet-option selected" data-bet="10">10</div>
                 <div class="bet-option" data-bet="50">50</div>
                 <div class="bet-option" data-bet="100">100</div>
@@ -994,6 +957,8 @@
         });
         const auth = firebase.auth();
         const db = firebase.firestore();
+        // Повторно используем локальную Firebase-сессию GloBIT Arcade.
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.warn);
 
         // ==================== ЗВУКОВАЯ СИСТЕМА ====================
         let audioCtx = null;
@@ -1219,53 +1184,6 @@
             let r = Math.random() * total;
             for (let i = 0; i < SYMBOLS.length; i++) { r -= SYMBOL_WEIGHTS[i]; if (r <= 0) return SYMBOLS[i]; }
             return SYMBOLS[0];
-        }
-
-        // ==================== ТАБЛИЦА ЛИДЕРОВ ====================
-        async function showLeaderboard() {
-            const panel = document.getElementById('leaderboardPanel');
-            if (panel.style.display === 'none') {
-                playButtonClick();
-                panel.style.display = 'block';
-
-                try {
-                    const snapshot = await db.collection('score')
-                        .doc('runcasino')
-                        .collection('records')
-                        .orderBy('score', 'desc')
-                        .limit(10)
-                        .get();
-
-                    const listDiv = document.getElementById('leaderboardList');
-
-                    if (snapshot.empty) {
-                        listDiv.innerHTML =
-                            '<div style="color:#aaa;text-align:center;padding:10px;">Нет рекордов</div>';
-                        return;
-                    }
-
-                    let html = '';
-                    let rank = 1;
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        const name = data.displayName || data.globalId || 'Игрок';
-                        const score = data.score || 0;
-
-                        html += `<div class="leaderboard-item">
-                            <span class="leaderboard-rank">#${rank++}</span>
-                            <span class="leaderboard-name">${name}</span>
-                            <span class="leaderboard-score">💰 ${score.toLocaleString()}</span>
-                        </div>`;
-                    });
-                    listDiv.innerHTML = html;
-                } catch (e) {
-                    console.error('Ошибка загрузки рекордов:', e);
-                    document.getElementById('leaderboardList').innerHTML =
-                        '<div style="color:#ff5252;">Ошибка загрузки</div>';
-                }
-            } else {
-                panel.style.display = 'none';
-            }
         }
 
         // ==================== FIREBASE ====================
