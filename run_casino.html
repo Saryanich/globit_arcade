@@ -1308,15 +1308,10 @@
         window.logout = async () => {
             stopAutoSpin();
             if (superGameTimer) clearInterval(superGameTimer);
-            if (auth.currentUser) {
-                await updateBalanceDB();
-                await db.collection('users').doc(auth.currentUser.uid).update({ online: false });
-                await auth.signOut();
-            }
+            if (auth.currentUser) await updateBalanceDB();
             resetGame();
-            document.getElementById('loginIdentifier').value = '';
-            document.getElementById('loginPassword').value = '';
-            showScreen('loginScreen');
+            document.getElementById('startMenu').style.display = 'flex';
+            showScreen('gameScreen');
         };
 
         // ==================== МЕГА-ИГРА ====================
@@ -1480,7 +1475,7 @@
             initGrid();
             setupBetSelector();
             updateUI();
-            initAudio();
+            // Звук включается только по настройке стартового меню.
 
             // Проверка супер-режима отложена до начала игры.
         }
