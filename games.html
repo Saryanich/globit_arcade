@@ -390,19 +390,12 @@
                         if (typeof url === 'string' && url.startsWith('/') && movedPaths[url.slice(1)]) url = '/' + movedPaths[url.slice(1)];
                         return { ...g, name: g.name || g.title || 'Без названия', url, icon: g.icon || g.image || g.thumbnail || '', genre: g.genre || g.category || 'Аркада', ageRating: g.ageRating || g.age || '3+', description: g.description || g.desc || '' };
                     });
-                // Локальная карточка гарантирует доступ к игре даже до добавления записи в Firestore.
-                const moscowGame = {
-                    id: 'moscowat3am-local',
-                    name: 'Москва в 3 часа ночи',
-                    url: 'game/moscowat3.00am.html',
-                    icon: '🌃',
-                    genre: 'Экшн',
-                    ageRating: '12+',
-                    description: 'Ночная 3D-оборона Москвы: волны целей, улучшения и режим Global ID.',
-                    rating: 0,
-                    localGame: true
-                };
-                allGames = [moscowGame, ...remoteGames.filter(g => g.id !== moscowGame.id)];
+                // Исключаем игру «Москва в 3 часа ночи» из каталога независимо от того,
+                // добавлена ли она локально или сохранена в Firestore.
+                allGames = remoteGames.filter(g =>
+                    !/москва в 3 часа ночи/i.test(g.name || '') &&
+                    !String(g.url || '').toLowerCase().includes('moscowat3.00am.html')
+                );
                 if (allGames.length === 0) {
                     grid.innerHTML = '<div class="no-games">Нет доступных игр. Добавьте игры через админ-панель.</div>';
                 } else {
