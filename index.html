@@ -352,6 +352,21 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        // Немедленно завершаем сессию, если устройство отозвано через Global ID.
+        let deviceRevocationUnsub = null;
+        auth.onAuthStateChanged(user => {
+            if (deviceRevocationUnsub) { deviceRevocationUnsub(); deviceRevocationUnsub = null; }
+            let token = null;
+            try { token = localStorage.getItem('itglobal_shared_device_token'); } catch {}
+            if (!user || !token) return;
+            deviceRevocationUnsub = db.collection('users').doc(user.uid).onSnapshot(snap => {
+                if (snap.exists && (snap.data().revokedDeviceTokens || []).includes(token)) {
+                    if (deviceRevocationUnsub) { deviceRevocationUnsub(); deviceRevocationUnsub = null; }
+                    auth.signOut().finally(() => location.replace('index.html?deviceRevoked=1'));
+                }
+            }, error => console.warn('Проверка отзыва устройства:', error));
+        });
+
         // Particles.js
         particlesJS('particles-js', {
             particles: {
