@@ -499,6 +499,12 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.warn);
+        function redirectToGlobalId() {
+            const target = new URL('/Global-ID/', window.location.origin);
+            target.searchParams.set('continue', window.location.href);
+            window.location.replace(target.href);
+        }
 
         particlesJS('particles-js', {
             particles: {
@@ -516,20 +522,29 @@
         let currentUser = null;
 
         auth.onAuthStateChanged(async (user) => {
-            if (!user) {
-                window.location.href = 'index.html';
-                return;
+            if (!user) { redirectToGlobalId(); return; }
+            if (!user.emailVerified) { await auth.signOut(); redirectToGlobalId(); return; }
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (!userDoc.exists) { await auth.signOut(); redirectToGlobalId(); return; }
+                const userData = userDoc.data() || {};
+                let token = null;
+                try { token = localStorage.getItem('itglobal_shared_device_token'); } catch {}
+                if (userData.accountLocked === true || (token && (userData.revokedDeviceTokens || []).includes(token))) {
+                    await auth.signOut(); redirectToGlobalId(); return;
+                }
+                if (userData.role !== 'admin' && userData.role !== 'employee') {
+                    alert('Доступ запрещён');
+                    window.location.href = 'games.html';
+                    return;
+                }
+                currentUser = user;
+                loadAllGames();
+                loadPlayers();
+            } catch (error) {
+                console.error('Не удалось проверить права администратора:', error);
+                alert('Не удалось проверить права доступа. Обновите страницу.');
             }
-            currentUser = user;
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            const role = userDoc.data()?.role || 'user';
-            if (role !== 'admin' && role !== 'employee') {
-                alert('Доступ запрещён');
-                window.location.href = 'games.html';
-                return;
-            }
-            loadAllGames();
-            loadPlayers();
         });
 
         window.addGame = async function() {
