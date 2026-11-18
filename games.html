@@ -315,6 +315,12 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.warn);
+        function redirectToGlobalId() {
+            const target = new URL('/Global-ID/', window.location.origin);
+            target.searchParams.set('continue', window.location.href);
+            window.location.replace(target.href);
+        }
         // Сохраняем одну Firebase-сессию между каталогом и играми на этом же сайте.
         auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.warn);
 
@@ -339,21 +345,31 @@
         let currentGameName = '';
 
         auth.onAuthStateChanged(async (user) => {
-            if (!user) { window.location.href = 'index.html'; return; }
-            currentUser = user;
+            if (!user) { redirectToGlobalId(); return; }
+            if (!user.emailVerified) { await auth.signOut(); redirectToGlobalId(); return; }
             try {
                 const userDoc = await db.collection('users').doc(user.uid).get();
+                if (!userDoc.exists) { await auth.signOut(); redirectToGlobalId(); return; }
                 const userData = userDoc.data() || {};
+                let token = null;
+                try { token = localStorage.getItem('itglobal_shared_device_token'); } catch {}
+                if (userData.accountLocked === true || (token && (userData.revokedDeviceTokens || []).includes(token))) {
+                    await auth.signOut(); redirectToGlobalId(); return;
+                }
+                if (userData.arcadeAccess === false) {
+                    document.getElementById('gamesGrid').innerHTML = '<div class="no-games">Доступ к GloBIT Arcade отключён в Global ID</div>';
+                    return;
+                }
+                currentUser = user;
                 currentRole = userData.role || 'user';
                 document.getElementById('userInfo').textContent = userData.displayName || user.email?.split('@')[0] || 'Игрок';
-                if (currentRole === 'admin' || currentRole === 'employee') {
-                    document.getElementById('btnAdminLink').classList.remove('hidden');
-                }
+                if (currentRole === 'admin' || currentRole === 'employee') document.getElementById('btnAdminLink').classList.remove('hidden');
+                await loadUserRatings();
+                loadGames();
             } catch (e) {
-                document.getElementById('userInfo').textContent = user.email?.split('@')[0] || 'Игрок';
+                console.error('Global ID session check failed:', e);
+                document.getElementById('userInfo').textContent = 'Не удалось проверить авторизацию';
             }
-            await loadUserRatings();
-            loadGames();
         });
 
         async function loadUserRatings() {
