@@ -351,6 +351,13 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.warn);
+
+        function redirectToGlobalId() {
+            const target = new URL('/Global-ID/', window.location.origin);
+            target.searchParams.set('continue', window.location.href);
+            window.location.replace(target.href);
+        }
 
         // Немедленно завершаем сессию, если устройство отозвано через Global ID.
         let deviceRevocationUnsub = null;
@@ -454,72 +461,8 @@
             }
         }
 
-        window.login = async () => {
-            const identifier = document.getElementById('loginIdentifier').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            if (!identifier || !password) return showMessage('authMessage', 'Заполните все поля', true);
-
-            await getDeviceInfo();
-            const loginBtn = document.querySelector('#loginScreen .btn-primary');
-            loginBtn.disabled = true;
-            loginBtn.textContent = '⏳ Проверка...';
-
-            try {
-                let email = identifier;
-
-                if (!identifier.includes('@')) {
-                    // Как в Global ID и Iceberg: сначала читаем точный публичный
-                    // mapping global_ids/{GlobalID}. Не запрашиваем коллекцию users
-                    // до входа — Firestore Rules обычно запрещают такой запрос.
-                    const globalId = identifier.trim();
-                    if (!/^[0-9a-zA-Z]{22}$/.test(globalId)) {
-                        loginBtn.disabled = false;
-                        loginBtn.textContent = '🚀 Войти';
-                        return showMessage('authMessage', 'Global ID должен содержать 22 латинские буквы или цифры', true);
-                    }
-
-                    const mappingDoc = await db.collection('global_ids').doc(globalId).get();
-                    if (!mappingDoc.exists || typeof mappingDoc.data()?.email !== 'string' || !mappingDoc.data().email.includes('@')) {
-                        loginBtn.disabled = false;
-                        loginBtn.textContent = '🚀 Войти';
-                        return showMessage('authMessage', 'Global ID не найден или не привязан к email', true);
-                    }
-                    email = mappingDoc.data().email.trim();
-                }
-
-                // Сохраняем авторизацию на этом устройстве, как в Global ID и Iceberg.
-                // Firebase хранит refresh token и восстанавливает сессию при следующем открытии.
-                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-                const userCred = await auth.signInWithEmailAndPassword(email, password);
-                await ensureUserDocument(userCred.user.uid, email);
-
-                await db.collection('users').doc(userCred.user.uid).update({
-                    arcadeAccess: true,
-                    arcadeLastLogin: firebase.firestore.FieldValue.serverTimestamp(),
-                    online: true,
-                    lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
-                    currentIP,
-                    currentDevice: deviceFingerprint
-                });
-
-                loginBtn.disabled = false;
-                loginBtn.textContent = '🚀 Войти';
-                await showRoleScreen(userCred.user);
-            } catch (error) {
-                console.error('Ошибка входа:', error);
-                loginBtn.disabled = false;
-                loginBtn.textContent = '🚀 Войти';
-                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                    showMessage('authMessage', 'Неверный email или пароль', true);
-                } else if (error.code === 'auth/invalid-email') {
-                    showMessage('authMessage', 'Некорректный email', true);
-                } else if (error.code === 'permission-denied' || error.code === 'firestore/permission-denied') {
-                    showMessage('authMessage', 'Firestore запретил чтение global_ids. Разрешите публичное чтение только документа global_ids/{GlobalID} в правилах Firestore.', true);
-                } else {
-                    showMessage('authMessage', 'Ошибка: ' + error.message, true);
-                }
-            }
-        };
+        // Вход и 2FA централизованы в Global ID.
+        window.login = () => redirectToGlobalId();
 
         window.verify2FA = async () => {
             const code = ['code1', 'code2', 'code3', 'code4'].map(id => document.getElementById(id).value).join('');
@@ -605,15 +548,36 @@
         };
 
         auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                const loginScreen = document.getElementById('loginScreen');
-                const twoFactorScreen = document.getElementById('twoFactorScreen');
-                const roleScreen = document.getElementById('roleScreen');
-                if (!loginScreen.classList.contains('hidden') && 
-                    twoFactorScreen.classList.contains('hidden') && 
-                    roleScreen.classList.contains('hidden')) {
-                    await showRoleScreen(user);
+            if (!user) { redirectToGlobalId(); return; }
+            if (!user.emailVerified) {
+                await auth.signOut();
+                redirectToGlobalId();
+                return;
+            }
+            try {
+                const profileSnap = await db.collection('users').doc(user.uid).get();
+                if (!profileSnap.exists) {
+                    await auth.signOut();
+                    redirectToGlobalId();
+                    return;
                 }
+                const profile = profileSnap.data() || {};
+                let sharedToken = null;
+                try { sharedToken = localStorage.getItem('itglobal_shared_device_token'); } catch {}
+                const revoked = sharedToken && (profile.revokedDeviceTokens || []).includes(sharedToken);
+                if (profile.accountLocked === true || revoked) {
+                    await auth.signOut();
+                    redirectToGlobalId();
+                    return;
+                }
+                if (profile.arcadeAccess === false) {
+                    showMessage('authMessage', 'Доступ к GloBIT Arcade отключён в Global ID.', true);
+                    return;
+                }
+                await showRoleScreen(user);
+            } catch (error) {
+                console.error('Не удалось проверить сессию Global ID:', error);
+                showMessage('authMessage', 'Не удалось проверить авторизацию. Обновите страницу.', true);
             }
         });
     </script>
