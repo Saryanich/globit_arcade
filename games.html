@@ -343,6 +343,7 @@
         let allGames = [];
         let userRatings = {};
         let currentGameName = '';
+        let globalIdSessionWatcher = null;
 
         auth.onAuthStateChanged(async (user) => {
             if (!user) { redirectToGlobalId(); return; }
@@ -361,6 +362,14 @@
                     return;
                 }
                 currentUser = user;
+                if (globalIdSessionWatcher) { globalIdSessionWatcher(); globalIdSessionWatcher = null; }
+                globalIdSessionWatcher = db.collection('users').doc(user.uid).onSnapshot(snap => {
+                    const latest = snap.data() || {};
+                    if (!snap.exists || latest.accountLocked === true || (token && (latest.revokedDeviceTokens || []).includes(token))) {
+                        if (globalIdSessionWatcher) { globalIdSessionWatcher(); globalIdSessionWatcher = null; }
+                        auth.signOut().finally(redirectToGlobalId);
+                    }
+                }, error => console.warn('Global ID session watcher:', error));
                 currentRole = userData.role || 'user';
                 document.getElementById('userInfo').textContent = userData.displayName || user.email?.split('@')[0] || 'Игрок';
                 if (currentRole === 'admin' || currentRole === 'employee') document.getElementById('btnAdminLink').classList.remove('hidden');
