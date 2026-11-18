@@ -520,6 +520,7 @@
         });
 
         let currentUser = null;
+        let globalIdSessionWatcher = null;
 
         auth.onAuthStateChanged(async (user) => {
             if (!user) { redirectToGlobalId(); return; }
@@ -539,6 +540,14 @@
                     return;
                 }
                 currentUser = user;
+                if (globalIdSessionWatcher) { globalIdSessionWatcher(); globalIdSessionWatcher = null; }
+                globalIdSessionWatcher = db.collection('users').doc(user.uid).onSnapshot(snap => {
+                    const latest = snap.data() || {};
+                    if (!snap.exists || latest.accountLocked === true || (token && (latest.revokedDeviceTokens || []).includes(token))) {
+                        if (globalIdSessionWatcher) { globalIdSessionWatcher(); globalIdSessionWatcher = null; }
+                        auth.signOut().finally(redirectToGlobalId);
+                    }
+                }, error => console.warn('Global ID admin session watcher:', error));
                 loadAllGames();
                 loadPlayers();
             } catch (error) {
