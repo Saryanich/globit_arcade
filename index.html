@@ -531,14 +531,18 @@
         window.goToAdmin = () => { window.location.href = 'admin.html'; };
 
         window.logout = async () => {
-            if (auth.currentUser) {
-                await db.collection('users').doc(auth.currentUser.uid).update({ online: false });
+            const user = auth.currentUser;
+            try {
+                if (user) {
+                    await db.collection('users').doc(user.uid).update({
+                        online: false,
+                        lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+                    }).catch(() => {});
+                }
                 await auth.signOut();
+            } finally {
+                redirectToGlobalId();
             }
-            document.getElementById('roleScreen').classList.add('hidden');
-            document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('loginIdentifier').value = '';
-            document.getElementById('loginPassword').value = '';
         };
 
         auth.onAuthStateChanged(async (user) => {
