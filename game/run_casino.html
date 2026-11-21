@@ -1060,6 +1060,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             <div class="balance-display">
                 <span class="balance-label">💰 Баланс</span>
                 <span class="balance-amount" id="balanceDisplay">1000</span>
+                <div id="prestigeStatus" style="font-size:.78rem;color:#ffd700;margin-top:.35rem;">⭐ Престиж 0 · шанс крупного приза 1%</div>
+                <button id="prestigeButton" type="button" onclick="performPrestige()" disabled style="margin-top:.55rem;padding:.55rem 1rem;border:1px solid #ffd700;border-radius:12px;background:linear-gradient(135deg,#493400,#9b6d00);color:#fff;font-weight:800;opacity:.55;">⭐ ПРЕСТИЖ · 50 000 000</button>
             </div>
 
             
@@ -1255,7 +1257,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         let isSpinInProgress = false;
         let lastSpinFinishedAt = 0;
         const SPIN_MIN_GAP = 1800;
-        let casinoProgress = { autoSpinUnlocked: false, totalSpins: 0, totalWins: 0, bestWin: 0, superGameCompletedLevels: [], superGameLuckBoost: false, superGameDebuffPercent: 0, superGameDebuffUntil: 0, comboRevealEnabled: true };
+        let casinoProgress = { autoSpinUnlocked: false, totalSpins: 0, totalWins: 0, bestWin: 0, prestige: 0, superGameCompletedLevels: [], superGameLuckBoost: false, superGameDebuffPercent: 0, superGameDebuffUntil: 0, comboRevealEnabled: true };
         const MAX_PRIZE = Number.MAX_SAFE_INTEGER;
         const MAX_SPIN_PAYOUT_MULTIPLIER = 30;
         const MEGA_THRESHOLD = 1000000;
@@ -1539,7 +1541,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             if (!Number.isFinite(loadedBalance) || loadedBalance < 0) throw new Error('Сервер вернул некорректный баланс');
             gameBalance = Math.floor(loadedBalance);
             const progress = scoreData.casinoProgress || {};
-            casinoProgress = { ...casinoProgress, ...progress, comboRevealEnabled: progress.comboRevealEnabled !== false, upgradeLevels:{ ...(progress.upgradeLevels || {}) }, superGameCompletedLevels:Array.isArray(progress.superGameCompletedLevels) ? progress.superGameCompletedLevels.map(Number) : (Number(progress.superGameCompletedLevel) > 0 ? [Number(progress.superGameCompletedLevel)] : []) };
+            casinoProgress = { ...casinoProgress, ...progress, prestige:Math.max(0,Math.floor(Number(progress.prestige)||0)), comboRevealEnabled: progress.comboRevealEnabled !== false, upgradeLevels:{ ...(progress.upgradeLevels || {}) }, superGameCompletedLevels:Array.isArray(progress.superGameCompletedLevels) ? progress.superGameCompletedLevels.map(Number) : (Number(progress.superGameCompletedLevel) > 0 ? [Number(progress.superGameCompletedLevel)] : []) };
             autoSpinUnlocked = progress.autoSpinUnlocked === true || getUpgradeLevel('auto') > 0;
             document.getElementById('displayName').textContent = data.displayName || user.email?.split('@')[0] || 'Игрок';
             document.getElementById('globalIdDisplay').textContent = currentGlobalId;
@@ -1588,6 +1590,9 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         function updateUI(){
             const balance = document.getElementById('balanceDisplay');
             if (balance) balance.textContent = Number(gameBalance || 0).toLocaleString();
+            const prestigeStatus=document.getElementById('prestigeStatus'),prestigeButton=document.getElementById('prestigeButton');
+            if(prestigeStatus)prestigeStatus.textContent='⭐ Престиж '+getPrestigeCount()+' · шанс крупного приза '+getPrestigeHighPrizeChance().toFixed(1).replace('.',',')+'%';
+            if(prestigeButton){prestigeButton.disabled=gameBalance<50000000||!casinoDataReady||isSpinInProgress||megaGameActive||riskActive||miniGameBusy;prestigeButton.style.opacity=prestigeButton.disabled?'.55':'1';prestigeButton.textContent=gameBalance>=50000000?'⭐ ПОВЫСИТЬ ПРЕСТИЖ':'⭐ ПРЕСТИЖ · '+Math.max(0,50000000-gameBalance).toLocaleString()+' ДОСТУПНО';}
             const autoStatus = document.getElementById('autoUpgradeStatus');
             const autoBuy = document.getElementById('buyAutoUpgrade');
             if (autoStatus) autoStatus.textContent = autoSpinUnlocked ? 'УЛУЧШЕНИЕ АКТИВНО' : 'Автоспин не куплен';
@@ -1641,6 +1646,27 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             turbo:{title:'⚙️ Турбо-механизм',desc:'Ускоряет остановку барабанов.',costs:[16000,48000,115000,250000,500000]},
             auto:{title:'🔄 Автопривод',desc:'Открывает автоспин и ускоряет его.',costs:[20000,60000,140000,300000,600000]}
         };
+        function getPrestigeCount(){return Math.max(0,Math.floor(Number(casinoProgress.prestige)||0));}
+        function getPrestigeHighPrizeChance(){return Math.min(100,1+getPrestigeCount()*.2);}
+        async function performPrestige(){
+            if(!casinoDataReady||isSpinInProgress||riskActive||megaGameActive||miniGameBusy||gameBalance<50000000)return;
+            const nextPrestige=getPrestigeCount()+1;
+            const chance=(1+nextPrestige*.2).toFixed(1).replace(".",",");
+            if(!confirm('Активировать престиж '+nextPrestige+'?\\n\\nБаланс станет 1 000 монет. Все улучшения и пройденные суперигры сбросятся.\\nШанс крупного приза вырастет до '+chance+'%.\\nПрестиж '+nextPrestige+' останется навсегда.'))return;
+            const previousBalance=gameBalance,previousProgress={...casinoProgress};
+            stopAutoSpin();gameBalance=1000;
+            casinoProgress={autoSpinUnlocked:false,totalSpins:0,totalWins:0,bestWin:0,prestige:nextPrestige,upgradeLevels:{},superGameCompletedLevels:[],superGameLuckBoost:false,superGameDebuffPercent:0,superGameDebuffUntil:0,comboRevealEnabled:true};
+            autoSpinUnlocked=false;freespinsRemaining=0;lastWinAmount=0;currentBet=50;
+            document.querySelectorAll('.bet-option').forEach(o=>o.classList.toggle('selected',Number(o.dataset.bet)===50));
+            try{
+                await updateBalanceDB();
+                document.getElementById('winMessage').textContent='⭐ ПРЕСТИЖ '+nextPrestige+'! Шанс крупного приза: '+chance+'%';
+                playMegaWinSound();triggerHaptic('jackpot');triggerCasinoFX('jackpot');updateUI();
+            }catch(error){
+                gameBalance=previousBalance;casinoProgress=previousProgress;autoSpinUnlocked=casinoProgress.autoSpinUnlocked===true;
+                updateUI();document.getElementById('winMessage').textContent='Не удалось сохранить престиж. Изменения отменены.';
+            }
+        }
         function getUpgradeLevel(key){return Math.max(0,Math.min(5,Number(casinoProgress.upgradeLevels?.[key])||0));}
         function openWorkshop(){
             if(!casinoDataReady)return;if(isSpinInProgress||miniGameBusy)return;renderWorkshop();document.getElementById('workshopOverlay').classList.add('open');document.getElementById('workshopOverlay').setAttribute('aria-hidden','false');playButtonClick();}
@@ -1898,6 +1924,12 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 updateUI();document.getElementById('winMessage').textContent='';
                 const grid=createSlotGrid(false);await animateSlotGrid(grid,getSpinAnimationDuration());
                 let result=checkWin(grid,false,false);
+                let prestigePrizeTriggered=false;
+                const prestigeChance=getPrestigeHighPrizeChance()/100;
+                if(result.win<=0&&Math.random()<prestigeChance){
+                    for(let c=0;c<SLOT_COLS;c++){grid[0][c]='7';const node=document.getElementById('cell-0-'+c);if(node)node.textContent='7';}
+                    result=checkWin(grid,false,false);prestigePrizeTriggered=result.win>0;
+                }
                 let permanentLuckTriggered=false;
                 if(result.win<=0&&casinoProgress.superGameLuckBoost&&Math.random()<0.03){
                     const luckyRow=Math.floor(Math.random()*SLOT_ROWS);
@@ -1907,6 +1939,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 if(result.win>0)result.win=Math.min(Math.floor(result.win*getPayoutBoost()),Math.floor(currentBet*MAX_SPIN_PAYOUT_MULTIPLIER));
                 let penaltySuppressed=false;
                 if(result.win>0&&suppressWinBySuperGamePenalty()){result.win=0;result.cells=[];result.details=['⏳ Временное снижение вероятности выигрыша'];penaltySuppressed=true;}
+                if(prestigePrizeTriggered&&result.win>0)result.details.unshift('⭐ ПРЕСТИЖНЫЙ ПРИЗ · шанс '+getPrestigeHighPrizeChance().toFixed(1).replace('.',',')+'%');
                 if(permanentLuckTriggered&&result.win>0)result.details.unshift('🍀 Постоянная удача +3%');
                 lastWinAmount=result.win;
                 if(result.win>0){
