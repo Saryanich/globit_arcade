@@ -1115,6 +1115,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             try {
                 audio.pause();
                 audio.currentTime = 0;
+                const volumes = {sfxReel:0.48,sfxLever:0.38,sfxWin:0.58,sfxLose:0.42,sfxCoin:0.48};
+                audio.volume = volumes[id] ?? 0.5;
                 const playback = audio.play();
                 if (playback && typeof playback.catch === 'function') playback.catch(() => { if (fallback) fallback(); });
             } catch (e) { if (fallback) fallback(); }
@@ -1134,11 +1136,11 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         function playSuperWinSound() { playWinSound(); playCoinDrop();
             [1046.5, 1318.52].forEach((f, i) => setTimeout(() => playTone(f, 0.4, 'sine', 0.5), i * 200)); }
 
-        function playMegaWinSound() { [261.63, 329.63, 392, 523.25, 659.25, 783.99, 1046.5, 1318.52].forEach((f, i) =>
-            setTimeout(() => playTone(f, 0.5, 'sine', 0.6), i * 180)); }
+        function playMegaWinSound() { playWinSound(); playCoinDrop();
+            [1046.5, 1318.52].forEach((f, i) => setTimeout(() => playTone(f, 0.5, 'sine', 0.55), i * 180)); }
 
-        function playMegaLoseSound() { [1046.5, 783.99, 523.25, 261.63].forEach((f, i) => setTimeout(() => playTone(f, 0.6,
-                'sawtooth', 0.5), i * 300)); }
+        function playMegaLoseSound() { playLoseSound();
+            [523.25, 261.63].forEach((f, i) => setTimeout(() => playTone(f, 0.45, 'sawtooth', 0.35), i * 300)); }
 
         function playLoseSound() { playSfx('sfxLose', () => { playTone(440, 0.3, 'sawtooth', 0.2);
             setTimeout(() => playTone(349.23, 0.4, 'sawtooth', 0.2), 200); }); }
@@ -2268,7 +2270,13 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             audioEnabled = casinoSoundOn;
             document.getElementById('casinoSoundToggle').textContent = casinoSoundOn ? '🔊 Звук: ВКЛ' : '🔇 Звук: ВЫКЛ';
             if (casinoSoundOn) initAudio();
-            else if (audioCtx && audioCtx.state === 'running') audioCtx.suspend().catch(() => {});
+            else {
+                document.querySelectorAll('audio[id^="sfx"]').forEach(audio => {
+                    audio.pause();
+                    try { audio.currentTime = 0; } catch (e) {}
+                });
+                if (audioCtx && audioCtx.state === 'running') audioCtx.suspend().catch(() => {});
+            }
         });
         document.getElementById('casinoStartButton').addEventListener('click', () => {
             if (!menuInitialized) initGuestCasino();
