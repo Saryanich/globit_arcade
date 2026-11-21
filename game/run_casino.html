@@ -1189,7 +1189,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         });
         const auth = firebase.auth();
         const db = firebase.firestore();
-        // Повторно используем локальную Firebase-сессию GloBIT Arcade.
+        // Повторно используем локальную Firebase-сессию GLoB Data.
         auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.warn);
 
 
@@ -1608,7 +1608,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             if (currentGlobalId) await updateBalanceInScore(currentGlobalId, gameBalance);
             updateBankUI();
         }
-        // Авторизация выполняется в GloBIT Arcade; здесь используется уже существующая сессия.
+        // Авторизация выполняется в GLoB Data; здесь используется уже существующая сессия.
         window.logout = async () => {
             stopAutoSpin();
                 if (auth.currentUser) await updateBalanceDB();
@@ -2289,7 +2289,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             if(overlay) overlay.classList.toggle('ready',casinoDataReady);
             if(start) start.disabled=!casinoDataReady;
             if(title) title.textContent=casinoDataReady?'Данные загружены':'Подключаемся к GLoB Data…';
-            if(message) message.textContent=casinoDataReady?'Серверный баланс и прогресс синхронизированы.':'Игра заблокирована до загрузки серверного баланса. Не закрывайте страницу.';
+            if(message) message.textContent=casinoDataReady?'Серверный баланс и прогресс синхронизированы.':(casinoLoadError?'Ошибка подключения: '+casinoLoadError+'. Игра откроется после восстановления связи с GLoB Data.':'Загружаем серверный баланс GLoB Data. Не закрывайте страницу.');
             if(status) status.textContent=casinoDataReady?'✓ Аккаунт подключён. Баланс и прогресс загружены.':(casinoLoadError?'Ожидание соединения… '+casinoLoadError:'Подключаемся к GLoB Data и загружаем сохранённый баланс…');
         }
         async function initGuestCasino() {
