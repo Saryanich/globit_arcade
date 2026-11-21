@@ -971,6 +971,21 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         @media(max-width:520px){.slot-grid{gap:4px;padding:6px}.slot-cell{font-size:clamp(.95rem,4vw,1.35rem)}.lever-housing{min-height:186px}.lever-stick{height:105px}}
         @media(prefers-reduced-motion:reduce){.slot-cell.spinning,.slot-cell.reel-stop,.casino-particle,.casino-fx.active{animation:none!important}}
 
+
+        .cabinet-lower{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+        .cabinet-lower .arcade-door{min-width:0;width:100%;padding:12px 8px;font-size:.83rem;line-height:1.25}
+        .workshop-overlay{position:fixed;inset:0;z-index:10010;display:none;align-items:center;justify-content:center;padding:12px;background:#030706ef;backdrop-filter:blur(9px)}
+        .workshop-overlay.open{display:flex}.workshop-modal{width:min(640px,100%);max-height:min(88dvh,850px);overflow:auto;border:1px solid #b88a4c88;border-radius:16px;padding:14px;background:linear-gradient(145deg,#211b14,#0d1511 70%);box-shadow:0 20px 70px #000c;color:#f6e8ce}
+        .workshop-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.workshop-top small{color:#d8ad67;letter-spacing:.12em}.workshop-top h2{margin:4px 0;font-size:1.2rem}.workshop-top p{margin:0;color:#b8aa94;font-size:.8rem}
+        .workshop-wallet{padding:10px 12px;margin:12px 0;border-radius:10px;background:#0006;display:flex;justify-content:space-between}.workshop-wallet b{color:#ffe08a;font-variant-numeric:tabular-nums}
+        .workshop-upgrades{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.workshop-card{min-width:0;padding:11px;border:1px solid #bd94504a;border-radius:12px;background:linear-gradient(150deg,#2a241b,#111a15)}
+        .workshop-card h3{font-size:.92rem;margin:0 0 4px}.workshop-card p{font-size:.72rem;line-height:1.35;color:#c1b7a6;min-height:32px;margin:0 0 9px}
+        .workshop-level{display:flex;justify-content:space-between;font-size:.73rem;color:#e7ce9d;margin-bottom:6px}.workshop-meter{height:5px;background:#0009;border-radius:9px;overflow:hidden;margin-bottom:9px}.workshop-meter i{display:block;height:100%;background:linear-gradient(90deg,#39b86b,#f1c66e);border-radius:9px}
+        .workshop-buy{width:100%;min-height:36px;border:1px solid #d3a95b88;border-radius:8px;background:linear-gradient(130deg,#75502a,#372417);color:#fff0d0;font-weight:800;font-size:.76rem}.workshop-buy:disabled{opacity:.4}
+        .workshop-bottom{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:12px;color:#a99b86;font-size:.68rem}.workshop-bottom button{border:1px solid #bd9450;border-radius:8px;padding:8px 13px;background:#4b3823;color:#ffe7b8;font-weight:800}
+        .mini-game-tabs{grid-template-columns:repeat(5,minmax(0,1fr))}.haptic-fallback .lever{filter:brightness(1.35) saturate(1.25)}
+        @media(max-width:520px){.workshop-overlay{padding:7px}.workshop-modal{padding:11px;max-height:92dvh}.workshop-upgrades{grid-template-columns:1fr}.workshop-card p{min-height:0}.cabinet-lower{gap:7px}.cabinet-lower .arcade-door{font-size:.72rem;padding:10px 5px}.mini-game-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.workshop-bottom{font-size:.62rem}}
+
     </style>
 </head>
 <body>
@@ -994,7 +1009,12 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
   </div>
 </div>
 
-    <div class="mini-arcade-overlay" id="miniArcadeScreen" aria-hidden="true"><section class="mini-arcade-cabinet"><header class="mini-arcade-header"><div><small>GLOBIT • RETRO HALL</small><h2>MINI CASINO</h2></div><button class="mini-close" type="button" aria-label="Закрыть мини-казино" onclick="closeMiniArcade()">✕</button></header><div class="mini-wallet">ВАШ БАЛАНС <b id="miniBalance">0</b> COINS</div><div class="mini-game-tabs"><button onclick="selectMiniGame('wheel')" class="mini-game-card" data-mini="wheel"><i>🎡</i><b>РУЛЕТКА</b><small>× до 8</small><small data-mini-cooldown="wheel"></small></button><button onclick="selectMiniGame('dice')" class="mini-game-card" data-mini="dice"><i>🎲</i><b>КОСТИ</b><small>× до 5</small><small data-mini-cooldown="dice"></small></button><button onclick="selectMiniGame('cards')" class="mini-game-card" data-mini="cards"><i>🂡</i><b>КАРТЫ</b><small>Красное / чёрное</small><small data-mini-cooldown="cards"></small></button><button onclick="selectMiniGame('coin')" class="mini-game-card" data-mini="coin"><i>🪙</i><b>МОНЕТКА</b><small>Орёл / решка</small><small data-mini-cooldown="coin"></small></button></div><div class="mini-stage" id="miniStage"><div class="mini-stage-idle"><span>🎰</span><h3>ВЫБЕРИ АВТОМАТ</h3><p>Все игры используют текущую ставку.</p></div></div><div class="mini-footer"><span>RETRO ARCADE • 1986</span><button onclick="closeMiniArcade()">← НАЗАД К СЛОТАМ</button></div></section></div>
+    <div class="mini-arcade-overlay" id="miniArcadeScreen" aria-hidden="true"><section class="mini-arcade-cabinet"><header class="mini-arcade-header"><div><small>GLOBIT • RETRO HALL</small><h2>MINI CASINO</h2></div><button class="mini-close" type="button" aria-label="Закрыть мини-казино" onclick="closeMiniArcade()">✕</button></header><div class="mini-wallet">ВАШ БАЛАНС <b id="miniBalance">0</b> COINS</div><div class="mini-game-tabs"><button onclick="selectMiniGame('wheel')" class="mini-game-card" data-mini="wheel"><i>🎡</i><b>РУЛЕТКА</b><small>× до 8</small><small data-mini-cooldown="wheel"></small></button><button onclick="selectMiniGame('dice')" class="mini-game-card" data-mini="dice"><i>🎲</i><b>КОСТИ</b><small>× до 5</small><small data-mini-cooldown="dice"></small></button><button onclick="selectMiniGame('cards')" class="mini-game-card" data-mini="cards"><i>🂡</i><b>КАРТЫ</b><small>Красное / чёрное</small><small data-mini-cooldown="cards"></small></button><button onclick="selectMiniGame('coin')" class="mini-game-card" data-mini="coin"><i>🪙</i><b>МОНЕТКА</b><small>Орёл / решка</small><small data-mini-cooldown="coin"></small></button><button onclick="selectMiniGame('risk')" class="mini-game-card" data-mini="risk"><i>🃏</i><b>РИСК</b><small>Удвой выигрыш</small><small data-mini-cooldown="risk"></small></button></div><div class="mini-stage" id="miniStage"><div class="mini-stage-idle"><span>🎰</span><h3>ВЫБЕРИ АВТОМАТ</h3><p>Все игры используют текущую ставку.</p></div></div><div class="mini-footer"><span>RETRO ARCADE • 1986</span><button onclick="closeMiniArcade()">← НАЗАД К СЛОТАМ</button></div></section></div>
+    <div class="workshop-overlay" id="workshopOverlay" aria-hidden="true"><section class="workshop-modal">
+      <header class="workshop-top"><div><small>GLOBIT • UPGRADES</small><h2>🛠 МАСТЕРСКАЯ</h2><p>Прокачивай автомат по уровням</p></div><button type="button" class="mini-close" onclick="closeWorkshop()">✕</button></header>
+      <div class="workshop-wallet">Баланс: <b id="workshopBalance">0</b> монет</div><div class="workshop-upgrades" id="workshopUpgrades"></div>
+      <footer class="workshop-bottom"><span>Уровни сохраняются в аккаунте</span><button type="button" onclick="closeWorkshop()">ГОТОВО</button></footer>
+    </section></div>
     <div class="app-container">
 <!-- ИГРА -->
         <div id="gameScreen" class="screen">
@@ -1060,15 +1080,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             <div class="machine-row"><div class="slot-grid" id="slotGrid"></div><div class="lever-housing"><button class="lever" id="casinoLever" type="button" aria-label="Потянуть рычаг вниз и на себя"><span class="lever-track"></span><span class="lever-stick"><i class="lever-ball"></i></span><span class="lever-base">PULL</span></button></div><div class="machine-actions"><button class="cabinet-action" id="autoBtn" onclick="toggleAutoSpin()">AUTO</button><button class="cabinet-action" id="riskBtn" onclick="startRiskGame()" disabled>RISK</button><button class="cabinet-action" id="superBtn" onclick="startSuperGame()" style="display:none">SUPER</button><button class="cabinet-action" id="megaBtn" onclick="startMegaGame()" style="display:none">MEGA</button></div></div><button id="spinBtn" type="button" hidden aria-hidden="true" tabindex="-1"></button>
             <div class="win-message" id="winMessage"></div>
 
-            <div class="cabinet-lower"><div class="upgrade-panel"><div class="upgrade-head"><b>🛠 МАСТЕРСКАЯ</b><span id="autoUpgradeStatus">Автоспин не куплен</span></div><button class="btn btn-auto" id="buyAutoUpgrade" onclick="buyAutoSpinUpgrade()">⚡ Купить автоспин · 5 000</button><div class="upgrade-note">Автоспин — постоянное улучшение аккаунта.</div></div><button class="arcade-door" onclick="openMiniArcade()">🕹 ОТКРЫТЬ MINI CASINO <span>4 АВТОМАТА</span></button></div>
-
-            <div class="risk-game-area" id="riskGameArea">
-                <div style="font-weight:700;color:#ff5252;">🎯 Риск-игра! Удвой!</div>
-                <p style="color:#ccc;font-size:0.8rem;">Найди ❤️ среди карт</p>
-                <div class="risk-cards" id="riskCards"></div>
-                <p style="font-size:0.75rem;color:#aaa;">Ставка: <strong id="riskAmount">0</strong></p>
-                <button class="btn btn-secondary" onclick="cancelRisk()" style="font-size:0.75rem;">Отмена</button>
-            </div>
+            <div class="cabinet-lower"><button class="arcade-door" type="button" onclick="openWorkshop()">🛠 МАСТЕРСКАЯ <span>УЛУЧШЕНИЯ · УРОВНИ</span></button><button class="arcade-door" type="button" onclick="openMiniArcade()">🕹 MINI CASINO <span>5 ИГР</span></button></div>
 
             <button class="btn btn-secondary" onclick="logout()" style="margin-top:0.6rem;">🚪 Выйти</button>
         </div>
