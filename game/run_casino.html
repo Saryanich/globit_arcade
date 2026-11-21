@@ -1391,6 +1391,12 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
             updateMegaProgress();
             document.getElementById('balanceDisplay').textContent = gameBalance;
+            casinoProgress.totalSpins = (casinoProgress.totalSpins || 0) + 1;
+            if (result.win > 0) {
+                casinoProgress.totalWins = (casinoProgress.totalWins || 0) + 1;
+                casinoProgress.bestWin = Math.max(casinoProgress.bestWin || 0, result.win);
+            }
+            await updateBalanceDB();
 
             if (megaGameSpins >= megaGameTotalSpins) {
                 await new Promise(r => setTimeout(r, 1500));
