@@ -826,6 +826,33 @@
 #casinoLeaderboardContent .leader-row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #ffffff20;padding:4px 0}
 .start-note{margin-top:12px;color:#8090aa;font-size:11px;line-height:1.5}
 @media(max-height:650px){.start-menu{align-items:flex-start}.start-menu-card{padding:14px}.start-label{margin:8px 0}.start-menu-btn{padding:9px}}
+/* RETRO CABINET */
+:root{--accent-green:#68f58a;--accent-gold:#ffd166;--blur:blur(12px)}
+body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c 100%);font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.screen,.start-menu-card{background:linear-gradient(145deg,#1d2b27,#101916);border:3px solid #bd8b42;border-radius:12px;box-shadow:0 0 0 5px #3c2b1b,0 18px 50px #000b,inset 0 0 24px #0008}
+.game-title{font-family:Georgia,serif;letter-spacing:4px;text-shadow:0 0 14px #ffca58}
+.balance-display,.slot-grid,.upgrade-panel,.mini-casino{border-radius:8px;background:#080e0c;border:2px solid #8d6a35;box-shadow:inset 0 0 18px #000}
+.slot-cell{border-radius:4px;background:linear-gradient(145deg,#33483d,#111d18);border:2px solid #a17a43;text-shadow:0 2px 4px #000}
+.btn,.bet-option{border-radius:5px;font-family:inherit;box-shadow:0 3px 0 #382b1a}
+.btn:active{transform:translateY(3px)}
+.machine-row{display:flex;align-items:center;gap:8px}
+.machine-row .slot-grid{flex:1;min-width:0}
+.lever{width:48px;min-width:48px;height:210px;position:relative;border:2px solid #98703a;border-radius:9px;background:linear-gradient(90deg,#34251a,#76512b,#2a1e16);cursor:pointer;display:flex;align-items:flex-start;justify-content:flex-start;flex-direction:column;padding:8px 0;overflow:hidden}
+.lever-stick{position:absolute;top:28px;left:21px;width:6px;height:112px;background:linear-gradient(90deg,#aaa,#eee,#777);border-radius:8px;transform-origin:50% 95%;transition:transform .22s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 8px #fff5}
+.lever-ball{position:absolute;z-index:2;top:13px;left:12px;width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff,#ef5555 35%,#8c0909 80%);box-shadow:0 3px 8px #000}
+.lever-base{position:absolute;bottom:8px;color:#f6cf7a;font-size:9px;font-weight:900;letter-spacing:1px}
+.lever.pulled .lever-stick{transform:rotate(28deg)}
+.lever.pulled .lever-ball{animation:leverDrop .22s ease}
+@keyframes leverDrop{to{transform:translateY(95px)}}
+.upgrade-panel,.mini-casino{padding:10px;margin:8px 0;color:#f7d58a}
+.upgrade-head{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:11px;color:#f7d58a}
+.upgrade-head span,.upgrade-note{color:#a9b7a9;font-size:10px}
+.upgrade-note{margin-top:6px;line-height:1.4}
+.mini-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.mini-buttons .btn{font-size:10px;padding:9px 4px;margin:0}
+#buyAutoUpgrade{margin-top:8px}
+@media(max-width:380px){.lever{width:40px;min-width:40px}.mini-buttons{grid-template-columns:1fr}.machine-row .slot-cell{font-size:1.35rem}}
+
 </style>
 </head>
 <body>
@@ -834,13 +861,7 @@
   <div class="start-menu-card">
     <img src="https://i.ibb.co/wFK0H7rM/Glo-BIT-Arcade.jpg" alt="GloBIT Arcade" class="start-logo">
     <h1>🎰 RUN CASINO</h1>
-    <p class="start-subtitle">Выбери персонажа, настрой звук и начинай игру</p>
-    <div class="start-label">👤 Выбери персонажа</div>
-    <div class="start-characters" id="casinoCharacterSelector">
-      <button type="button" class="casino-character selected" data-character="0">🧑‍🚀<span>Игрок</span></button>
-      <button type="button" class="casino-character" data-character="1">🦊<span>Лис</span></button>
-      <button type="button" class="casino-character" data-character="2">🤖<span>Робот</span></button>
-    </div>
+    <p class="start-subtitle">Ретро-автомат GloBIT: крути барабаны, открывай улучшения и мини-игры</p>
     <button type="button" class="start-menu-btn" id="casinoSoundToggle">🔊 Звук: ВКЛ</button>
     <button type="button" class="start-menu-btn" id="casinoLeaderboardToggle">🏆 Таблица лидеров</button>
     <div id="casinoLeaderboardPanel" class="casino-leaderboard hidden"><div class="start-label">🏆 Лучшие игроки</div><div id="casinoLeaderboardContent">Нажмите, чтобы загрузить таблицу</div></div>
@@ -918,9 +939,10 @@
                 <div class="paytable-row" style="color:#ffd700;font-weight:900;"><span>👑 МЕГА: 4 в ряд</span><span>×200</span></div>
             </div>
 
-            <div class="slot-grid" id="slotGrid"></div>
+            <div class="machine-row"><div class="slot-grid" id="slotGrid"></div><button class="lever" id="casinoLever" type="button" aria-label="Дёрнуть рычаг"><span class="lever-ball"></span><span class="lever-stick"></span><span class="lever-base">PULL</span></button></div>
             <div class="win-message" id="winMessage"></div>
 
+            <div class="upgrade-panel"><div class="upgrade-head"><b>🛠 МАСТЕРСКАЯ</b><span id="autoUpgradeStatus">Автоспин не куплен</span></div><button class="btn btn-auto" id="buyAutoUpgrade" onclick="buyAutoSpinUpgrade()">⚡ Купить автоспин · 5 000</button><div class="upgrade-note">Улучшение сохраняется в профиле и открывает автоматический запуск с паузой между спинами.</div></div><div class="mini-casino"><div class="upgrade-head"><b>🕹 MINI CASINO</b><span>Дополнительные игры</span></div><div class="mini-buttons"><button class="btn btn-secondary" onclick="playMiniGame('coin')">🪙 Монетка</button><button class="btn btn-secondary" onclick="playMiniGame('dice')">🎲 Кубик</button><button class="btn btn-secondary" onclick="playMiniGame('wheel')">🎡 Колесо</button></div></div>
             <div class="controls">
                 <button class="btn btn-gold" id="spinBtn" onclick="spin()">🎲 Крутить</button>
                 <button class="btn btn-auto" id="autoBtn" onclick="toggleAutoSpin()">🔄 АВТО</button>
@@ -1077,6 +1099,11 @@
         let megaGameSavedBalance = 0;
         let autoSpinActive = false;
         let autoSpinInterval = null;
+        let autoSpinUnlocked = false;
+        let isSpinInProgress = false;
+        let lastSpinFinishedAt = 0;
+        const SPIN_MIN_GAP = 1300;
+        let casinoProgress = { autoSpinUnlocked: false, totalSpins: 0, totalWins: 0, bestWin: 0 };
         const MAX_PRIZE = 5000;
         const SUPER_PRIZE = 500000;
         const SUPER_COST = 150000;
@@ -1123,26 +1150,18 @@
 
         async function updateBalanceInScore(globalId, newBalance) {
             if (!auth.currentUser || !globalId) return;
-
             try {
                 const scoreRef = getScoreDocRef(globalId);
-                const scoreDoc = await scoreRef.get();
-
-                if (!scoreDoc.exists) {
-                    await scoreRef.set({
-                        score: newBalance,
-                        globalId: globalId,
-                        email: auth.currentUser.email,
-                        displayName: document.getElementById('displayName').textContent || globalId,
-                        createdAt: new Date(),
-                        updatedAt: new Date()
-                    });
-                } else {
-                    await scoreRef.update({
-                        score: newBalance,
-                        updatedAt: new Date()
-                    });
-                }
+                await scoreRef.set({
+                    score: Math.max(0, Math.floor(Number(newBalance) || 0)),
+                    globalId,
+                    uid: auth.currentUser.uid,
+                    email: auth.currentUser.email || '',
+                    displayName: document.getElementById('displayName').textContent || globalId,
+                    casinoProgress: { ...casinoProgress, autoSpinUnlocked },
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
                 try {
                     const user = auth.currentUser;
                     if (user) {
@@ -1393,6 +1412,12 @@
             document.getElementById('globalIdDisplay').textContent = currentGlobalId;
 
             gameBalance = await getBalanceFromScore(currentGlobalId);
+            try {
+                const saved = await getScoreDocRef(currentGlobalId).get();
+                const progress = saved.exists ? (saved.data().casinoProgress || {}) : {};
+                casinoProgress = { ...casinoProgress, ...progress };
+                autoSpinUnlocked = progress.autoSpinUnlocked === true;
+            } catch (e) { console.warn('Не удалось загрузить улучшения', e); }
 
             if (gameBalance < 10) {
                 gameBalance = 1000;
@@ -1454,6 +1479,10 @@
 
         function updateUI() {
             document.getElementById('balanceDisplay').textContent = gameBalance;
+            const autoStatus = document.getElementById('autoUpgradeStatus');
+            const autoBuy = document.getElementById('buyAutoUpgrade');
+            if (autoStatus) autoStatus.textContent = autoSpinUnlocked ? 'УЛУЧШЕНИЕ АКТИВНО' : 'Автоспин не куплен';
+            if (autoBuy) { autoBuy.disabled = autoSpinUnlocked; autoBuy.textContent = autoSpinUnlocked ? '✓ АВТОСПИН КУПЛЕН' : '⚡ Купить автоспин · 5 000'; }
             updateSuperBalanceDisplay();
             const sb = document.getElementById('spinBtn');
             const rb = document.getElementById('riskBtn');
@@ -1516,7 +1545,44 @@
             playButtonClick();
         }
 
+        async function buyAutoSpinUpgrade() {
+            if (autoSpinUnlocked) { document.getElementById('winMessage').textContent = '⚡ Автоспин уже куплен и сохранён.'; return; }
+            const cost = 5000;
+            if (gameBalance < cost) { document.getElementById('winMessage').textContent = 'Недостаточно монет для улучшения.'; return; }
+            gameBalance -= cost;
+            autoSpinUnlocked = true;
+            casinoProgress.autoSpinUnlocked = true;
+            await updateBalanceDB();
+            updateUI();
+            document.getElementById('winMessage').textContent = '⚡ Автоспин открыт навсегда для этого аккаунта!';
+        }
+
+        function playMiniGame(kind) {
+            if (isSpinInProgress || riskActive || superGameActive || megaGameActive) return;
+            if (gameBalance < currentBet) { document.getElementById('winMessage').textContent = 'Недостаточно монет для ставки.'; return; }
+            isSpinInProgress = true;
+            const cost = currentBet;
+            gameBalance -= cost;
+            updateUI();
+            document.getElementById('winMessage').textContent = '🎮 Игра запускается...';
+            setTimeout(async () => {
+                let mult = 0, label = '';
+                if (kind === 'coin') { const win = Math.random() < 0.48; mult = win ? 2 : 0; label = win ? '🪙 Орёл! Выплата ×2' : '🪙 Решка. Не повезло'; }
+                else if (kind === 'dice') { const roll = 1 + Math.floor(Math.random() * 6); mult = roll === 6 ? 5 : (roll >= 4 ? 1.5 : 0); label = '🎲 Выпало ' + roll + (mult ? ' · Выплата ×' + mult : ' · Без выигрыша'); }
+                else { const roll = Math.random(); mult = roll > .94 ? 8 : (roll > .72 ? 2 : 0); label = mult ? '🎡 Сектор удачи! ×' + mult : '🎡 Пустой сектор'; }
+                const payout = Math.floor(cost * mult);
+                gameBalance += payout;
+                casinoProgress.totalSpins = (casinoProgress.totalSpins || 0) + 1;
+                if (payout) { casinoProgress.totalWins = (casinoProgress.totalWins || 0) + 1; casinoProgress.bestWin = Math.max(casinoProgress.bestWin || 0, payout); playWinSound(); } else playLoseSound();
+                document.getElementById('winMessage').textContent = label + (payout ? ' · +' + payout.toLocaleString() + ' монет' : '');
+                await updateBalanceDB();
+                isSpinInProgress = false;
+                updateUI();
+            }, 1400);
+        }
+
         function startAutoSpin() {
+            if (!autoSpinUnlocked) { document.getElementById('winMessage').textContent = '🔒 Сначала купи улучшение автоспина в мастерской.'; return; }
             if (autoSpinActive || superGameActive || megaGameActive) return;
             if (gameBalance < currentBet && freespinsRemaining <= 0) {
                 document.getElementById('winMessage').textContent = '❌ Недостаточно средств для автоигры';
@@ -1706,7 +1772,7 @@
             return { win: isSuper ? total : (isMega ? total : Math.min(total, MAX_PRIZE)), cells, details };
         }
 
-        async function performSpin() {
+        async function _performSpinCore() {
             if (riskActive) return;
 
             if (megaGameActive) {
@@ -1715,7 +1781,6 @@
             }
 
             const spinButton = document.getElementById('spinBtn');
-            if (spinButton.disabled) return;
             if (!superGameActive && gameBalance < currentBet && freespinsRemaining <= 0) {
                 stopAutoSpin();
                 return;
@@ -1725,13 +1790,6 @@
 
             playSpinStart();
             playSpinSound();
-
-            if (!superGameActive && freespinsRemaining <= 0) {
-                gameBalance -= currentBet;
-                await updateBalanceDB();
-            } else if (!superGameActive && freespinsRemaining > 0) {
-                freespinsRemaining--;
-            }
 
             if (superGameActive) {
                 const elapsed = (Date.now() - superGameStartTime) / 1000;
@@ -1750,6 +1808,13 @@
                 }
                 superGameSpins++;
                 superGameStartTime = Date.now();
+            }
+
+            if (!superGameActive && freespinsRemaining <= 0) {
+                gameBalance -= currentBet;
+                await updateBalanceDB();
+            } else if (!superGameActive && freespinsRemaining > 0) {
+                freespinsRemaining--;
             }
 
             updateUI();
@@ -1833,15 +1898,35 @@
                 setTimeout(() => checkMegaGameEligibility(), 800);
             }
 
+            casinoProgress.totalSpins = (casinoProgress.totalSpins || 0) + 1;
+            if (result.win > 0) {
+                casinoProgress.totalWins = (casinoProgress.totalWins || 0) + 1;
+                casinoProgress.bestWin = Math.max(casinoProgress.bestWin || 0, result.win);
+            }
+            await updateBalanceDB();
             updateUI();
             document.getElementById('spinBtn').disabled = false;
         }
 
-        async function spin() {
-            if (megaGameActive) {
-                await megaGameSpin();
-                return;
+        async function performSpin() {
+            if (isSpinInProgress || riskActive) return;
+            const wait = Math.max(0, SPIN_MIN_GAP - (Date.now() - lastSpinFinishedAt));
+            isSpinInProgress = true;
+            updateUI();
+            const lever = document.getElementById('casinoLever');
+            if (lever) lever.classList.add('pulled');
+            try {
+                if (wait) await new Promise(resolve => setTimeout(resolve, wait));
+                await _performSpinCore();
+            } finally {
+                lastSpinFinishedAt = Date.now();
+                isSpinInProgress = false;
+                if (lever) lever.classList.remove('pulled');
+                updateUI();
             }
+        }
+
+        async function spin() {
             if (autoSpinActive) {
                 stopAutoSpin();
                 return;
@@ -2013,12 +2098,6 @@
             if (casinoSoundOn) initAudio();
             else if (audioCtx && audioCtx.state === 'running') audioCtx.suspend().catch(() => {});
         });
-        document.querySelectorAll('#casinoCharacterSelector .casino-character').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('#casinoCharacterSelector .casino-character').forEach(x => x.classList.remove('selected'));
-                btn.classList.add('selected');
-            });
-        });
         document.getElementById('casinoStartButton').addEventListener('click', () => {
             if (!menuInitialized) initGuestCasino();
             document.getElementById('startMenu').style.display = 'none';
@@ -2037,6 +2116,7 @@
                 out.innerHTML = snap.docs.map((d,i) => '<div class="leader-row"><span>'+(i+1)+'. '+String(d.data().displayName||d.data().globalId||'Игрок').replace(/[&<>"]/g,'')+'</span><b>'+Number(d.data().score||0).toLocaleString()+'</b></div>').join('');
             } catch (e) { out.textContent = 'Таблица недоступна: проверьте правила Firestore для score/runcasino/records.'; }
         });
+        document.getElementById('casinoLever')?.addEventListener('click', () => { if (!isSpinInProgress) spin(); });
         document.body.addEventListener('click', function firstClick() {
             if (casinoSoundOn) initAudio();
             document.body.removeEventListener('click', firstClick);
