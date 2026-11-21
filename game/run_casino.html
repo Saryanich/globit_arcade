@@ -1968,7 +1968,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 let result=checkWin(grid,false,false);
                 let prestigePrizeTriggered=false;
                 const prestigeChance=getPrestigeHighPrizeChance()/100;
-                const beginnerBoostActive=gameBalance<5000&&getPrestigeCount()===0;
+                const beginnerBoostActive=gameBalance<5000;
                 if(result.win<=0&&beginnerBoostActive&&Math.random()<0.25){
                     const luckyRow=Math.floor(Math.random()*SLOT_ROWS),luckySymbol=['💚','💜','🖤','6'][Math.floor(Math.random()*4)];
                     for(let c=0;c<3;c++){grid[luckyRow][c]=luckySymbol;const node=document.getElementById('cell-'+luckyRow+'-'+c);if(node)node.textContent=luckySymbol;}
