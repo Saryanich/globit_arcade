@@ -1061,7 +1061,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
     <button type="button" class="start-menu-btn" id="casinoLeaderboardToggle">🏆 Таблица лидеров</button>
     <div id="casinoLeaderboardPanel" class="casino-leaderboard hidden"><div class="start-label">🏆 Лучшие игроки</div><div id="casinoLeaderboardContent">Нажмите, чтобы загрузить таблицу</div></div>
     <button type="button" class="start-menu-btn primary" id="casinoStartButton">▶ НАЧАТЬ ИГРУ</button>
-    <div class="start-note" id="casinoLoadStatus">Подключаемся к аккаунту и загружаем сохранённый баланс…</div>
+    <div class="start-note" id="casinoLoadStatus">Подключаемся к GLoB Data и загружаем сохранённый баланс…</div>
   </div>
 </div>
 
@@ -1109,7 +1109,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
     <footer class="bank-footer"><span>Автопополнение баланса до 500 монет учитывается как долг</span><button type="button" onclick="closeBank()">ЗАКРЫТЬ</button></footer>
   </section>
 </div>
-    <div id="casinoLoadingOverlay" class="casino-loading-overlay"><div class="casino-loading-card"><div class="casino-loader"></div><b id="casinoLoadingTitle">Подключаемся к GloBIT Arcade…</b><span id="casinoLoadingText">Игра заблокирована до загрузки серверного баланса.</span></div></div>
+    <div id="casinoLoadingOverlay" class="casino-loading-overlay"><div class="casino-loading-card"><div class="casino-loader"></div><b id="casinoLoadingTitle">Подключаемся к GLoB Data…</b><span id="casinoLoadingText">Игра заблокирована до загрузки серверного баланса.</span></div></div>
     <div class="app-container">
 <!-- ИГРА -->
         <div id="gameScreen" class="screen">
@@ -1759,7 +1759,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             gameBalance=Math.floor(loadedBalance);
             if(gameBalance<500){casinoBank.overdraftDebt+=500-gameBalance;gameBalance=500;await scoreRef.set({score:gameBalance,casinoBank:cloneBankData(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});}
             const progress = scoreData.casinoProgress || {};
-            casinoProgress = { ...casinoProgress, ...progress, prestige:Math.max(0,Math.floor(Number(progress.prestige)||0)), comboRevealEnabled: progress.comboRevealEnabled !== false, upgradeLevels:{ ...(progress.upgradeLevels || {}) }, superGameCompletedLevels:Array.isArray(progress.superGameCompletedLevels) ? progress.superGameCompletedLevels.map(Number) : (Number(progress.superGameCompletedLevel) > 0 ? [Number(progress.superGameCompletedLevel)] : []) };
+            casinoProgress = { ...casinoProgress, ...progress, prestige:Math.max(0,Math.floor(Number(progress.prestige)||0)), comboRevealEnabled: progress.comboRevealEnabled !== false, comboRevealUnlocked: progress.comboRevealUnlocked===true || Number(progress.upgradeLevels?.turbo)>=5 || Number(progress.prestige)>0, upgradeLevels:{ ...(progress.upgradeLevels || {}) }, superGameCompletedLevels:Array.isArray(progress.superGameCompletedLevels) ? progress.superGameCompletedLevels.map(Number) : (Number(progress.superGameCompletedLevel) > 0 ? [Number(progress.superGameCompletedLevel)] : []) };
             autoSpinUnlocked = progress.autoSpinUnlocked === true || getUpgradeLevel('auto') > 0;
             document.getElementById('displayName').textContent = data.displayName || user.email?.split('@')[0] || 'Игрок';
             document.getElementById('globalIdDisplay').textContent = currentGlobalId;
@@ -1891,8 +1891,10 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             const chance=(1+nextPrestige*.2).toFixed(1).replace(".",",");
             if(!confirm('Активировать престиж '+nextPrestige+'?\\n\\nБаланс станет 500 монет. Все улучшения и пройденные суперигры сбросятся.\\nШанс крупного приза вырастет до '+chance+'%.\\nПрестиж '+nextPrestige+' останется навсегда.'))return;
             const previousBalance=gameBalance,previousProgress={...casinoProgress};
+            const keepComboReveal=casinoProgress.comboRevealUnlocked===true||getUpgradeLevel('turbo')>=5;
+            const keepComboRevealSetting=casinoProgress.comboRevealEnabled!==false;
             stopAutoSpin();gameBalance=500;
-            casinoProgress={autoSpinUnlocked:false,totalSpins:0,totalWins:0,bestWin:0,prestige:nextPrestige,upgradeLevels:{},superGameCompletedLevels:[],superGameLuckBoost:false,superGameDebuffPercent:0,superGameDebuffUntil:0,comboRevealEnabled:true};
+            casinoProgress={autoSpinUnlocked:false,totalSpins:0,totalWins:0,bestWin:0,prestige:nextPrestige,upgradeLevels:{},superGameCompletedLevels:[],superGameLuckBoost:false,superGameDebuffPercent:0,superGameDebuffUntil:0,comboRevealUnlocked:keepComboReveal,comboRevealEnabled:keepComboRevealSetting};
             autoSpinUnlocked=false;freespinsRemaining=0;lastWinAmount=0;currentBet=50;
             document.querySelectorAll('.bet-option').forEach(o=>o.classList.toggle('selected',Number(o.dataset.bet)===50));
             try{
@@ -1919,15 +1921,15 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 return '<article class="workshop-card"><h3>'+item.title+'</h3><p>'+item.desc+'</p><div class="workshop-level"><span>Уровень '+level+'/5</span><b>'+(full?'MAX':cost.toLocaleString()+' монет')+'</b></div><div class="workshop-meter"><i style="width:'+(level*20)+'%"></i></div><button class="workshop-buy" data-upgrade-key="'+key+'" '+(full||gameBalance<cost?'disabled':'')+'>'+(full?'✓ МАКСИМУМ':gameBalance<cost?'Не хватает монет':'УЛУЧШИТЬ · '+cost.toLocaleString())+'</button></article>';
             }).join('');
             host.querySelectorAll('[data-upgrade-key]').forEach(button=>button.addEventListener('click',()=>buyWorkshopUpgrade(button.dataset.upgradeKey)));
-            if(getUpgradeLevel('turbo')>=5){
+            if(casinoProgress.comboRevealUnlocked===true){
                 const setting=document.createElement('article');setting.className='workshop-card combo-setting';
                 setting.innerHTML='<h3>✨ Анимация комбинаций</h3><p>Показывать каждую выигрышную комбинацию отдельно перед итоговым выигрышем.</p><label class="casino-switch"><input type="checkbox" '+(casinoProgress.comboRevealEnabled!==false?'checked':'')+' onchange="setComboRevealEnabled(this.checked)"><span class="casino-switch-track"></span><b>'+(casinoProgress.comboRevealEnabled!==false?'ВКЛ':'ВЫКЛ')+'</b></label>';
                 host.appendChild(setting);
             }
         }
 
-        async function buyWorkshopUpgrade(key){const item=WORKSHOP_UPGRADES[key];if(!item)return;const level=getUpgradeLevel(key);if(level>=5)return;const cost=item.costs[level];if(gameBalance<cost)return;gameBalance-=cost;casinoProgress.upgradeLevels=casinoProgress.upgradeLevels||{};casinoProgress.upgradeLevels[key]=level+1;if(key==='auto'){autoSpinUnlocked=true;casinoProgress.autoSpinUnlocked=true;}await updateBalanceDB();renderWorkshop();updateUI();playSfx('sfxWin');triggerHaptic('medium');document.getElementById('winMessage').textContent=item.title+' улучшено до уровня '+(level+1)+'!';}
-        function setComboRevealEnabled(enabled){if(getUpgradeLevel('turbo')<5)return;casinoProgress.comboRevealEnabled=!!enabled;updateBalanceDB().then(()=>renderWorkshop()).catch(error=>{casinoProgress.comboRevealEnabled=!enabled;renderWorkshop();console.error('Не удалось сохранить настройку анимации:',error);});}
+        async function buyWorkshopUpgrade(key){const item=WORKSHOP_UPGRADES[key];if(!item)return;const level=getUpgradeLevel(key);if(level>=5)return;const cost=item.costs[level];if(gameBalance<cost)return;gameBalance-=cost;casinoProgress.upgradeLevels=casinoProgress.upgradeLevels||{};casinoProgress.upgradeLevels[key]=level+1;if(key==='turbo'&&level+1>=5)casinoProgress.comboRevealUnlocked=true;if(key==='auto'){autoSpinUnlocked=true;casinoProgress.autoSpinUnlocked=true;}await updateBalanceDB();renderWorkshop();updateUI();playSfx('sfxWin');triggerHaptic('medium');document.getElementById('winMessage').textContent=item.title+' улучшено до уровня '+(level+1)+'!';}
+        function setComboRevealEnabled(enabled){if(casinoProgress.comboRevealUnlocked!==true)return;casinoProgress.comboRevealEnabled=!!enabled;updateBalanceDB().then(()=>renderWorkshop()).catch(error=>{casinoProgress.comboRevealEnabled=!enabled;renderWorkshop();console.error('Не удалось сохранить настройку анимации:',error);});}
         function getAutoSpinDelay(){return Math.max(1200,AUTO_SPIN_DELAY-getUpgradeLevel('auto')*200);}
         function getSpinAnimationDuration(){return Math.max(850,1850-getUpgradeLevel('turbo')*180);}
         function getPayoutBoost(){return 1+getUpgradeLevel('payout')*.01;}
@@ -2115,7 +2117,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         async function animateWinningCombinations(result){
             const gridNode=document.getElementById('slotGrid');
             const cells=Array.from(document.querySelectorAll('.slot-cell'));
-            if(!gridNode||!result||!result.combinations?.length||(getUpgradeLevel('turbo')<5&&getPrestigeCount()===0)||casinoProgress.comboRevealEnabled===false)return false;
+            if(!gridNode||!result||!result.combinations?.length||casinoProgress.comboRevealUnlocked!==true||casinoProgress.comboRevealEnabled===false)return false;
             const rawTotal=result.combinations.reduce((sum,item)=>sum+item.amount,0),factor=rawTotal>0?result.win/rawTotal:1;
             for(const combo of result.combinations){
                 const color=COMBO_COLORS[Math.floor(Math.random()*COMBO_COLORS.length)];
@@ -2286,9 +2288,9 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             const start=document.getElementById('casinoStartButton');
             if(overlay) overlay.classList.toggle('ready',casinoDataReady);
             if(start) start.disabled=!casinoDataReady;
-            if(title) title.textContent=casinoDataReady?'Данные загружены':'Подключаемся к GloBIT Arcade…';
+            if(title) title.textContent=casinoDataReady?'Данные загружены':'Подключаемся к GLoB Data…';
             if(message) message.textContent=casinoDataReady?'Серверный баланс и прогресс синхронизированы.':'Игра заблокирована до загрузки серверного баланса. Не закрывайте страницу.';
-            if(status) status.textContent=casinoDataReady?'✓ Аккаунт подключён. Баланс и прогресс загружены.':(casinoLoadError?'Ожидание соединения… '+casinoLoadError:'Подключаемся к аккаунту и загружаем сохранённый баланс…');
+            if(status) status.textContent=casinoDataReady?'✓ Аккаунт подключён. Баланс и прогресс загружены.':(casinoLoadError?'Ожидание соединения… '+casinoLoadError:'Подключаемся к GLoB Data и загружаем сохранённый баланс…');
         }
         async function initGuestCasino() {
             if (auth.currentUser || !casinoAuthResolved || casinoDataReady) return;
@@ -2310,7 +2312,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                         await loadGame(user);
                         menuInitialized=true; casinoDataReady=true; casinoLoadError=''; updateCasinoLoadingUI(); return;
                     } catch(error) {
-                        lastError=error; casinoLoadError='Попытка '+attempt+' · ожидаем сервер'; updateCasinoLoadingUI();
+                        lastError=error; casinoLoadError='Попытка '+attempt+' · '+String(error.code||error.message||'ошибка сервера').slice(0,90); updateCasinoLoadingUI();
                         console.warn('Ожидание серверных данных Run Casino:',error);
                         await new Promise(resolve=>setTimeout(resolve,Math.min(1000+attempt*500,10000)));
                     }
