@@ -1205,7 +1205,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         // ==================== PARTICLES ====================
         particlesJS('particles-js', {
             particles: {
-                number: { value: 45, density: { enable: true, value_area: 800 } },
+                number: { value: 20, density: { enable: true, value_area: 1000 } },
                 color: { value: ['#00e676', '#2979ff', '#ff1744', '#ffd700', '#d500f9', '#ff6d00'] },
                 shape: { type: 'circle' },
                 opacity: { value: 0.35, random: true },
@@ -1253,11 +1253,11 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         let lastSpinFinishedAt = 0;
         const SPIN_MIN_GAP = 1300;
         let casinoProgress = { autoSpinUnlocked: false, totalSpins: 0, totalWins: 0, bestWin: 0 };
-        const MAX_PRIZE = 5000;
+        const MAX_PRIZE = Number.MAX_SAFE_INTEGER;
         const SUPER_PRIZE = 500000;
         const SUPER_COST = 150000;
         const SUPER_MAX_SPINS = 1;
-        const MEGA_THRESHOLD = 1000000000;
+        const MEGA_THRESHOLD = 1000000;
         const MEGA_BET_PERCENT = 0.1;
         const AUTO_SPIN_DELAY = 2000;
         let currentGlobalId = null;
@@ -1632,7 +1632,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             superBtn.disabled=superRemaining>0||isSpinInProgress||gameBalance<SUPER_COST;
             superBtn.textContent=superRemaining>0?'SUPER · '+formatCooldown(superRemaining):gameBalance<SUPER_COST?'SUPER · НУЖНО 150K':'💥 SUPER SPIN · 150K';
             if(superGameActive){superInd.classList.add('active');if(sb)sb.textContent='💥 СУПЕР-СПИН ИДЁТ…';superBtn.style.display='none';megaBtn.style.display='none';autoBtn.style.display='none';}
-            else{superInd.classList.remove('active');autoBtn.style.display='block';if(sb)sb.textContent=freespinsRemaining>0?'🎰 ФРИСПИН ('+freespinsRemaining+')':'🎲 Крутить ('+currentBet+')';autoBtn.disabled=isSpinInProgress||riskActive;autoBtn.textContent=autoSpinActive?'⏹ СТОП':'🔄 АВТО';autoBtn.className=autoSpinActive?'btn btn-auto active':'btn btn-auto';}
+            else{superInd.classList.remove('active');autoBtn.style.display='block';if(sb)sb.textContent=freespinsRemaining>0?'🎰 ФРИСПИН ('+freespinsRemaining+')':'🎲 Крутить ('+currentBet+')';autoBtn.disabled=riskActive||(!autoSpinActive&&isSpinInProgress);autoBtn.textContent=autoSpinActive?'⏹ СТОП':'🔄 АВТО';autoBtn.className=autoSpinActive?'btn btn-auto active':'btn btn-auto';}
             document.getElementById('freespinIndicator').innerHTML=freespinsRemaining>0?'<span class="freespin-badge">🔥 '+freespinsRemaining+' ФРИСПИНОВ</span>':'';
             const timer=document.getElementById('superTimer');
             if(timer&&!superGameActive&&superRemaining>0)timer.textContent='⏱ Супер-спин через '+formatCooldown(superRemaining);
