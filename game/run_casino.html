@@ -842,7 +842,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 .lever-ball{position:absolute;z-index:2;top:13px;left:12px;width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff,#ef5555 35%,#8c0909 80%);box-shadow:0 3px 8px #000}
 .lever-base{position:absolute;bottom:8px;color:#f6cf7a;font-size:9px;font-weight:900;letter-spacing:1px}
 .lever.pulled .lever-stick{transform:rotate(28deg)}
-.lever.pulled .lever-ball{animation:leverDrop .22s ease}
+
 @keyframes leverDrop{to{transform:translateY(95px)}}
 .upgrade-panel,.mini-casino{padding:10px;margin:8px 0;color:#f7d58a}
 .upgrade-head{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:11px;color:#f7d58a}
@@ -864,7 +864,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 .lever-stick{position:absolute;z-index:2;left:50%;top:34px;width:9px;height:118px;border-radius:9px;background:linear-gradient(90deg,#777,#fff 35%,#aaa 65%,#51412f);transform:translateX(-50%) rotate(0deg);transform-origin:50% 94%;transition:transform .32s cubic-bezier(.2,.8,.25,1);box-shadow:2px 1px 6px #000}
 .lever-ball{position:absolute;top:-17px;left:50%;width:31px;height:31px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle at 28% 23%,#fff8df 0,#ff6660 18%,#b51c19 57%,#4c0908 100%);border:2px solid #f0b66b;box-shadow:0 3px 8px #000,0 0 10px #f33a2b88}
 .lever-base{position:absolute;bottom:6px;left:0;right:0;color:#f4d18b;font-size:9px;letter-spacing:2px;font-weight:900}
-.lever.pulled .lever-stick{transform:translateX(-50%) rotate(34deg)}
+
 .machine-actions{display:flex;flex-direction:column;justify-content:center;gap:7px}
 .cabinet-action{min-height:38px;border:1px solid #a77a3b;border-radius:6px;background:linear-gradient(#57402a,#24180f);color:#f7d99b;font:900 10px ui-monospace,monospace;letter-spacing:1px;box-shadow:0 3px 0 #100b07,inset 0 1px #fff3}
 .cabinet-action.primary{background:linear-gradient(#f4c75f,#9b5b19);color:#291709;font-size:12px}
@@ -954,8 +954,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         .lever:active{cursor:grabbing}
         .lever-stick{transform:translateX(-50%) rotateX(0deg) translateZ(0);transform-origin:50% 94%;transition:transform .14s ease-out;will-change:transform}
         .lever.pulled .lever-stick{transform:translateX(-50%) rotateX(48deg) translateY(5px) translateZ(20px)}
-        .lever-ball{transition:filter .12s ease,box-shadow .12s ease}
-        .lever.pulled .lever-ball{filter:brightness(1.22);box-shadow:0 5px 12px #000,0 0 16px #ff514caa}
+        .lever-ball{transition:filter .12s ease,box-shadow .12s ease;animation:none!important}
+        .lever.pulled .lever-ball{animation:none!important;transform:translateX(-50%);filter:brightness(1.22);box-shadow:0 5px 12px #000,0 0 16px #ff514caa}
         .lever-base{pointer-events:none}
         .machine-actions .cabinet-action{min-height:36px}
         .mini-game-card [data-mini-cooldown]{color:#9fe9a6;min-height:10px}
