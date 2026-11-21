@@ -1188,18 +1188,14 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
         // ==================== PERSISTENT COOLDOWNS ====================
         const MINI_GAME_COOLDOWN_MS=5*60*1000;
-        const SUPER_COOLDOWN_MS=15*60*1000;
         const MINI_GAME_IDS=['wheel','dice','cards','coin','risk'];
-        let miniCooldownInterval=null,superCooldownInterval=null,superPreviousBet=10;
+        let miniCooldownInterval=null,superCooldownInterval=null;
         function cooldownStorageId(){return String(currentGlobalId||(auth.currentUser&&auth.currentUser.uid)||'guest').replace(/[^a-zA-Z0-9_-]/g,'_');}
         function readCooldown(key){try{return Math.max(0,Number(localStorage.getItem(key))||0);}catch(e){return 0;}}
         function writeCooldown(key,until){try{localStorage.setItem(key,String(until));}catch(e){}}
         function miniCooldownKey(kind){return 'globit:runcasino:'+cooldownStorageId()+':mini:'+kind;}
         function getMiniCooldownRemaining(kind){return Math.max(0,readCooldown(miniCooldownKey(kind))-Date.now());}
         function startMiniCooldown(kind){writeCooldown(miniCooldownKey(kind),Date.now()+MINI_GAME_COOLDOWN_MS);}
-        function superCooldownKey(){return 'globit:runcasino:'+cooldownStorageId()+':super';}
-        function getSuperCooldownRemaining(){return Math.max(0,readCooldown(superCooldownKey())-Date.now());}
-        function startSuperCooldown(){writeCooldown(superCooldownKey(),Date.now()+SUPER_COOLDOWN_MS);}
         function formatCooldown(ms){const seconds=Math.max(0,Math.ceil(ms/1000));return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');}
 
         // ==================== PARTICLES ====================
@@ -1234,12 +1230,6 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             lastWinAmount = 0;
         let riskActive = false,
             freespinsRemaining = 0;
-        let superGameActive = false,
-            superGameSpins = 0,
-            superGameTimer = null;
-        let superGameStartTime = 0;
-        let superDeposit = 0;
-        let superTotalWon = 0;
         let megaGameActive = false,
             megaGameSpins = 0,
             megaGameWins = 0;
@@ -1252,13 +1242,9 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         let isSpinInProgress = false;
         let lastSpinFinishedAt = 0;
         const SPIN_MIN_GAP = 1300;
-        let casinoProgress = { autoSpinUnlocked: false, totalSpins: 0, totalWins: 0, bestWin: 0 };
+        let casinoProgress = { autoSpinUnlocked: false, totalSpins: 0, totalWins: 0, bestWin: 0, superGameCompletedLevel: 0, superGameLuckBoost: false, superGameDebuffPercent: 0, superGameDebuffUntil: 0 };
         const MAX_PRIZE = Number.MAX_SAFE_INTEGER;
-        const SUPER_PRIZE = 500000;
-        const SUPER_COST = 150000;
-        const SUPER_MAX_SPINS = 1;
         const MEGA_THRESHOLD = 1000000;
-        const MEGA_BET_PERCENT = 0.1;
         const AUTO_SPIN_DELAY = 2000;
         let currentGlobalId = null;
 
@@ -1402,8 +1388,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         // Авторизация выполняется в GloBIT Arcade; здесь используется уже существующая сессия.
         window.logout = async () => {
             stopAutoSpin();
-            if (superGameTimer) clearInterval(superGameTimer);
-            if (auth.currentUser) await updateBalanceDB();
+                if (auth.currentUser) await updateBalanceDB();
             resetGame();
             document.getElementById('startMenu').style.display = 'flex';
             showScreen('gameScreen');
@@ -1589,13 +1574,6 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         }
 
         function updateSuperBalanceDisplay() {
-            const display = document.getElementById('superBalanceDisplay');
-            if (superGameActive) {
-                display.style.display = 'flex';
-                document.getElementById('superBalanceAmount').textContent = superDeposit;
-            } else {
-                display.style.display = 'none';
-            }
         }
 
 
@@ -1613,7 +1591,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             if (megaBtn) megaBtn.style.display = 'none';
             if (autoBtn) {
                 autoBtn.style.display = megaGameActive ? 'none' : 'block';
-                autoBtn.disabled = riskActive || (!autoSpinActive && isSpinInProgress);
+                autoBtn.disabled = riskActive || (!autoSpinActive && isSpinInProgress); autoBtn.style.pointerEvents = 'auto';
                 autoBtn.textContent = autoSpinActive ? '⏹ СТОП АВТО' : 'AUTO';
                 autoBtn.setAttribute('aria-label', autoSpinActive ? 'Немедленно остановить автоспин' : 'Запустить автоспин');
                 autoBtn.className = autoSpinActive ? 'cabinet-action active' : 'cabinet-action';
@@ -1626,7 +1604,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             refreshMiniCooldownUI();
         }
         function toggleAutoSpin() {
-            if (superGameActive || megaGameActive) return;
+            if (megaGameActive) return;
             if (autoSpinActive) {
                 stopAutoSpin();
             } else {
@@ -1674,7 +1652,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             document.querySelectorAll('#miniChoice button,#miniPlayButton').forEach(button=>{button.disabled=remain>0;});
         }
         function openMiniArcade(){
-            if(isSpinInProgress||riskActive||superGameActive||megaGameActive)return;
+            if(isSpinInProgress||riskActive||megaGameActive)return;
             document.getElementById('miniArcadeScreen').classList.add('open');document.getElementById('miniArcadeScreen').setAttribute('aria-hidden','false');
             updateMiniBalance();startMiniCooldownTicker();playButtonClick();
         }
@@ -1697,7 +1675,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             playButtonClick();
         }
         async function playMiniGame(kind,choice){
-            if(miniGameBusy||isSpinInProgress||riskActive||superGameActive||megaGameActive)return;
+            if(miniGameBusy||isSpinInProgress||riskActive||megaGameActive)return;
             const remain=getMiniCooldownRemaining(kind);
             if(remain>0){const out=document.getElementById('miniResult');if(out)out.textContent='⏳ Попробуй через '+formatCooldown(remain);return;}
             if(gameBalance<currentBet){document.getElementById('miniResult').textContent='Недостаточно монет для ставки.';playLoseSound();return;}
@@ -1730,7 +1708,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
         function startAutoSpin() {
             if (!autoSpinUnlocked) { document.getElementById('winMessage').textContent = '🔒 Сначала купи улучшение автоспина в мастерской.'; return; }
-            if (autoSpinActive || superGameActive || megaGameActive) return;
+            if (autoSpinActive || megaGameActive) return;
             if (gameBalance < currentBet && freespinsRemaining <= 0) {
                 document.getElementById('winMessage').textContent = '❌ Недостаточно средств для автоигры';
                 playLoseSound();
@@ -1747,13 +1725,13 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             if (autoSpinInterval) clearTimeout(autoSpinInterval);
             autoSpinInterval = null;
             updateUI();
-            if (!superGameActive && !megaGameActive) document.getElementById('winMessage').textContent =
+            if (!megaGameActive) document.getElementById('winMessage').textContent =
                 '⏹ Автоигра остановлена';
         }
 
         function autoSpinLoop() {
             if (!autoSpinActive) return;
-            if (superGameActive || megaGameActive) { stopAutoSpin(); return; }
+            if (megaGameActive) { stopAutoSpin(); return; }
             if (gameBalance < currentBet && freespinsRemaining <= 0) {
                 stopAutoSpin();
                 document.getElementById('winMessage').textContent = '❌ Средства закончились. Автоигра остановлена.';
@@ -1862,12 +1840,12 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         async function _performSpinCore(){
             if(riskActive)return;if(megaGameActive){await megaGameSpin();return;}
             const spinButton=document.getElementById('spinBtn');
-            if(!superGameActive&&gameBalance<currentBet&&freespinsRemaining<=0){stopAutoSpin();return;}
+            if(gameBalance<currentBet&&freespinsRemaining<=0){stopAutoSpin();return;}
             if(spinButton)spinButton.disabled=true;
-            playReelRattle();triggerHaptic(superGameActive?'heavy':'spin');
+            playReelRattle();triggerHaptic('spin');
             try{
-                if(!superGameActive&&freespinsRemaining<=0){gameBalance-=currentBet;await updateBalanceDB();}
-                else if(!superGameActive&&freespinsRemaining>0)freespinsRemaining--;
+                if(freespinsRemaining<=0){gameBalance-=currentBet;await updateBalanceDB();}
+                else if(freespinsRemaining>0)freespinsRemaining--;
                 updateUI();document.getElementById('winMessage').textContent='';
                 const grid=createSlotGrid(false);await animateSlotGrid(grid,getSpinAnimationDuration());
                 let result=checkWin(grid,false,false);
@@ -1882,9 +1860,9 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 if(permanentLuckTriggered&&result.win>0)result.details.unshift('🍀 Постоянная удача +20%');
                 lastWinAmount=result.win;
                 if(result.win>0){
-                    gameBalance+=result.win;if(superGameActive)superTotalWon+=result.win;
+                    gameBalance+=result.win;
                     if(result.win>=500000)playSuperWinSound();else if(result.win>=10000)playBigWinSound();else playWinSound();
-                    document.getElementById('winMessage').textContent=(superGameActive?'💥 СУПЕР-СПИН':'🎉 ВЫИГРЫШ')+' +'+result.win.toLocaleString()+' · '+result.details.join(' | ');
+                    document.getElementById('winMessage').textContent='🎉 ВЫИГРЫШ'+' +'+result.win.toLocaleString()+' · '+result.details.join(' | ');
                     result.cells.forEach(cell=>{const node=document.getElementById('cell-'+cell.row+'-'+cell.col);if(node)node.classList.add('win');});
                     triggerCasinoFX(result.win>=500000?'jackpot':'win');
                     triggerHaptic(result.win>=500000?'jackpot':result.win>=10000?'bigWin':'win');
@@ -1895,7 +1873,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 }
                 await updateBalanceDB();
                 
-                if(!megaGameActive&&!superGameActive&&gameBalance>=MEGA_THRESHOLD)setTimeout(()=>checkMegaGameEligibility(),800);
+                if(!megaGameActive&&gameBalance>=MEGA_THRESHOLD)setTimeout(()=>checkMegaGameEligibility(),800);
                 casinoProgress.totalSpins=(casinoProgress.totalSpins||0)+1;
                 if(result.win>0){casinoProgress.totalWins=(casinoProgress.totalWins||0)+1;casinoProgress.bestWin=Math.max(casinoProgress.bestWin||0,result.win);}
                 await updateBalanceDB();
@@ -1920,8 +1898,6 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             await performSpin();
         }
 
-
-        async function startSuperGame(){ return; }
 
         function startRiskMini(){
             if(riskActive||lastWinAmount<=0||getMiniCooldownRemaining('risk')>0)return;
@@ -1951,7 +1927,6 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
         function resetGame() {
             stopAutoSpin(); riskActive = false; freespinsRemaining = 0; lastWinAmount = 0;
-            superGameActive = false; superGameSpins = 0; superGameTimer = null; superDeposit = 0; superTotalWon = 0;
             megaGameActive = false; megaGameSpins = 0; megaGameWins = 0; megaGameSavedBalance = 0; megaGameLevel = 0; superGameGreen = 0; superGameRed = 0;
             document.getElementById('superTimer').textContent = '';
             const indicator = document.getElementById('megaIndicator'); if (indicator) indicator.classList.remove('active');
@@ -2028,7 +2003,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         const casinoLever=document.getElementById('casinoLever');
         let leverPointerStart=null,leverPullTriggered=false;
         casinoLever?.addEventListener('pointerdown',event=>{
-            if(isSpinInProgress||riskActive||superGameActive||autoSpinActive)return;
+            if(isSpinInProgress||riskActive||autoSpinActive)return;
             initAudio();leverPointerStart={id:event.pointerId,y:event.clientY};leverPullTriggered=false;casinoLever.setPointerCapture?.(event.pointerId);
         });
         casinoLever?.addEventListener('pointermove',event=>{
