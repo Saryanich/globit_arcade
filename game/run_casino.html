@@ -1491,7 +1491,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         }
         async function repayBankLoan(){
             const loan=casinoBank.activeLoan;if(!loan){setBankStatus('Активного кредита нет.');return;}
-            if(Date.now()>=loan.dueAt+5*60000){await collectExpiredBankLoan();setBankStatus('Срок отсрочки истёк: сработало взыскание инкассаторов.');return;}
+            if(Date.now()>=loan.dueAt+5*60000){await collectExpiredBankLoan();setBankStatus(casinoBank.activeLoan?'Не удалось завершить взыскание. Повторим после синхронизации.':'Срок отсрочки истёк: сработало взыскание инкассаторов.');return;}
             const totalAvailable=Math.max(0,gameBalance-500)+(casinoBank.savingsOpened?casinoBank.savingsBalance:0);
             if(totalAvailable<loan.amount){setBankStatus('Недостаточно средств. Нужны деньги сверх 500 на балансе и/или накопления.');return;}
             const beforeBalance=gameBalance,beforeBank=cloneBankData();
@@ -1524,6 +1524,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             if(!ok)casinoBank.activeLoan=beforeBank.activeLoan;
         }
         async function updateBankClock(){
+            if(!casinoDataReady){updateBankUI();return;}
             const loan=casinoBank.activeLoan;
             if(loan&&Date.now()>=loan.dueAt+5*60000&&!isSpinInProgress&&!megaGameActive&&!riskActive)await collectExpiredBankLoan();
             updateBankUI();
