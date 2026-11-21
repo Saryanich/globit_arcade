@@ -1784,7 +1784,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                     result=checkWin(grid,false,false);permanentLuckTriggered=result.win>0;
                 }
                 if(result.win>0)result.win=Math.floor(result.win*getPayoutBoost());
-                if(result.win>0&&suppressWinBySuperGamePenalty()){result.win=0;result.cells=[];result.details=['⏳ Временное снижение вероятности выигрыша'];}
+                let penaltySuppressed=false;
+                if(result.win>0&&suppressWinBySuperGamePenalty()){result.win=0;result.cells=[];result.details=['⏳ Временное снижение вероятности выигрыша'];penaltySuppressed=true;}
                 if(permanentLuckTriggered&&result.win>0)result.details.unshift('🍀 Постоянная удача +20%');
                 lastWinAmount=result.win;
                 if(result.win>0){
@@ -1796,7 +1797,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                     triggerHaptic(result.win>=500000?'jackpot':result.win>=10000?'bigWin':'win');
                     setTimeout(()=>document.querySelectorAll('.slot-cell.win').forEach(cell=>cell.classList.remove('win')),3200);
                 }else{
-                    playLoseSound();document.getElementById('winMessage').textContent=freespinsRemaining>0?'🔄 Фриспин готов. Попробуй ещё!':'Почти! Следующий рывок может быть удачнее.';
+                    playLoseSound();document.getElementById('winMessage').textContent=penaltySuppressed?'⏳ Сработал временный штраф суперигры — выигрыш не засчитан.':(freespinsRemaining>0?'🔄 Фриспин готов. Попробуй ещё!':'Почти! Следующий рывок может быть удачнее.');
                     lastWinAmount=0;triggerHaptic('lose');
                 }
                 await updateBalanceDB();
@@ -1840,12 +1841,12 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             if(!riskActive)return;riskActive=false;startMiniCooldown('risk');
             document.querySelectorAll('.mini-risk-card').forEach((card,i)=>{card.textContent=i===winIdx?'❤️':'💙';card.classList.add(i===winIdx?'revealed':'revealed-lose');card.disabled=true;});
             const amount=lastWinAmount;
-            let riskWon=chosen===winIdx;
-            if(riskWon&&suppressWinBySuperGamePenalty())riskWon=false;
+            let riskWon=chosen===winIdx, riskPenaltyBlocked=false;
+            if(riskWon&&suppressWinBySuperGamePenalty()){riskWon=false;riskPenaltyBlocked=true;}
             else if(!riskWon&&casinoProgress.superGameLuckBoost&&Math.random()<0.20)riskWon=true;
             if(riskWon){gameBalance+=amount;document.getElementById('winMessage').textContent='🎯 РИСК! Выигрыш удвоен: '+(amount*2).toLocaleString();playRiskWinSound();triggerHaptic('bigWin');triggerCasinoFX('win');}
             else{gameBalance=Math.max(0,gameBalance-amount);document.getElementById('winMessage').textContent='💔 Риск проигран: −'+amount.toLocaleString();playRiskLoseSound();triggerHaptic('lose');triggerCasinoFX('lose');}
-            lastWinAmount=0;const out=document.getElementById('miniResult');if(out)out.textContent=riskWon?'🎉 Угадал! Выигрыш удвоен.':'💔 Не угадал. Выигрыш потерян.';
+            lastWinAmount=0;const out=document.getElementById('miniResult');if(out)out.textContent=riskWon?'🎉 Угадал! Выигрыш удвоен.':(riskPenaltyBlocked?'⚠️ Выбрано правильно, но временный штраф не дал выиграть.':'💔 Не угадал. Выигрыш потерян.');
             const choice=document.getElementById('miniChoice');if(choice)choice.innerHTML='<span class="mini-result">Следующая игра через 05:00</span>';
             updateBalanceDB();updateMiniBalance();refreshMiniCooldownUI();updateUI();
             if(gameBalance>=MEGA_THRESHOLD)setTimeout(checkMegaGameEligibility,700);
