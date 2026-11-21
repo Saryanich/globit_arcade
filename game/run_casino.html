@@ -1077,7 +1077,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 <div class="paytable-row"><span>Супер: 6 подряд</span><span>×18</span></div>
                 <div class="paytable-row"><span>Стоимость суперспина</span><span>150 000 · раз в 15 минут</span></div>            </div>
 
-            <div class="machine-row"><div class="slot-grid" id="slotGrid"></div><div class="lever-housing"><button class="lever" id="casinoLever" type="button" aria-label="Потянуть рычаг вниз и на себя"><span class="lever-track"></span><span class="lever-stick"><i class="lever-ball"></i></span><span class="lever-base">PULL</span></button></div><div class="machine-actions"><button class="cabinet-action" id="autoBtn" onclick="toggleAutoSpin()">AUTO</button><button class="cabinet-action" id="riskBtn" onclick="startRiskGame()" disabled>RISK</button><button class="cabinet-action" id="superBtn" onclick="startSuperGame()" style="display:none">SUPER</button><button class="cabinet-action" id="megaBtn" onclick="startMegaGame()" style="display:none">MEGA</button></div></div><button id="spinBtn" type="button" hidden aria-hidden="true" tabindex="-1"></button>
+            <div class="machine-row"><div class="slot-grid" id="slotGrid"></div><div class="lever-housing"><button class="lever" id="casinoLever" type="button" aria-label="Потянуть рычаг вниз и на себя"><span class="lever-track"></span><span class="lever-stick"><i class="lever-ball"></i></span><span class="lever-base">PULL</span></button></div><div class="machine-actions"><button class="cabinet-action" id="autoBtn" onclick="toggleAutoSpin()">AUTO</button><button class="cabinet-action" id="superBtn" onclick="startSuperGame()" style="display:none">SUPER</button><button class="cabinet-action" id="megaBtn" onclick="startMegaGame()" style="display:none">MEGA</button></div></div><button id="spinBtn" type="button" hidden aria-hidden="true" tabindex="-1"></button>
             <div class="win-message" id="winMessage"></div>
 
             <div class="cabinet-lower"><button class="arcade-door" type="button" onclick="openWorkshop()">🛠 МАСТЕРСКАЯ <span>УЛУЧШЕНИЯ · УРОВНИ</span></button><button class="arcade-door" type="button" onclick="openMiniArcade()">🕹 MINI CASINO <span>5 ИГР</span></button></div>
@@ -1564,18 +1564,17 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             if(autoStatus)autoStatus.textContent=autoSpinUnlocked?'УЛУЧШЕНИЕ АКТИВНО':'Автоспин не куплен';
             if(autoBuy){autoBuy.disabled=autoSpinUnlocked;autoBuy.textContent=autoSpinUnlocked?'✓ АВТОСПИН КУПЛЕН':'⚡ Купить автоспин · 5 000';}
             updateSuperBalanceDisplay();
-            const sb=document.getElementById('spinBtn'),rb=document.getElementById('riskBtn');
+            const sb=document.getElementById('spinBtn');
             const superBtn=document.getElementById('superBtn'),megaBtn=document.getElementById('megaBtn'),autoBtn=document.getElementById('autoBtn');
             const superInd=document.getElementById('superIndicator'),superRemaining=getSuperCooldownRemaining();
             if(sb)sb.disabled=isSpinInProgress||riskActive||superGameActive||megaGameActive;
-            if(megaGameActive){if(sb)sb.textContent='👑 МЕГА-СПИН ('+megaGameSpins+'/'+megaGameTotalSpins+')';superBtn.style.display='none';megaBtn.style.display='none';autoBtn.style.display='none';rb.disabled=true;superInd.classList.remove('active');return;}
+            if(megaGameActive){if(sb)sb.textContent='👑 МЕГА-СПИН ('+megaGameSpins+'/'+megaGameTotalSpins+')';superBtn.style.display='none';megaBtn.style.display='none';autoBtn.style.display='none';superInd.classList.remove('active');return;}
             megaBtn.style.display=gameBalance>=MEGA_THRESHOLD?'block':'none';
-            superBtn.style.display=gameBalance>=SUPER_COST&&!superGameActive?'block':'none';
-            superBtn.disabled=superRemaining>0||isSpinInProgress;
-            superBtn.textContent=superRemaining>0?'SUPER · '+formatCooldown(superRemaining):'💥 SUPER SPIN · '+SUPER_COST.toLocaleString();
+            superBtn.style.display=superGameActive?'none':'block';
+            superBtn.disabled=superRemaining>0||isSpinInProgress||gameBalance<SUPER_COST;
+            superBtn.textContent=superRemaining>0?'SUPER · '+formatCooldown(superRemaining):gameBalance<SUPER_COST?'SUPER · НУЖНО 150K':'💥 SUPER SPIN · 150K';
             if(superGameActive){superInd.classList.add('active');if(sb)sb.textContent='💥 СУПЕР-СПИН ИДЁТ…';superBtn.style.display='none';megaBtn.style.display='none';autoBtn.style.display='none';}
             else{superInd.classList.remove('active');autoBtn.style.display='block';if(sb)sb.textContent=freespinsRemaining>0?'🎰 ФРИСПИН ('+freespinsRemaining+')':'🎲 Крутить ('+currentBet+')';autoBtn.disabled=isSpinInProgress||riskActive;autoBtn.textContent=autoSpinActive?'⏹ СТОП':'🔄 АВТО';autoBtn.className=autoSpinActive?'btn btn-auto active':'btn btn-auto';}
-            rb.disabled=lastWinAmount<=0||riskActive||superGameActive||megaGameActive||isSpinInProgress;
             document.getElementById('freespinIndicator').innerHTML=freespinsRemaining>0?'<span class="freespin-badge">🔥 '+freespinsRemaining+' ФРИСПИНОВ</span>':'';
             const timer=document.getElementById('superTimer');
             if(timer&&!superGameActive&&superRemaining>0)timer.textContent='⏱ Супер-спин через '+formatCooldown(superRemaining);
@@ -1583,7 +1582,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             refreshMiniCooldownUI();
             if(!superCooldownInterval)superCooldownInterval=setInterval(()=>{
                 const remain=getSuperCooldownRemaining(),button=document.getElementById('superBtn'),time=document.getElementById('superTimer');
-                if(button&&button.style.display!=='none'){button.disabled=remain>0||isSpinInProgress;button.textContent=remain>0?'SUPER · '+formatCooldown(remain):'💥 SUPER SPIN · '+SUPER_COST.toLocaleString();}
+                if(button&&button.style.display!=='none'){button.disabled=remain>0||isSpinInProgress||gameBalance<SUPER_COST;button.textContent=remain>0?'SUPER · '+formatCooldown(remain):gameBalance<SUPER_COST?'SUPER · НУЖНО 150K':'💥 SUPER SPIN · 150K';}
                 if(time&&!superGameActive)time.textContent=remain>0?'⏱ Супер-спин через '+formatCooldown(remain):'';
             },1000);
         }
@@ -1877,11 +1876,14 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             if(remaining>0){document.getElementById('winMessage').textContent='⏳ Супер-спин доступен через '+formatCooldown(remaining);updateUI();return;}
             if(gameBalance<SUPER_COST){document.getElementById('winMessage').textContent='Нужно '+SUPER_COST.toLocaleString()+' монет для супер-спина.';return;}
             stopAutoSpin();superPreviousBet=currentBet;currentBet=SUPER_COST;superDeposit=SUPER_COST;superTotalWon=0;superGameSpins=0;superGameActive=true;
-            startSuperCooldown();gameBalance-=SUPER_COST;
+            gameBalance-=SUPER_COST;startSuperCooldown();
             document.getElementById('superIndicator').classList.add('active');
-            document.getElementById('superTimer').textContent='⏱ Следующий супер-спин через 15:00';
-            document.getElementById('winMessage').textContent='💥 СУПЕР-СПИН: шанс выигрыша 8%. Стоимость 150 000.';
-            triggerHaptic('heavy');playSpinStart();updateUI();await updateBalanceDB();await performSpin();
+            document.getElementById('superTimer').textContent='⏱ Следующий суперспин через 15:00';
+            document.getElementById('winMessage').textContent='💥 СУПЕРСПИН · шанс выигрыша 8% · ставка 150 000';
+            triggerHaptic('heavy');playSpinStart();isSpinInProgress=true;updateUI();
+            try{await updateBalanceDB();await _performSpinCore();}
+            catch(error){console.error('Super spin failed:',error);gameBalance+=SUPER_COST;document.getElementById('winMessage').textContent='Ошибка суперспина. Ставка возвращена.';endSuperGame();}
+            finally{isSpinInProgress=false;updateUI();}
         }
         function endSuperGame(){
             const won=superTotalWon;superGameActive=false;superGameTimer=null;superDeposit=0;superTotalWon=0;superGameSpins=0;currentBet=superPreviousBet||10;
@@ -1937,7 +1939,6 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
         function cancelRisk() {
             riskActive = false;
-            document.getElementById('riskGameArea').classList.remove('active');
             document.getElementById('winMessage').textContent = 'Риск отменён';
             lastWinAmount = 0;
             updateUI();
@@ -1959,7 +1960,6 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             megaGameSpins = 0;
             megaGameWins = 0;
             megaGameSavedBalance = 0;
-            document.getElementById('riskGameArea').classList.remove('active');
             document.getElementById('superTimer').textContent = '';
             document.getElementById('superIndicator').classList.remove('active');
             document.getElementById('megaIndicator').classList.remove('active');
