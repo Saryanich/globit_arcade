@@ -917,7 +917,18 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         .mini-game-tabs{grid-template-columns:repeat(5,minmax(0,1fr))}.mini-risk-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:12px auto;max-width:340px}.mini-risk-cards .risk-card{min-width:0;min-height:78px}
         @media(max-width:520px){.workshop-overlay{padding:7px}.workshop-modal{padding:11px;max-height:92dvh}.workshop-upgrades{grid-template-columns:1fr}.workshop-card p{min-height:0}.cabinet-lower{gap:7px}.cabinet-lower .arcade-door{font-size:.72rem;padding:10px 5px}.mini-game-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.workshop-bottom{font-size:.62rem}}
 
-    </style>
+            /* Mobile GPU budget: retain motion and glow, reduce expensive compositing on phones. */
+        @media (max-width:600px) {
+            :root { --blur: blur(10px); }
+            .screen { backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); box-shadow:0 12px 28px rgba(0,0,0,.5),0 0 16px rgba(0,230,118,.08); }
+            .slot-cell.spinning { filter:brightness(1.08); }
+            .slot-cell { transition:border-color .16s ease,box-shadow .16s ease; }
+            .slot-cell.win { animation-duration:.6s; animation-iteration-count:3; box-shadow:0 0 18px rgba(255,215,0,.65)!important; }
+            .slot-grid.mega-active { animation-duration:1.25s; box-shadow:0 0 28px rgba(255,215,0,.35),inset 0 0 22px rgba(0,0,0,.8)!important; }
+            .mega-mode-indicator { animation-duration:1.2s; }
+            .logo { animation-duration:5s; }
+        }
+</style>
 </head>
 <body>
     <audio id="sfxReel" src="https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-spin-1930.mp3" preload="none" loop></audio>
