@@ -1090,47 +1090,19 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.warn);
 
 
-        // ==================== EXTERNAL SOUND SYSTEM ====================
-        // MP3 assets from Mixkit only; no oscillator/Web Audio synthesis.
-        let audioEnabled=false;
-        function initAudio(){audioEnabled=typeof casinoSoundOn==='undefined'?true:!!casinoSoundOn;}
-        function playSfx(id,options={}){
-            if(!audioEnabled)return;const audio=document.getElementById(id);if(!audio)return;
-            try{const volumes={sfxReel:.42,sfxLever:.42,sfxWin:.68,sfxLose:.45,sfxCoin:.58};audio.volume=volumes[id]??.5;
-                audio.loop=options.loop===true;if(!options.keepPosition){audio.pause();audio.currentTime=0;}
-                const p=audio.play();if(p&&typeof p.catch==='function')p.catch(()=>{});
-            }catch(e){console.warn('SFX playback failed:',id,e);}
-        }
-        function stopSfx(id){const a=document.getElementById(id);if(!a)return;try{a.pause();a.currentTime=0;a.loop=false;}catch(e){}}
-        function playSpinSound(){playSfx('sfxLever');}
-        function playWinSound(){playSfx('sfxWin');}
-        function playBigWinSound(){playSfx('sfxWin');setTimeout(()=>playSfx('sfxCoin'),420);}
-        function playSuperWinSound(){playSfx('sfxWin');setTimeout(()=>playSfx('sfxCoin'),250);setTimeout(()=>playSfx('sfxCoin'),720);}
-        function playMegaWinSound(){playSuperWinSound();}
-        function playMegaLoseSound(){playLoseSound();}
-        function playLoseSound(){playSfx('sfxLose');}
-        function playRiskWinSound(){playSfx('sfxWin');}
-        function playRiskLoseSound(){playSfx('sfxLose');}
-        function playButtonClick(){playSfx('sfxLever');}
-        function playReelRattle(){playSfx('sfxReel',{loop:true});}
-        function stopReelRattle(){stopSfx('sfxReel');}
-        function playLeverClunk(){playSfx('sfxLever');}
-        function playCoinDrop(){playSfx('sfxCoin');}
-        function playCardFlip(){playSfx('sfxLever');}
-        function playSpinStart(){playSfx('sfxLever');}
-        function playMegaStartSound(){playSfx('sfxWin');}
-
-        function triggerHaptic(level='light'){
-            const patterns={light:[12],medium:[22,18,22],heavy:[42,24,58]};
-            const style=level==='heavy'?'HEAVY':level==='medium'?'MEDIUM':'LIGHT';
-            try{
-                const cap=window.Capacitor?.Plugins?.Haptics;
-                if(cap?.impact){cap.impact({style}).catch(()=>{});return;}
-                const bridge=window.webkit?.messageHandlers?.haptics;
-                if(bridge?.postMessage){bridge.postMessage({type:'impact',style});return;}
-                if(navigator.vibrate)navigator.vibrate(patterns[level]||patterns.light);
-            }catch(e){}
-        }
+        // MIXED AUDIO: external MP3 plus Web Audio fallback.
+        let audioEnabled=false,casinoAudioContext=null,reelSynthTimer=null;
+        function initAudio(){audioEnabled=casinoSoundOn!==false;if(!audioEnabled)return;try{const C=window.AudioContext||window.webkitAudioContext;if(C){if(!casinoAudioContext)casinoAudioContext=new C();if(casinoAudioContext.state==='suspended')casinoAudioContext.resume().catch(()=>{});}}catch(e){}}
+        function synthTone(freq,duration=.12,wave='sine',gain=.045,slide=0){if(!audioEnabled)return;try{if(!casinoAudioContext)initAudio();const c=casinoAudioContext;if(!c)return;const t=c.currentTime,o=c.createOscillator(),g=c.createGain();o.type=wave;o.frequency.setValueAtTime(freq,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(25,freq+slide),t+duration);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(gain,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+duration+.02);}catch(e){}}
+        function synthNoise(duration=.14,gain=.025,filter=1200){if(!audioEnabled)return;try{if(!casinoAudioContext)initAudio();const c=casinoAudioContext;if(!c)return;const n=Math.max(1,Math.floor(c.sampleRate*duration)),b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);const src=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();src.buffer=b;f.type='lowpass';f.frequency.value=filter;g.gain.setValueAtTime(gain,c.currentTime);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+duration);src.connect(f);f.connect(g);g.connect(c.destination);src.start();}catch(e){}}
+        function synthSfx(id){if(!audioEnabled)return;if(id==='sfxReel'){synthNoise(.22,.018,900);synthTone(92,.16,'sawtooth',.012,-28);}else if(id==='sfxLever'){synthNoise(.075,.035,1800);synthTone(180,.09,'triangle',.04,-95);}else if(id==='sfxWin'){synthTone(660,.18,'triangle',.05,180);setTimeout(()=>synthTone(880,.2,'triangle',.04,130),90);setTimeout(()=>synthTone(1180,.24,'sine',.035,90),180);}else if(id==='sfxLose'){synthTone(240,.28,'triangle',.04,-125);setTimeout(()=>synthTone(115,.34,'sawtooth',.02,-45),110);}else if(id==='sfxCoin'){synthTone(1250,.09,'sine',.04,240);setTimeout(()=>synthTone(1680,.11,'sine',.03,140),65);}}
+        function playSfx(id,options={}){if(!audioEnabled)return;synthSfx(id);const a=document.getElementById(id);if(!a)return;try{a.volume=({sfxReel:.34,sfxLever:.32,sfxWin:.58,sfxLose:.38,sfxCoin:.48})[id]??.4;a.loop=options.loop===true;if(!options.keepPosition){a.pause();a.currentTime=0;}const p=a.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}}
+        function stopSfx(id){const a=document.getElementById(id);if(a){try{a.pause();a.currentTime=0;a.loop=false;}catch(e){}}}
+        function playSpinSound(){playSfx('sfxLever');}function playWinSound(){playSfx('sfxWin');}function playBigWinSound(){playSfx('sfxWin');setTimeout(()=>playSfx('sfxCoin'),420);}function playSuperWinSound(){playSfx('sfxWin');setTimeout(()=>playSfx('sfxCoin'),250);setTimeout(()=>playSfx('sfxCoin'),720);}function playMegaWinSound(){playSuperWinSound();}function playMegaLoseSound(){playLoseSound();}function playLoseSound(){playSfx('sfxLose');}function playRiskWinSound(){playSfx('sfxWin');}function playRiskLoseSound(){playSfx('sfxLose');}function playButtonClick(){playSfx('sfxLever');}function playLeverClunk(){playSfx('sfxLever');}function playCoinDrop(){playSfx('sfxCoin');}function playCardFlip(){playSfx('sfxLever');}function playSpinStart(){playSfx('sfxLever');}function playMegaStartSound(){playSfx('sfxWin');}
+        function playReelRattle(){playSfx('sfxReel',{loop:true});if(reelSynthTimer)clearInterval(reelSynthTimer);reelSynthTimer=setInterval(()=>synthNoise(.11,.009,650),180);}
+        function stopReelRattle(){stopSfx('sfxReel');if(reelSynthTimer)clearInterval(reelSynthTimer);reelSynthTimer=null;}
+        // iOS Safari has no web Taptic API; true haptics need a native bridge.
+        function triggerHaptic(level='light'){const patterns={light:[12],medium:[22,18,22],heavy:[42,24,58]},style=level==='heavy'?'HEAVY':level==='medium'?'MEDIUM':'LIGHT';try{const h=window.Capacitor?.Plugins?.Haptics;if(h?.impact){const p=h.impact({style});if(p?.catch)p.catch(()=>{});return true;}const w=window.webkit?.messageHandlers?.haptics||window.webkit?.messageHandlers?.hapticFeedback;if(w?.postMessage){w.postMessage({type:'impact',style,pattern:patterns[level]||patterns.light});return true;}if(typeof navigator.vibrate==='function')return navigator.vibrate(patterns[level]||patterns.light);}catch(e){}document.documentElement.classList.remove('haptic-fallback');void document.documentElement.offsetWidth;document.documentElement.classList.add('haptic-fallback');setTimeout(()=>document.documentElement.classList.remove('haptic-fallback'),180);return false;}
         function triggerCasinoFX(kind='win'){
             const layer=document.getElementById('casinoFxLayer'),screen=document.getElementById('gameScreen');if(!layer||!screen)return;
             layer.className='casino-fx';void layer.offsetWidth;layer.classList.add('active');if(kind==='jackpot')layer.classList.add('jackpot');
