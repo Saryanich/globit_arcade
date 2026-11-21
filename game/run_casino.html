@@ -1234,7 +1234,6 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                     email: auth.currentUser.email || '',
                     displayName: document.getElementById('displayName').textContent || globalId,
                     casinoProgress: { ...casinoProgress, autoSpinUnlocked },
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
                 try {
@@ -1252,6 +1251,10 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 console.log(`💾 Баланс сохранен в score для ${globalId}: ${newBalance}`);
             } catch (e) {
                 console.error('❌ Ошибка сохранения баланса в score:', e);
+                casinoDataReady = false;
+                casinoLoadError = 'Сохранение не подтверждено сервером. Игра заблокирована.';
+                updateCasinoLoadingUI();
+                throw e;
             }
         }
 
@@ -1362,11 +1365,9 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             const completed = new Set((Array.isArray(casinoProgress.superGameCompletedLevels) ? casinoProgress.superGameCompletedLevels : []).map(Number));
             const legacy = Number(casinoProgress.superGameCompletedLevel) || 0;
             if (legacy > 0 && !completed.has(legacy)) completed.add(legacy);
-            for (let i = SUPER_GAME_LEVELS.length - 1; i >= 0; i--) {
-                const item = SUPER_GAME_LEVELS[i];
-                if (gameBalance >= item.threshold && !completed.has(item.level)) return item.level;
-            }
-            return 0;
+            let currentLevel = 0;
+            for (const item of SUPER_GAME_LEVELS) if (gameBalance >= item.threshold) currentLevel = item.level;
+            return currentLevel > 0 && !completed.has(currentLevel) ? currentLevel : 0;
         }
         function checkMegaGameEligibility() {
             const level = getEligibleSuperGameLevel();
@@ -1921,18 +1922,18 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 casinoDataReady=false; casinoLoadError=''; updateCasinoLoadingUI();
                 const myAttempt=++casinoLoadAttempt;
                 let lastError=null;
-                for(let attempt=1;attempt<=30;attempt++){
+                for(let attempt=1;;attempt++){
                     if(myAttempt!==casinoLoadAttempt || !auth.currentUser || auth.currentUser.uid!==user.uid) return;
                     try {
                         await loadGame(user);
                         menuInitialized=true; casinoDataReady=true; casinoLoadError=''; updateCasinoLoadingUI(); return;
                     } catch(error) {
-                        lastError=error; casinoLoadError='Попытка '+attempt+'/30'; updateCasinoLoadingUI();
+                        lastError=error; casinoLoadError='Попытка '+attempt+' · ожидаем сервер'; updateCasinoLoadingUI();
                         console.warn('Ожидание серверных данных Run Casino:',error);
-                        await new Promise(resolve=>setTimeout(resolve,Math.min(1000+attempt*500,5000)));
+                        await new Promise(resolve=>setTimeout(resolve,Math.min(1000+attempt*500,10000)));
                     }
                 }
-                casinoLoadError='Не удалось получить данные. Игра остаётся заблокированной, баланс не сбрасывается.';
+                casinoLoadError='Ожидаем сервер. Баланс не сбрасывается, игра остаётся заблокированной.';
                 updateCasinoLoadingUI();
                 throw lastError || new Error(casinoLoadError);
             })().finally(()=>{casinoLoadPromise=null;});
