@@ -1399,7 +1399,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             } catch (e) {
                 console.error('❌ Ошибка сохранения баланса в score:', e);
                 casinoDataReady = false;
-                casinoLoadError = 'Сохранение не подтверждено сервером. Игра заблокирована.';
+                casinoLoadError = 'Сохранение отклонено: '+String(e.code||'unknown')+' · '+String(e.message||e).slice(0,180);
                 updateCasinoLoadingUI();
                 setTimeout(() => { if (auth.currentUser) loadAuthenticatedCasino(auth.currentUser).catch(error => console.error('Повторная синхронизация не удалась:',error)); }, 1200);
                 throw e;
