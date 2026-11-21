@@ -907,9 +907,49 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 .mini-footer button{border:0;background:none;color:#e7c785;font:900 10px ui-monospace,monospace}
 @media(max-width:520px){.machine-row{grid-template-columns:minmax(0,1fr) 52px}.machine-actions{grid-column:1/-1;flex-direction:row}.machine-actions button{flex:1}.lever-housing{min-height:180px}.lever-stick{height:105px}.cabinet-lower{grid-template-columns:1fr}.mini-arcade-cabinet{padding:11px}.mini-game-tabs{grid-template-columns:repeat(2,1fr)}.mini-stage{min-height:210px}}
 
-</style>
+        /* Fine-grain wood, brushed steel and aged brass surface treatment. */
+        .screen {
+            background-image:
+                repeating-linear-gradient(0deg, rgba(255,225,170,.025) 0 1px, transparent 1px 4px),
+                repeating-linear-gradient(91deg, rgba(0,0,0,.10) 0 2px, transparent 2px 19px),
+                linear-gradient(145deg,#3b291c 0%,#1b1510 44%,#302015 100%);
+        }
+        .machine-row,.mini-arcade-cabinet {
+            background-image:
+                repeating-linear-gradient(2deg,rgba(255,220,155,.055) 0 1px,transparent 1px 5px),
+                repeating-linear-gradient(90deg,rgba(0,0,0,.10) 0 3px,transparent 3px 17px),
+                linear-gradient(135deg,#17110d,#49301b 48%,#17110d);
+        }
+        .lever-housing,.mini-wallet {
+            background-image:
+                repeating-linear-gradient(0deg,rgba(255,255,255,.075) 0 1px,transparent 1px 3px),
+                repeating-linear-gradient(90deg,#352316 0 3px,#654626 3px 6px,#281a11 6px 9px);
+        }
+        .lever-track,.lever-stick {
+            background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.30) 0 1px,transparent 1px 3px),
+                linear-gradient(90deg,#555,#e9e4d5 35%,#8c8a83 68%,#3c342a);
+        }
+        .slot-cell {
+            background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 4px),
+                linear-gradient(145deg,#3d5044,#101b16);
+        }
+        .mini-game-card,.arcade-door {
+            background-image:repeating-linear-gradient(0deg,rgba(255,225,170,.055) 0 1px,transparent 1px 4px),
+                linear-gradient(145deg,#49321d,#1a130d);
+        }
+        .mini-stage {box-shadow:inset 0 0 24px #000,0 0 0 1px #d3a95b33;}
+        .mini-game-card:active,.cabinet-action:active,.mini-play:active {filter:brightness(1.18);}
+        .lever-housing:after {content:"";position:absolute;inset:5px;border:1px solid #e5bf7166;border-radius:5px;pointer-events:none;box-shadow:inset 0 0 9px #000;}
+        .lever {z-index:1;}
+        @media(max-width:520px){.machine-row{gap:6px}.lever-housing:after{inset:3px}}
+    </style>
 </head>
 <body>
+    <audio id="sfxReel" src="https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-spin-1930.mp3" preload="none"></audio>
+    <audio id="sfxLever" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-changing-tab-206.mp3" preload="none"></audio>
+    <audio id="sfxWin" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" preload="none"></audio>
+    <audio id="sfxLose" src="https://assets.mixkit.co/sfx/preview/mixkit-game-show-losing-the-bonus-497.mp3" preload="none"></audio>
+    <audio id="sfxCoin" src="https://assets.mixkit.co/sfx/preview/mixkit-coins-handling-193.mp3" preload="none"></audio>
     <div id="particles-js"></div>
 <div id="startMenu" class="start-menu">
   <div class="start-menu-card">
@@ -924,7 +964,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
   </div>
 </div>
 
-    <div class="mini-arcade-overlay" id="miniArcadeScreen" aria-hidden="true"><section class="mini-arcade-cabinet"><header class="mini-arcade-header"><div><small>GLOBIT • RETRO HALL</small><h2>MINI CASINO</h2></div><button class="mini-close" onclick="closeMiniArcade()">✕</button></header><div class="mini-wallet">ВАШ БАЛАНС <b id="miniBalance">0</b> COINS</div><div class="mini-game-tabs"><button onclick="selectMiniGame('wheel')" class="mini-game-card" data-mini="wheel"><i>🎡</i><b>РУЛЕТКА</b><small>× до 8</small></button><button onclick="selectMiniGame('dice')" class="mini-game-card" data-mini="dice"><i>🎲</i><b>КОСТИ</b><small>× до 5</small></button><button onclick="selectMiniGame('cards')" class="mini-game-card" data-mini="cards"><i>🂡</i><b>КАРТЫ</b><small>Красное / чёрное</small></button><button onclick="selectMiniGame('coin')" class="mini-game-card" data-mini="coin"><i>🪙</i><b>МОНЕТКА</b><small>Орёл / решка</small></button></div><div class="mini-stage" id="miniStage"><div class="mini-stage-idle"><span>🎰</span><h3>ВЫБЕРИ АВТОМАТ</h3><p>Все игры используют текущую ставку.</p></div></div><div class="mini-footer"><span>RETRO ARCADE • 1986</span><button onclick="closeMiniArcade()">← НАЗАД К СЛОТАМ</button></div></section></div>
+    <div class="mini-arcade-overlay" id="miniArcadeScreen" aria-hidden="true"><section class="mini-arcade-cabinet"><header class="mini-arcade-header"><div><small>GLOBIT • RETRO HALL</small><h2>MINI CASINO</h2></div><button class="mini-close" type="button" aria-label="Закрыть мини-казино" onclick="closeMiniArcade()">✕</button></header><div class="mini-wallet">ВАШ БАЛАНС <b id="miniBalance">0</b> COINS</div><div class="mini-game-tabs"><button onclick="selectMiniGame('wheel')" class="mini-game-card" data-mini="wheel"><i>🎡</i><b>РУЛЕТКА</b><small>× до 8</small></button><button onclick="selectMiniGame('dice')" class="mini-game-card" data-mini="dice"><i>🎲</i><b>КОСТИ</b><small>× до 5</small></button><button onclick="selectMiniGame('cards')" class="mini-game-card" data-mini="cards"><i>🂡</i><b>КАРТЫ</b><small>Красное / чёрное</small></button><button onclick="selectMiniGame('coin')" class="mini-game-card" data-mini="coin"><i>🪙</i><b>МОНЕТКА</b><small>Орёл / решка</small></button></div><div class="mini-stage" id="miniStage"><div class="mini-stage-idle"><span>🎰</span><h3>ВЫБЕРИ АВТОМАТ</h3><p>Все игры используют текущую ставку.</p></div></div><div class="mini-footer"><span>RETRO ARCADE • 1986</span><button onclick="closeMiniArcade()">← НАЗАД К СЛОТАМ</button></div></section></div>
     <div class="app-container">
 <!-- ИГРА -->
         <div id="gameScreen" class="screen">
@@ -997,7 +1037,6 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             <div class="machine-row"><div class="slot-grid" id="slotGrid"></div><div class="lever-housing"><button class="lever" id="casinoLever" type="button" aria-label="Потянуть рычаг"><span class="lever-track"></span><span class="lever-stick"><i class="lever-ball"></i></span><span class="lever-base">PULL</span></button></div><div class="machine-actions"><button class="cabinet-action primary" id="spinBtn" onclick="spin()">SPIN</button><button class="cabinet-action" id="autoBtn" onclick="toggleAutoSpin()">AUTO</button><button class="cabinet-action" id="riskBtn" onclick="startRiskGame()" disabled>RISK</button><button class="cabinet-action" id="superBtn" onclick="startSuperGame()" style="display:none">SUPER</button><button class="cabinet-action" id="megaBtn" onclick="startMegaGame()" style="display:none">MEGA</button></div></div>
             <div class="win-message" id="winMessage"></div>
 
-            <div class="upgrade-panel"><div class="upgrade-head"><b>🛠 МАСТЕРСКАЯ</b><span id="autoUpgradeStatus">Автоспин не куплен</span></div><button class="btn btn-auto" id="buyAutoUpgrade" onclick="buyAutoSpinUpgrade()">⚡ Купить автоспин · 5 000</button><div class="upgrade-note">Улучшение сохраняется в профиле и открывает автоматический запуск с паузой между спинами.</div></div>
             <div class="cabinet-lower"><div class="upgrade-panel"><div class="upgrade-head"><b>🛠 МАСТЕРСКАЯ</b><span id="autoUpgradeStatus">Автоспин не куплен</span></div><button class="btn btn-auto" id="buyAutoUpgrade" onclick="buyAutoSpinUpgrade()">⚡ Купить автоспин · 5 000</button><div class="upgrade-note">Автоспин — постоянное улучшение аккаунта.</div></div><button class="arcade-door" onclick="openMiniArcade()">🕹 ОТКРЫТЬ MINI CASINO <span>4 АВТОМАТА</span></button></div>
 
             <div class="risk-game-area" id="riskGameArea">
@@ -1069,18 +1108,31 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             } catch (e) {}
         }
 
+        function playSfx(id, fallback) {
+            if (!audioEnabled) return;
+            const audio = document.getElementById(id);
+            if (!audio) { if (fallback) fallback(); return; }
+            try {
+                audio.pause();
+                audio.currentTime = 0;
+                const playback = audio.play();
+                if (playback && typeof playback.catch === 'function') playback.catch(() => { if (fallback) fallback(); });
+            } catch (e) { if (fallback) fallback(); }
+        }
+
         function playSpinSound() { playTone(880, 0.05, 'sine', 0.15);
             setTimeout(() => playTone(1046.5, 0.08, 'triangle', 0.1), 20); }
 
-        function playWinSound() { playTone(523.25, 0.2, 'sine', 0.25);
-            setTimeout(() => playTone(659.25, 0.2, 'sine', 0.25), 150);
-            setTimeout(() => playTone(783.99, 0.3, 'sine', 0.3), 300); }
+        function playWinSound() {
+            playSfx('sfxWin', () => { playTone(523.25, 0.2, 'sine', 0.25);
+                setTimeout(() => playTone(659.25, 0.2, 'sine', 0.25), 150);
+                setTimeout(() => playTone(783.99, 0.3, 'sine', 0.3), 300); });
+        }
 
-        function playBigWinSound() { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => setTimeout(() => playTone(f, 0.3, 'sine',
-                0.4), i * 150)); }
+        function playBigWinSound() { playWinSound(); playCoinDrop(); }
 
-        function playSuperWinSound() { [523.25, 659.25, 783.99, 1046.5, 1318.52].forEach((f, i) => setTimeout(() => playTone(f,
-                0.4, 'sine', 0.5), i * 200)); }
+        function playSuperWinSound() { playWinSound(); playCoinDrop();
+            [1046.5, 1318.52].forEach((f, i) => setTimeout(() => playTone(f, 0.4, 'sine', 0.5), i * 200)); }
 
         function playMegaWinSound() { [261.63, 329.63, 392, 523.25, 659.25, 783.99, 1046.5, 1318.52].forEach((f, i) =>
             setTimeout(() => playTone(f, 0.5, 'sine', 0.6), i * 180)); }
@@ -1088,8 +1140,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         function playMegaLoseSound() { [1046.5, 783.99, 523.25, 261.63].forEach((f, i) => setTimeout(() => playTone(f, 0.6,
                 'sawtooth', 0.5), i * 300)); }
 
-        function playLoseSound() { playTone(440, 0.3, 'sawtooth', 0.2);
-            setTimeout(() => playTone(349.23, 0.4, 'sawtooth', 0.2), 200); }
+        function playLoseSound() { playSfx('sfxLose', () => { playTone(440, 0.3, 'sawtooth', 0.2);
+            setTimeout(() => playTone(349.23, 0.4, 'sawtooth', 0.2), 200); }); }
 
         function playRiskWinSound() { playTone(659.25, 0.15, 'square', 0.25);
             setTimeout(() => playTone(783.99, 0.15, 'square', 0.25), 150); }
@@ -1100,16 +1152,22 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         function playButtonClick() { playTone(698.46, 0.07, 'sine', 0.1); }
 
         function playReelRattle(){
-            if(!audioEnabled||!audioCtx)return;
-            for(let i=0;i<14;i++) setTimeout(()=>{if(audioEnabled)playTone(145+Math.random()*130,.035,'square',.055)},i*78);
+            playSfx('sfxReel', () => {
+                if(!audioCtx)return;
+                for(let i=0;i<14;i++) setTimeout(()=>{if(audioEnabled)playTone(145+Math.random()*130,.035,'square',.055)},i*78);
+            });
         }
         function playLeverClunk(){
-            if(!audioEnabled||!audioCtx)return;
-            playTone(92,.14,'sawtooth',.18);setTimeout(()=>playTone(480,.04,'square',.12),70);
+            playSfx('sfxLever', () => {
+                if(!audioCtx)return;
+                playTone(92,.14,'sawtooth',.18);setTimeout(()=>playTone(480,.04,'square',.12),70);
+            });
         }
         function playCoinDrop(){
-            if(!audioEnabled||!audioCtx)return;
-            [1480,1120,1680,1320].forEach((f,i)=>setTimeout(()=>playTone(f,.07,'sine',.12),i*85));
+            playSfx('sfxCoin', () => {
+                if(!audioCtx)return;
+                [1480,1120,1680,1320].forEach((f,i)=>setTimeout(()=>playTone(f,.07,'sine',.12),i*85));
+            });
         }
         function playCardFlip(){
             if(!audioEnabled||!audioCtx)return;
@@ -1641,7 +1699,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         function closeMiniArcade() {
             document.getElementById('miniArcadeScreen').classList.remove('open');
             document.getElementById('miniArcadeScreen').setAttribute('aria-hidden','true');
-            miniGameBusy=false; isSpinInProgress=false; updateUI();
+            // Keep the in-flight game lock until its result and balance write finish.
+            updateUI();
         }
         function updateMiniBalance() {
             const el=document.getElementById('miniBalance');
@@ -1655,8 +1714,14 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             const art={wheel:'<div class="mini-wheel" id="miniWheel"></div>',dice:'<div class="mini-die" id="miniDie">🎲</div>',cards:'<div><span class="mini-card">A♥</span><span class="mini-card" style="color:#222">K♠</span></div>',coin:'<div class="mini-coin" id="miniCoin">🪙</div>'};
             const rules={wheel:'Выигрыш ×8 на джекпот, ×2 на удачный сектор.',dice:'Выпало 6 — ×5. Выпало 4 или 5 — ×1,5.',cards:'Угадай цвет следующей карты. Верный цвет — ×2.',coin:'Выбери сторону монеты. Верный выбор — ×2.'};
             document.getElementById('miniStage').innerHTML='<div class="mini-game-view"><h3>'+titles[kind]+'</h3>'+art[kind]+'<p>'+rules[kind]+'</p><div class="mini-result" id="miniResult">Ставка: '+Number(currentBet).toLocaleString()+' монет</div><div id="miniChoice"></div><button class="mini-play" id="miniPlayButton" onclick="playMiniGame(\''+kind+'\')">ИГРАТЬ · '+Number(currentBet).toLocaleString()+'</button></div>';
-            if(kind==='coin') document.getElementById('miniChoice').innerHTML='<button class="mini-play" onclick="playMiniGame(\'coin\',\'heads\')">ОРЁЛ</button> <button class="mini-play" onclick="playMiniGame(\'coin\',\'tails\')">РЕШКА</button>';
-            if(kind==='cards') document.getElementById('miniChoice').innerHTML='<button class="mini-play" onclick="playMiniGame(\'cards\',\'red\')">КРАСНЫЙ</button> <button class="mini-play" onclick="playMiniGame(\'cards\',\'black\')">ЧЁРНЫЙ</button>';
+            if(kind==='coin') {
+                document.getElementById('miniPlayButton').style.display='none';
+                document.getElementById('miniChoice').innerHTML='<button class="mini-play" type="button" onclick="playMiniGame(\'coin\',\'heads\')">ОРЁЛ</button> <button class="mini-play" type="button" onclick="playMiniGame(\'coin\',\'tails\')">РЕШКА</button>';
+            }
+            if(kind==='cards') {
+                document.getElementById('miniPlayButton').style.display='none';
+                document.getElementById('miniChoice').innerHTML='<button class="mini-play" type="button" onclick="playMiniGame(\'cards\',\'red\')">КРАСНЫЙ</button> <button class="mini-play" type="button" onclick="playMiniGame(\'cards\',\'black\')">ЧЁРНЫЙ</button>';
+            }
             playButtonClick();
         }
         async function playMiniGame(kind, choice) {
@@ -1895,6 +1960,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
             playSpinStart();
             playSpinSound();
+            playReelRattle();
 
             if (superGameActive) {
                 const elapsed = (Date.now() - superGameStartTime) / 1000;
