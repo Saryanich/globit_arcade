@@ -983,7 +983,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         .workshop-level{display:flex;justify-content:space-between;font-size:.73rem;color:#e7ce9d;margin-bottom:6px}.workshop-meter{height:5px;background:#0009;border-radius:9px;overflow:hidden;margin-bottom:9px}.workshop-meter i{display:block;height:100%;background:linear-gradient(90deg,#39b86b,#f1c66e);border-radius:9px}
         .workshop-buy{width:100%;min-height:36px;border:1px solid #d3a95b88;border-radius:8px;background:linear-gradient(130deg,#75502a,#372417);color:#fff0d0;font-weight:800;font-size:.76rem}.workshop-buy:disabled{opacity:.4}
         .workshop-bottom{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:12px;color:#a99b86;font-size:.68rem}.workshop-bottom button{border:1px solid #bd9450;border-radius:8px;padding:8px 13px;background:#4b3823;color:#ffe7b8;font-weight:800}
-        .mini-game-tabs{grid-template-columns:repeat(5,minmax(0,1fr))}.mini-risk-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:12px auto;max-width:340px}.mini-risk-cards .risk-card{min-width:0;min-height:78px}.haptic-fallback .lever{filter:brightness(1.35) saturate(1.25)}
+        .mini-game-tabs{grid-template-columns:repeat(5,minmax(0,1fr))}.mini-risk-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:12px auto;max-width:340px}.mini-risk-cards .risk-card{min-width:0;min-height:78px}
         @media(max-width:520px){.workshop-overlay{padding:7px}.workshop-modal{padding:11px;max-height:92dvh}.workshop-upgrades{grid-template-columns:1fr}.workshop-card p{min-height:0}.cabinet-lower{gap:7px}.cabinet-lower .arcade-door{font-size:.72rem;padding:10px 5px}.mini-game-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.workshop-bottom{font-size:.62rem}}
 
     </style>
@@ -1119,7 +1119,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         let casinoHapticsOn=(()=>{try{return localStorage.getItem(HAPTICS_STORAGE_KEY)!=='off';}catch(e){return true;}})();
         let hapticsUnavailable=false;
         const HAPTIC_PATTERNS={
-            tick:[9], light:[13], medium:[22,28,18], heavy:[38,24,52],
+            tick:[14], light:[15], medium:[22,28,18], heavy:[38,24,52],
             lever:[24,22,34], spin:[16,26,12], reelStop:[18,24,28],
             win:[18,34,22,34,42], bigWin:[28,28,42,30,62],
             jackpot:[42,34,52,38,78,48,110],
@@ -1419,6 +1419,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         function startMegaGame() {
             if (megaGameActive || superGameActive || gameBalance < MEGA_THRESHOLD) return;
 
+            triggerHaptic('heavy');
             playMegaStartSound();
             megaGameActive = true;
             megaGameSpins = 0;
@@ -1452,6 +1453,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         }
 
         function endMegaGame(success) {
+            triggerHaptic(success?'jackpot':'lose');
             megaGameActive = false;
             document.getElementById('megaIndicator').classList.remove('active');
             document.getElementById('megaProgress').style.display = 'none';
@@ -1500,7 +1502,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             document.getElementById('balanceDisplay').textContent = gameBalance;
 
             const grid=createSlotGrid(false);
-            playReelRattle();await animateSlotGrid(grid,1800);
+            triggerHaptic('spin');playReelRattle();await animateSlotGrid(grid,1800);
             const result = checkWin(grid, false, true);
 
             if (result.win > 0) {
@@ -1508,7 +1510,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 gameBalance += result.win;
                 document.getElementById('winMessage').innerHTML =
                     `👑 МЕГА-ПОБЕДА! +${result.win.toLocaleString()}! (${megaGameWins}/${megaGameRequiredWins})<br><small>${result.details.join(' | ')}</small>`;
-                playWinSound();
+                playWinSound();triggerHaptic(result.win>=500000?'jackpot':'bigWin');
                 result.cells.forEach(({ row, col }) => document.getElementById(`cell-${row}-${col}`).classList.add(
                     'win'));
                 setTimeout(() => document.querySelectorAll('.slot-cell.win').forEach(c => c.classList.remove('win')),
@@ -1516,7 +1518,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             } else {
                 document.getElementById('winMessage').textContent =
                     `👑 Спин ${megaGameSpins}/${megaGameTotalSpins} | Побед: ${megaGameWins}/${megaGameRequiredWins}`;
-                playLoseSound();
+                playLoseSound();triggerHaptic('lose');
             }
 
             updateMegaProgress();
