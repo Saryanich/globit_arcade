@@ -211,32 +211,6 @@
             opacity: 0.4;
             cursor: not-allowed;
         }
-        .btn-super {
-            background: linear-gradient(135deg, #ff6d00, #ff1744, #d500f9);
-            color: white;
-            font-weight: 900;
-            font-size: 1.1rem;
-            animation: superBtnGlow 1s ease-in-out infinite;
-            box-shadow: 0 0 30px rgba(255, 109, 0, 0.7), 0 0 60px rgba(213, 0, 249, 0.5);
-            letter-spacing: 2px;
-        }
-        @keyframes superBtnGlow {
-            0%,
-            100% {
-                box-shadow: 0 0 30px rgba(255, 109, 0, 0.7), 0 0 60px rgba(213, 0, 249, 0.5);
-            }
-            50% {
-                box-shadow: 0 0 50px rgba(255, 109, 0, 1), 0 0 90px rgba(213, 0, 249, 0.8);
-            }
-        }
-        .btn-super:hover {
-            transform: scale(1.05);
-        }
-        .btn-super:disabled {
-            opacity: 0.5;
-            animation: none;
-        }
-
         .btn-mega {
             background: linear-gradient(135deg, #ffd700, #ff6d00, #ff1744, #d500f9, #2979ff);
             color: white;
@@ -352,31 +326,6 @@
             }
         }
 
-        .super-mode-indicator {
-            text-align: center;
-            padding: 0.5rem;
-            background: linear-gradient(135deg, #ff6d00, #d500f9);
-            border-radius: 12px;
-            font-weight: 900;
-            font-size: 1rem;
-            letter-spacing: 2px;
-            animation: superPulse 0.5s ease-in-out infinite;
-            margin: 0.5rem 0;
-            display: none;
-        }
-        .super-mode-indicator.active {
-            display: block;
-        }
-        @keyframes superPulse {
-            0%,
-            100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
-        }
-
         .mega-mode-indicator {
             text-align: center;
             padding: 0.5rem;
@@ -463,27 +412,6 @@
         }
         .balance-amount {
             color: var(--accent-gold);
-            font-size: 1.4rem;
-            font-weight: 800;
-        }
-
-        .super-balance-display {
-            background: rgba(255, 109, 0, 0.15);
-            border-radius: 18px;
-            padding: 0.5rem 1rem;
-            margin: 0.3rem 0;
-            border: 2px solid var(--accent-orange);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .super-balance-label {
-            color: #ffab40;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-        }
-        .super-balance-amount {
-            color: var(--accent-orange);
             font-size: 1.4rem;
             font-weight: 800;
         }
@@ -1600,7 +1528,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             if (frees) frees.innerHTML = freespinsRemaining > 0 ? '<span class="freespin-badge">🔥 ' + freespinsRemaining + ' ФРИСПИНОВ</span>' : '';
             const timer = document.getElementById('superTimer');
             const penalty = getSuperGamePenaltyRemaining();
-            if (timer) timer.textContent = penalty > 0 ? '⚠️ Шанс выигрыша снижен: ' + formatCooldown(penalty) : (casinoProgress.superGameLuckBoost ? '🍀 Постоянная удача +20%' : '');
+            if (timer) { const status = []; if (penalty > 0) status.push('⚠️ Шанс выигрыша снижен: ' + formatCooldown(penalty)); if (casinoProgress.superGameLuckBoost) status.push('🍀 Постоянная удача +20%'); timer.textContent = status.join(' · '); }
             refreshMiniCooldownUI();
         }
         function toggleAutoSpin() {
@@ -1703,7 +1631,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 out.textContent=label+(payout?' · +'+payout.toLocaleString()+' монет':'');await updateBalanceDB();updateMiniBalance();
                 if(gameBalance>=MEGA_THRESHOLD)setTimeout(checkMegaGameEligibility,700);
             }catch(error){console.error('Mini game error:',error);if(out)out.textContent='Не удалось завершить раунд. Таймер уже запущен.';await updateBalanceDB();}
-            finally{stopReelRattle();miniGameBusy=false;isSpinInProgress=false;refreshMiniCooldownUI();updateUI();}
+            finally{stopReelRattle();miniGameBusy=false;isSpinInProgress=false;refreshMiniCooldownUI();updateUI();if(!megaGameActive&&gameBalance>=MEGA_THRESHOLD)setTimeout(checkMegaGameEligibility,250);}
         }
 
         function startAutoSpin() {
@@ -1873,7 +1801,6 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 }
                 await updateBalanceDB();
                 
-                if(!megaGameActive&&gameBalance>=MEGA_THRESHOLD)setTimeout(()=>checkMegaGameEligibility(),800);
                 casinoProgress.totalSpins=(casinoProgress.totalSpins||0)+1;
                 if(result.win>0){casinoProgress.totalWins=(casinoProgress.totalWins||0)+1;casinoProgress.bestWin=Math.max(casinoProgress.bestWin||0,result.win);}
                 await updateBalanceDB();
@@ -1887,7 +1814,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             isSpinInProgress=true;updateUI();const lever=document.getElementById('casinoLever');
             if(lever)lever.classList.add('pulled');playLeverClunk();triggerHaptic('lever');
             try{if(wait)await new Promise(resolve=>setTimeout(resolve,wait));await _performSpinCore();}
-            finally{lastSpinFinishedAt=Date.now();isSpinInProgress=false;if(lever)lever.classList.remove('pulled');updateUI();}
+            finally{lastSpinFinishedAt=Date.now();isSpinInProgress=false;if(lever)lever.classList.remove('pulled');updateUI();if(!megaGameActive&&gameBalance>=MEGA_THRESHOLD)setTimeout(checkMegaGameEligibility,250);}
         }
 
         async function spin() {
