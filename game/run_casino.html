@@ -1002,6 +1002,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
     <h1>🎰 RUN CASINO</h1>
     <p class="start-subtitle">Ретро-автомат GloBIT: крути барабаны, открывай улучшения и мини-игры</p>
     <button type="button" class="start-menu-btn" id="casinoSoundToggle">🔊 Звук: ВКЛ</button>
+    <button type="button" class="start-menu-btn" id="casinoHapticsToggle">📳 Вибрация: ВКЛ</button>
     <button type="button" class="start-menu-btn" id="casinoLeaderboardToggle">🏆 Таблица лидеров</button>
     <div id="casinoLeaderboardPanel" class="casino-leaderboard hidden"><div class="start-label">🏆 Лучшие игроки</div><div id="casinoLeaderboardContent">Нажмите, чтобы загрузить таблицу</div></div>
     <button type="button" class="start-menu-btn primary" id="casinoStartButton">▶ НАЧАТЬ ИГРУ</button>
@@ -1113,8 +1114,63 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         function playSpinSound(){playSfx('sfxLever');}function playWinSound(){playSfx('sfxWin');}function playBigWinSound(){playSfx('sfxWin');setTimeout(()=>playSfx('sfxCoin'),420);}function playSuperWinSound(){playSfx('sfxWin');setTimeout(()=>playSfx('sfxCoin'),250);setTimeout(()=>playSfx('sfxCoin'),720);}function playMegaWinSound(){playSuperWinSound();}function playMegaLoseSound(){playLoseSound();}function playLoseSound(){playSfx('sfxLose');}function playRiskWinSound(){playSfx('sfxWin');}function playRiskLoseSound(){playSfx('sfxLose');}function playButtonClick(){playSfx('sfxLever');}function playLeverClunk(){playSfx('sfxLever');}function playCoinDrop(){playSfx('sfxCoin');}function playCardFlip(){playSfx('sfxLever');}function playSpinStart(){playSfx('sfxLever');}function playMegaStartSound(){playSfx('sfxWin');}
         function playReelRattle(){playSfx('sfxReel',{loop:true});if(reelSynthTimer)clearInterval(reelSynthTimer);reelSynthTimer=setInterval(()=>synthNoise(.11,.009,650),180);}
         function stopReelRattle(){stopSfx('sfxReel');if(reelSynthTimer)clearInterval(reelSynthTimer);reelSynthTimer=null;}
-        // iOS Safari has no web Taptic API; true haptics need a native bridge.
-        function triggerHaptic(level='light'){const patterns={light:[12],medium:[22,18,22],heavy:[42,24,58]},style=level==='heavy'?'HEAVY':level==='medium'?'MEDIUM':'LIGHT';try{const h=window.Capacitor?.Plugins?.Haptics;if(h?.impact){const p=h.impact({style});if(p?.catch)p.catch(()=>{});return true;}const w=window.webkit?.messageHandlers?.haptics||window.webkit?.messageHandlers?.hapticFeedback;if(w?.postMessage){w.postMessage({type:'impact',style,pattern:patterns[level]||patterns.light});return true;}if(typeof navigator.vibrate==='function')return navigator.vibrate(patterns[level]||patterns.light);}catch(e){}document.documentElement.classList.remove('haptic-fallback');void document.documentElement.offsetWidth;document.documentElement.classList.add('haptic-fallback');setTimeout(()=>document.documentElement.classList.remove('haptic-fallback'),180);return false;}
+        // Real device haptics only: Android Chrome Vibration API or an installed native bridge.
+        const HAPTICS_STORAGE_KEY='globit:runcasino:haptics';
+        let casinoHapticsOn=(()=>{try{return localStorage.getItem(HAPTICS_STORAGE_KEY)!=='off';}catch(e){return true;}})();
+        let hapticsUnavailable=false;
+        const HAPTIC_PATTERNS={
+            tick:[9], light:[13], medium:[22,28,18], heavy:[38,24,52],
+            lever:[24,22,34], spin:[16,26,12], reelStop:[18,24,28],
+            win:[18,34,22,34,42], bigWin:[28,28,42,30,62],
+            jackpot:[42,34,52,38,78,48,110],
+            lose:[48,36,22], risk:[28,24,48],
+            wheel:[9,82,9,94,9,112,9,142,9,178,9,220,9,275,9,340,9,390,22],
+            dice:[12,34,12,34,12,34,22],
+            coin:[12,75,12,75,12,75,24],
+            cards:[18,55,18,55,28]
+        };
+        function hasRealHaptics(){
+            return !!(window.Capacitor?.Plugins?.Haptics?.impact
+                || window.webkit?.messageHandlers?.haptics?.postMessage
+                || window.webkit?.messageHandlers?.hapticFeedback?.postMessage
+                || (typeof navigator.vibrate==='function'));
+        }
+        function updateHapticsToggleUI(){
+            const button=document.getElementById('casinoHapticsToggle');
+            if(!button)return;
+            button.textContent=!hasRealHaptics()?'📳 Вибрация: НЕДОСТУПНА':(casinoHapticsOn?'📳 Вибрация: ВКЛ':'📳 Вибрация: ВЫКЛ');
+            button.disabled=!hasRealHaptics();
+            button.setAttribute('aria-pressed',String(casinoHapticsOn));
+        }
+        function triggerHaptic(level='light'){
+            if(!casinoHapticsOn||hapticsUnavailable||document.visibilityState==='hidden')return false;
+            const pattern=HAPTIC_PATTERNS[level]||HAPTIC_PATTERNS.light;
+            const style=level==='heavy'||level==='jackpot'||level==='bigWin'?'HEAVY':level==='medium'||level==='win'||level==='risk'?'MEDIUM':'LIGHT';
+            try{
+                const h=window.Capacitor?.Plugins?.Haptics;
+                if(h){
+                    let task;
+                    if((level==='win'||level==='bigWin'||level==='jackpot')&&h.notification)
+                        task=h.notification({type:'SUCCESS'});
+                    else if(level==='lose'&&h.notification)
+                        task=h.notification({type:'ERROR'});
+                    else if(h.impact)task=h.impact({style});
+                    if(task&&typeof task.catch==='function')task.catch(()=>{});
+                    if(task)return true;
+                }
+                const bridge=window.webkit?.messageHandlers?.haptics||window.webkit?.messageHandlers?.hapticFeedback;
+                if(bridge?.postMessage){
+                    bridge.postMessage({type:(level==='win'||level==='bigWin'||level==='jackpot')?'success':level==='lose'?'error':'impact',style,pattern});
+                    return true;
+                }
+                if(typeof navigator.vibrate==='function'){
+                    const ok=navigator.vibrate(pattern);
+                    if(ok===false){hapticsUnavailable=true;updateHapticsToggleUI();}
+                    return ok;
+                }
+            }catch(error){console.debug('Real haptics unavailable:',error);}
+            hapticsUnavailable=true;updateHapticsToggleUI();return false;
+        }
         function triggerCasinoFX(kind='win'){
             const layer=document.getElementById('casinoFxLayer'),screen=document.getElementById('gameScreen');if(!layer||!screen)return;
             layer.className='casino-fx';void layer.offsetWidth;layer.classList.add('active');if(kind==='jackpot')layer.classList.add('jackpot');
@@ -1666,12 +1722,12 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             if((kind==='coin'||kind==='cards')&&!choice){document.getElementById('miniResult').textContent='Сначала выбери вариант выше.';return;}
             miniGameBusy=true;isSpinInProgress=true;startMiniCooldown(kind);const cost=currentBet;gameBalance-=cost;updateUI();updateMiniBalance();refreshMiniCooldownUI();
             const out=document.getElementById('miniResult'),button=document.getElementById('miniPlayButton'),stage=document.getElementById('miniStage');
-            if(button)button.disabled=true;document.querySelectorAll('#miniChoice button').forEach(item=>item.disabled=true);triggerHaptic('medium');
+            if(button)button.disabled=true;document.querySelectorAll('#miniChoice button').forEach(item=>item.disabled=true);triggerHaptic('spin');
             try{
-                if(kind==='wheel'){document.getElementById('miniWheel')?.classList.add('spinning');playReelRattle();}
-                if(kind==='dice'){document.getElementById('miniDie')?.classList.add('rolling');playReelRattle();}
-                if(kind==='coin'){document.getElementById('miniCoin')?.classList.add('flipping');playCoinDrop();}
-                if(kind==='cards'){stage.querySelectorAll('.mini-card').forEach(card=>card.style.transform='translateY(-8px) rotateY(180deg)');playCardFlip();}
+                if(kind==='wheel'){document.getElementById('miniWheel')?.classList.add('spinning');playReelRattle();triggerHaptic('wheel');}
+                if(kind==='dice'){document.getElementById('miniDie')?.classList.add('rolling');playReelRattle();triggerHaptic('dice');}
+                if(kind==='coin'){document.getElementById('miniCoin')?.classList.add('flipping');playCoinDrop();triggerHaptic('coin');}
+                if(kind==='cards'){stage.querySelectorAll('.mini-card').forEach(card=>card.style.transform='translateY(-8px) rotateY(180deg)');playCardFlip();triggerHaptic('cards');}
                 await new Promise(resolve=>setTimeout(resolve,kind==='wheel'?2200:1500));stopReelRattle();
                 let multiplier=0,label='';
                 if(kind==='wheel'){const roll=Math.random();multiplier=roll>.975?8:roll>.72?2:roll>.48?.5:0;label=multiplier?'🎡 Сектор ×'+multiplier:'Пустой сектор';}
@@ -1812,7 +1868,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                     if(grid[row][col]==='💀')cell.classList.add('wild');
                     if(grid[row][col]==='⭐')cell.classList.add('scatter');
                 }
-                if(col<SLOT_COLS-1)playSfx('sfxLever');triggerHaptic('light');
+                if(col<SLOT_COLS-1)playSfx('sfxLever');triggerHaptic(col===SLOT_COLS-1?'reelStop':'tick');
             }
             stopReelRattle();
             setTimeout(()=>document.querySelectorAll('.slot-cell.reel-stop').forEach(cell=>cell.classList.remove('reel-stop')),250);
@@ -1824,7 +1880,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             const spinButton=document.getElementById('spinBtn');
             if(!superGameActive&&gameBalance<currentBet&&freespinsRemaining<=0){stopAutoSpin();return;}
             if(spinButton)spinButton.disabled=true;
-            playReelRattle();triggerHaptic(superGameActive?'heavy':'medium');
+            playReelRattle();triggerHaptic(superGameActive?'heavy':'spin');
             try{
                 if(!superGameActive&&freespinsRemaining<=0){gameBalance-=currentBet;await updateBalanceDB();}
                 else if(!superGameActive&&freespinsRemaining>0)freespinsRemaining--;
@@ -1837,11 +1893,11 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                     document.getElementById('winMessage').textContent=(superGameActive?'💥 СУПЕР-СПИН':'🎉 ВЫИГРЫШ')+' +'+result.win.toLocaleString()+' · '+result.details.join(' | ');
                     result.cells.forEach(cell=>{const node=document.getElementById('cell-'+cell.row+'-'+cell.col);if(node)node.classList.add('win');});
                     triggerCasinoFX(superGameActive&&result.win>=SUPER_COST*4?'jackpot':'win');
-                    triggerHaptic(superGameActive&&result.win>=SUPER_COST*4?'heavy':'medium');
+                    triggerHaptic(result.win>=500000?'jackpot':result.win>=10000?'bigWin':'win');
                     setTimeout(()=>document.querySelectorAll('.slot-cell.win').forEach(cell=>cell.classList.remove('win')),3200);
                 }else{
                     playLoseSound();document.getElementById('winMessage').textContent=superGameActive?'💥 Супер-спин не принёс выигрыш.':(freespinsRemaining>0?'🔄 Фриспин готов. Попробуй ещё!':'Почти! Следующий рывок может быть удачнее.');
-                    lastWinAmount=0;triggerHaptic('light');
+                    lastWinAmount=0;triggerHaptic('lose');
                 }
                 await updateBalanceDB();
                 if(superGameActive){superGameSpins++;endSuperGame();}
@@ -1857,7 +1913,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             if(isSpinInProgress||riskActive)return;
             const wait=Math.max(0,SPIN_MIN_GAP-(Date.now()-lastSpinFinishedAt));
             isSpinInProgress=true;updateUI();const lever=document.getElementById('casinoLever');
-            if(lever)lever.classList.add('pulled');playLeverClunk();triggerHaptic('medium');
+            if(lever)lever.classList.add('pulled');playLeverClunk();triggerHaptic('lever');
             try{if(wait)await new Promise(resolve=>setTimeout(resolve,wait));await _performSpinCore();}
             finally{lastSpinFinishedAt=Date.now();isSpinInProgress=false;if(lever)lever.classList.remove('pulled');updateUI();}
         }
@@ -1881,7 +1937,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             document.getElementById('superIndicator').classList.add('active');
             document.getElementById('superTimer').textContent='⏱ Следующий суперспин через 15:00';
             document.getElementById('winMessage').textContent='💥 СУПЕРСПИН · шанс выигрыша 8% · ставка 150 000';
-            triggerHaptic('heavy');playSpinStart();isSpinInProgress=true;updateUI();
+            triggerHaptic('jackpot');playSpinStart();isSpinInProgress=true;updateUI();
             try{await updateBalanceDB();await _performSpinCore();}
             catch(error){console.error('Super spin failed:',error);gameBalance+=SUPER_COST;document.getElementById('winMessage').textContent='Ошибка суперспина. Ставка возвращена.';endSuperGame();}
             finally{isSpinInProgress=false;updateUI();}
@@ -1908,8 +1964,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             if(!riskActive)return;riskActive=false;startMiniCooldown('risk');
             document.querySelectorAll('.mini-risk-card').forEach((card,i)=>{card.textContent=i===winIdx?'❤️':'💙';card.classList.add(i===winIdx?'revealed':'revealed-lose');card.disabled=true;});
             const amount=lastWinAmount;
-            if(chosen===winIdx){gameBalance+=amount;document.getElementById('winMessage').textContent='🎯 РИСК! Выигрыш удвоен: '+(amount*2).toLocaleString();playRiskWinSound();triggerHaptic('heavy');triggerCasinoFX('win');}
-            else{gameBalance=Math.max(0,gameBalance-amount);document.getElementById('winMessage').textContent='💔 Риск проигран: −'+amount.toLocaleString();playRiskLoseSound();triggerHaptic('medium');triggerCasinoFX('lose');}
+            if(chosen===winIdx){gameBalance+=amount;document.getElementById('winMessage').textContent='🎯 РИСК! Выигрыш удвоен: '+(amount*2).toLocaleString();playRiskWinSound();triggerHaptic('bigWin');triggerCasinoFX('win');}
+            else{gameBalance=Math.max(0,gameBalance-amount);document.getElementById('winMessage').textContent='💔 Риск проигран: −'+amount.toLocaleString();playRiskLoseSound();triggerHaptic('lose');triggerCasinoFX('lose');}
             lastWinAmount=0;const out=document.getElementById('miniResult');if(out)out.textContent=chosen===winIdx?'🎉 Угадал! Выигрыш удвоен.':'💔 Не угадал. Выигрыш потерян.';
             const choice=document.getElementById('miniChoice');if(choice)choice.innerHTML='<span class="mini-result">Следующая игра через 05:00</span>';
             updateBalanceDB();updateMiniBalance();refreshMiniCooldownUI();updateUI();
@@ -1978,6 +2034,16 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 // External audio elements were stopped above; no Web Audio context is used.
             }
         });
+        const hapticsToggle=document.getElementById('casinoHapticsToggle');
+        hapticsToggle?.addEventListener('click',()=>{
+            if(!hasRealHaptics())return;
+            casinoHapticsOn=!casinoHapticsOn;
+            try{localStorage.setItem(HAPTICS_STORAGE_KEY,casinoHapticsOn?'on':'off');}catch(e){}
+            if(casinoHapticsOn){hapticsUnavailable=false;triggerHaptic('medium');}
+            else if(typeof navigator.vibrate==='function')navigator.vibrate(0);
+            updateHapticsToggleUI();
+        });
+        updateHapticsToggleUI();
         document.getElementById('casinoStartButton').addEventListener('click', () => {
             if (!menuInitialized) initGuestCasino();
             document.getElementById('startMenu').style.display = 'none';
