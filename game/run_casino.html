@@ -525,6 +525,8 @@
         .slot-cell.spinning {
             animation: spinAnim 0.1s linear infinite;
         }
+        .slot-cell.prestige-return{animation:prestigeCellReturn .68s cubic-bezier(.2,.85,.25,1) both}
+        @keyframes prestigeCellReturn{0%{opacity:0;transform:translateY(-18px) scale(.55) rotateX(90deg);filter:blur(4px)}70%{opacity:1;transform:translateY(3px) scale(1.08) rotateX(0);filter:blur(0)}100%{opacity:1;transform:translateY(0) scale(1) rotateX(0);filter:blur(0)}}
         @keyframes spinAnim {
             0% {
                 transform: rotateX(0deg);
@@ -925,6 +927,25 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
         .cabinet-lower{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}.cabinet-lower .arcade-door{min-height:58px}.prestige-door{border-color:#d7b75c!important;box-shadow:inset 0 0 12px #d7a83b22,0 0 10px #d7a83b22!important;color:#ffe5a1!important}
         .cabinet-lower .arcade-door{min-width:0;width:100%;padding:12px 8px;font-size:.83rem;line-height:1.25}
+        .cabinet-lower{grid-template-columns:repeat(4,minmax(0,1fr))}
+        .bank-overlay{position:fixed;inset:0;z-index:10012;display:none;align-items:center;justify-content:center;padding:12px;background:#030806ed;backdrop-filter:blur(10px)}
+        .bank-overlay.open{display:flex;animation:arcadeFade .22s ease}
+        .bank-modal{width:min(620px,100%);max-height:min(90dvh,900px);overflow:auto;padding:15px;border:1px solid #55b98a99;border-radius:17px;background:linear-gradient(145deg,#102b20,#101b24 68%,#17132a);color:#e9fff1;box-shadow:0 20px 75px #000d,0 0 30px #00e67622}
+        .bank-modal .workshop-top small{color:#79e4a5}.bank-modal .workshop-top h2{color:#eafff0}.bank-modal .workshop-top p{color:#a9cbbb}
+        .bank-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:13px 0}
+        .bank-metrics>div{min-width:0;padding:10px;border:1px solid #6bd99b44;border-radius:10px;background:#0005;display:flex;flex-direction:column;gap:5px}
+        .bank-metrics small{font-size:10px;color:#a9cbbb}.bank-metrics b{font-size:clamp(14px,3vw,19px);color:#9dffbf;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+        .bank-section{margin-top:10px;padding:12px;border:1px solid #6bd99b44;border-radius:12px;background:linear-gradient(145deg,#10271eaa,#060e12aa)}
+        .bank-section h3{font-size:14px;margin-bottom:6px;color:#c9ffda}.bank-section p{font-size:11px;line-height:1.5;color:#b4cfc0;margin:5px 0 9px}
+        .bank-amount{width:100%;padding:10px 12px;margin:6px 0 9px;border:1px solid #6bd99b66;border-radius:9px;background:#020a08;color:#fff;font-size:16px}
+        .bank-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+        .bank-action{min-width:0;min-height:38px;padding:9px;border:1px solid #57c68b88;border-radius:9px;background:linear-gradient(135deg,#145b3b,#123c31);color:#eafff0;font-size:11px;font-weight:800}
+        .bank-action.gold{border-color:#c39d4c;background:linear-gradient(135deg,#6b501c,#3e3217);color:#ffefbd}
+        .bank-action.danger{border-color:#b85a5a;background:linear-gradient(135deg,#672525,#351515);color:#ffe4e4}
+        .bank-action:disabled{opacity:.35;filter:grayscale(.7)}
+        .bank-status{min-height:34px;margin-top:11px;padding:9px;border-radius:8px;background:#0006;color:#9dffbf;font-size:11px;line-height:1.4}
+        .bank-footer{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:12px;color:#9cb5a6;font-size:10px}.bank-footer button{border:1px solid #57c68b88;border-radius:8px;padding:8px 14px;background:#16412e;color:#eafff0;font-weight:800}
+        @media(max-width:520px){.cabinet-lower{grid-template-columns:repeat(2,minmax(0,1fr))}.bank-modal{padding:12px}.bank-metrics{gap:5px}.bank-metrics>div{padding:8px}.bank-section{padding:10px}}
         .workshop-overlay{position:fixed;inset:0;z-index:10010;display:none;align-items:center;justify-content:center;padding:12px;background:#030706ef;backdrop-filter:blur(9px)}
         .workshop-overlay.open{display:flex}.workshop-modal{width:min(640px,100%);max-height:min(88dvh,850px);overflow:auto;border:1px solid #b88a4c88;border-radius:16px;padding:14px;background:linear-gradient(145deg,#211b14,#0d1511 70%);box-shadow:0 20px 70px #000c;color:#f6e8ce}
         .workshop-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.workshop-top small{color:#d8ad67;letter-spacing:.12em}.workshop-top h2{margin:4px 0;font-size:1.2rem}.workshop-top p{margin:0;color:#b8aa94;font-size:.8rem}
@@ -1053,6 +1074,43 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
       <footer class="workshop-bottom"><span>Уровни сохраняются в аккаунте</span><button type="button" onclick="closeWorkshop()">ГОТОВО</button></footer>
     </section></div>
     <div class="prestige-overlay" id="prestigeOverlay" aria-hidden="true"><section class="prestige-modal"><header class="workshop-top"><div><small>GLOBIT • ASCENSION</small><h2>⭐ ПРЕСТИЖ</h2><p>Начни заново и навсегда увеличь шанс крупного приза</p></div><button type="button" class="mini-close" onclick="closePrestige()">✕</button></header><div class="prestige-wallet"><span>Текущий баланс</span><b id="prestigeBalance">500</b></div><div class="prestige-stats"><div><small>Текущий престиж</small><b id="prestigeCount">0</b></div><div><small>Шанс крупного приза</small><b id="prestigeChance">1%</b></div><div><small>Следующий шанс</small><b id="prestigeNextChance">1,2%</b></div></div><div class="prestige-description">Для престижа нужно накопить <b>50 000 000 монет</b>. После подтверждения баланс станет <b>500 монет</b>, улучшения и пройденные суперигры сбросятся, а престиж и бонус к шансу останутся навсегда.</div><div class="prestige-ready-note" id="prestigeReadyNote">Пока копи монеты. Когда достигнешь 50 000 000, поле автомата сменится на приглашение к престижу — потяни рычаг.</div><button type="button" class="prestige-action" id="prestigeAction" onclick="closePrestige()" disabled>НУЖНО 50 000 000 МОНЕТ</button><footer class="workshop-bottom"><span>Каждый престиж: +0,2% к шансу</span><button type="button" onclick="closePrestige()">ЗАКРЫТЬ</button></footer></section></div>
+<div class="bank-overlay" id="bankOverlay" aria-hidden="true">
+  <section class="bank-modal" role="dialog" aria-modal="true" aria-label="Банк Run Casino">
+    <header class="workshop-top">
+      <div><small>GLOBIT • FINANCE</small><h2>🏦 БАНК</h2><p>Сбережения, кредиты и долги</p></div>
+      <button type="button" class="mini-close" onclick="closeBank()" aria-label="Закрыть банк">✕</button>
+    </header>
+    <div class="bank-metrics">
+      <div><small>Игровой баланс</small><b id="bankMainBalanceView">500</b></div>
+      <div><small>Накопительный счёт</small><b id="bankSavingsView">0</b></div>
+      <div><small>Общий долг</small><b id="bankDebtView">0</b></div>
+    </div>
+    <section class="bank-section">
+      <h3>💎 Накопительный счёт</h3>
+      <p id="bankSavingsState">Счёт не открыт. Открытие стоит 5 000 монет. Деньги на счёте не используются для ставок.</p>
+      <button class="bank-action gold" id="bankOpenSavingsButton" type="button" onclick="openSavingsAccount()">ОТКРЫТЬ СЧЁТ · 5 000</button>
+      <label for="bankAmountInput" style="display:block;margin-top:10px;color:#bcebd0;font-size:10px">Сумма операции</label>
+      <input class="bank-amount" id="bankAmountInput" type="number" min="1" max="100000" step="1" value="1000" inputmode="numeric">
+      <div class="bank-actions">
+        <button class="bank-action" id="bankDepositButton" type="button" onclick="depositSavings()">ПОЛОЖИТЬ</button>
+        <button class="bank-action" id="bankWithdrawButton" type="button" onclick="withdrawSavings()">СНЯТЬ</button>
+      </div>
+    </section>
+    <section class="bank-section">
+      <h3>💳 Кредиты</h3>
+      <p id="bankLoanStatus">Нет активного кредита. Выбери сумму выше и оформи кредит.</p>
+      <div class="bank-actions">
+        <button class="bank-action gold" id="bankLoanButton" type="button" onclick="takeBankLoan()">ВЗЯТЬ КРЕДИТ</button>
+        <button class="bank-action" id="bankRepayLoanButton" type="button" onclick="repayBankLoan()" disabled>ПОГАСИТЬ КРЕДИТ</button>
+        <button class="bank-action danger" id="bankRepayDebtButton" type="button" onclick="repayOverdraftDebt()" disabled>ПОГАСИТЬ ДОЛГИ</button>
+      </div>
+      <p>Без процентов. Срок возврата — 30 минут, затем 5 минут отсрочки. За каждую полную минуту отсрочки шанс выигрыша уменьшается на 0,05%. После этого инкассаторы сначала списывают игровой баланс, затем накопления.</p>
+      <p>Можно оформить один кредит одновременно, от 500 до 100 000 монет.</p>
+    </section>
+    <div class="bank-status" id="bankStatus" role="status">Банк готов.</div>
+    <footer class="bank-footer"><span>Автопополнение баланса до 500 монет учитывается как долг</span><button type="button" onclick="closeBank()">ЗАКРЫТЬ</button></footer>
+  </section>
+</div>
     <div id="casinoLoadingOverlay" class="casino-loading-overlay"><div class="casino-loading-card"><div class="casino-loader"></div><b id="casinoLoadingTitle">Подключаемся к GloBIT Arcade…</b><span id="casinoLoadingText">Игра заблокирована до загрузки серверного баланса.</span></div></div>
     <div class="app-container">
 <!-- ИГРА -->
@@ -1115,7 +1173,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             <div class="machine-row"><div class="slot-grid" id="slotGrid"></div><div class="lever-housing"><button class="lever" id="casinoLever" type="button" aria-label="Потянуть рычаг вниз и на себя"><span class="lever-track"></span><span class="lever-stick"><i class="lever-ball"></i></span><span class="lever-base">PULL</span></button></div><div class="machine-actions"><button class="cabinet-action" id="autoBtn" onclick="toggleAutoSpin()">AUTO</button></div></div><button id="spinBtn" type="button" hidden aria-hidden="true" tabindex="-1"></button>
             <div class="win-message" id="winMessage"></div>
 
-            <div class="cabinet-lower"><button class="arcade-door" type="button" onclick="openWorkshop()">🛠 МАСТЕРСКАЯ <span>УЛУЧШЕНИЯ · УРОВНИ</span></button><button class="arcade-door" type="button" onclick="openMiniArcade()">🕹 MINI CASINO <span>5 ИГР</span></button><button class="arcade-door prestige-door" type="button" onclick="openPrestige()">⭐ ПРЕСТИЖ <span>СБРОС · УДАЧА</span></button></div>
+            <div class="cabinet-lower"><button class="arcade-door" type="button" onclick="openWorkshop()">🛠 МАСТЕРСКАЯ <span>УЛУЧШЕНИЯ · УРОВНИ</span></button><button class="arcade-door" type="button" onclick="openMiniArcade()">🕹 MINI CASINO <span>5 ИГР</span></button><button class="arcade-door bank-door" type="button" onclick="openBank()">🏦 БАНК <span>СБЕРЕЖЕНИЯ · КРЕДИТЫ</span></button><button class="arcade-door prestige-door" type="button" onclick="openPrestige()">⭐ ПРЕСТИЖ <span>СБРОС · УДАЧА</span></button></div>
 
             <button class="btn btn-secondary" onclick="logout()" style="margin-top:0.6rem;">🚪 Выйти</button>
         </div>
@@ -1282,6 +1340,17 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         const MEGA_THRESHOLD = 1000000;
         const AUTO_SPIN_DELAY = 2600;
         let currentGlobalId = null;
+        function createDefaultBankData(){return {savingsOpened:false,savingsBalance:0,activeLoan:null,overdraftDebt:0,lastCollectionAt:0,lastCollectionAmount:0,lastCollectionShortfall:0};}
+        function normalizeBankData(raw){
+            const src=raw&&typeof raw==='object'?raw:{};
+            const amount=Math.max(0,Math.floor(Number(src.activeLoan?.amount)||0));
+            const dueAt=Math.max(0,Number(src.activeLoan?.dueAt)||0);
+            const issuedAt=Math.max(0,Number(src.activeLoan?.issuedAt)||0);
+            return {savingsOpened:src.savingsOpened===true,savingsBalance:Math.max(0,Math.floor(Number(src.savingsBalance)||0)),activeLoan:amount>0&&dueAt>0?{amount,issuedAt,dueAt}:null,overdraftDebt:Math.max(0,Math.floor(Number(src.overdraftDebt)||0)),lastCollectionAt:Math.max(0,Number(src.lastCollectionAt)||0),lastCollectionAmount:Math.max(0,Math.floor(Number(src.lastCollectionAmount)||0)),lastCollectionShortfall:Math.max(0,Math.floor(Number(src.lastCollectionShortfall)||0))};
+        }
+        let casinoBank=createDefaultBankData();
+        let bankClockInterval=null;
+        let bankCollectionInProgress=false;
 
         // ==================== ФУНКЦИИ ДЛЯ РАБОТЫ С БАЛАНСОМ В SCORE ====================
         function getScoreDocRef(globalId) {
@@ -1313,6 +1382,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                     email: auth.currentUser.email || '',
                     displayName: document.getElementById('displayName').textContent || globalId,
                     casinoProgress: { ...casinoProgress, autoSpinUnlocked },
+                    casinoBank: { ...casinoBank, activeLoan: casinoBank.activeLoan ? { ...casinoBank.activeLoan } : null },
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
                 try {
@@ -1336,6 +1406,132 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 setTimeout(() => { if (auth.currentUser) loadAuthenticatedCasino(auth.currentUser).catch(error => console.error('Повторная синхронизация не удалась:',error)); }, 1200);
                 throw e;
             }
+        }
+
+
+        // ==================== БАНК RUN CASINO ====================
+        function cloneBankData(){return {...casinoBank,activeLoan:casinoBank.activeLoan?{...casinoBank.activeLoan}:null};}
+        function bankAmountInput(){const value=Math.floor(Number(document.getElementById('bankAmountInput')?.value)||0);return value;}
+        function bankFormatTime(ms){const total=Math.max(0,Math.ceil(ms/1000));return String(Math.floor(total/60)).padStart(2,'0')+':'+String(total%60).padStart(2,'0');}
+        function getBankLoanPenaltyPercent(){const loan=casinoBank.activeLoan;if(!loan||Date.now()<=loan.dueAt)return 0;const minutes=Math.floor((Date.now()-loan.dueAt)/60000);return Math.min(0.25,Math.max(0,minutes)*0.05);}
+        function shouldSuppressWinByLoanPenalty(){const pct=getBankLoanPenaltyPercent();return pct>0&&Math.random()<pct/100;}
+        function setBankStatus(message){const el=document.getElementById('bankStatus');if(el)el.textContent=message;}
+        function updateBankUI(){
+            const main=document.getElementById('bankMainBalanceView'),savings=document.getElementById('bankSavingsView'),debt=document.getElementById('bankDebtView');
+            if(!main)return;
+            const active=casinoBank.activeLoan;
+            if(main)main.textContent=Math.floor(gameBalance||0).toLocaleString();
+            if(savings)savings.textContent=Math.floor(casinoBank.savingsBalance||0).toLocaleString();
+            if(debt)debt.textContent=(Math.floor(casinoBank.overdraftDebt||0)+(active?Math.floor(active.amount||0):0)).toLocaleString();
+            const savingsState=document.getElementById('bankSavingsState');
+            if(savingsState)savingsState.textContent=casinoBank.savingsOpened?'Счёт открыт. Средства защищены от ставок и списываются только при снятии или взыскании долга. Проценты не начисляются.':'Счёт не открыт. Открытие стоит 5 000 монет. Деньги на счёте не используются для ставок.';
+            const openButton=document.getElementById('bankOpenSavingsButton');
+            if(openButton){openButton.style.display=casinoBank.savingsOpened?'none':'block';openButton.disabled=!casinoDataReady||gameBalance<5500||isSpinInProgress;}
+            const amount=bankAmountInput();
+            const locked=!casinoDataReady||isSpinInProgress||megaGameActive||riskActive;
+            const deposit=document.getElementById('bankDepositButton'),withdraw=document.getElementById('bankWithdrawButton');
+            if(deposit)deposit.disabled=locked||!casinoBank.savingsOpened||amount<1||amount>Math.max(0,gameBalance-500);
+            if(withdraw)withdraw.disabled=locked||!casinoBank.savingsOpened||amount<1||amount>casinoBank.savingsBalance;
+            const loanStatus=document.getElementById('bankLoanStatus');
+            if(loanStatus){
+                if(!active)loanStatus.textContent='Нет активного кредита. Выбери сумму выше и оформи кредит.';
+                else if(Date.now()<active.dueAt)loanStatus.textContent='К возврату: '+active.amount.toLocaleString()+' монет · осталось '+bankFormatTime(active.dueAt-Date.now())+'.';
+                else{
+                    const elapsed=Date.now()-active.dueAt, penalty=getBankLoanPenaltyPercent();
+                    loanStatus.textContent='ПРОСРОЧКА '+bankFormatTime(elapsed)+' / 05:00 · штраф к шансу выигрыша −'+penalty.toFixed(2).replace('.',',')+'%. Инкассаторы придут через '+bankFormatTime(5*60000-elapsed)+'.';
+                }
+            }
+            const loanButton=document.getElementById('bankLoanButton'),repayLoan=document.getElementById('bankRepayLoanButton'),repayDebt=document.getElementById('bankRepayDebtButton');
+            if(loanButton){loanButton.disabled=locked||!!active||amount<500||amount>100000;loanButton.textContent=active?'КРЕДИТ УЖЕ ОФОРМЛЕН':'ВЗЯТЬ КРЕДИТ';}
+            if(repayLoan)repayLoan.disabled=locked||!active;
+            if(repayDebt)repayDebt.disabled=locked||(Number(casinoBank.overdraftDebt)||0)<=0;
+        }
+        async function commitBankAction(previousBalance,previousBank,successMessage){
+            try{await updateBalanceDB();setBankStatus(successMessage);updateUI();return true;}
+            catch(error){gameBalance=previousBalance;casinoBank=previousBank;setBankStatus('Не удалось сохранить операцию. Данные восстановлены, повтори позже.');updateUI();return false;}
+        }
+        function openBank(){
+            if(!casinoDataReady||isSpinInProgress||megaGameActive||riskActive)return;
+            updateBankUI();document.getElementById('bankOverlay').classList.add('open');document.getElementById('bankOverlay').setAttribute('aria-hidden','false');playButtonClick();
+        }
+        function closeBank(){document.getElementById('bankOverlay').classList.remove('open');document.getElementById('bankOverlay').setAttribute('aria-hidden','true');updateUI();}
+        async function openSavingsAccount(){
+            if(casinoBank.savingsOpened)return;
+            if(gameBalance<5500){setBankStatus('Нужно минимум 5 500 монет: 5 000 за открытие и 500 останутся на балансе.');return;}
+            const beforeBalance=gameBalance,beforeBank=cloneBankData();gameBalance-=5000;casinoBank.savingsOpened=true;
+            await commitBankAction(beforeBalance,beforeBank,'Накопительный счёт открыт за 5 000 монет. Теперь можно хранить деньги отдельно от ставок.');
+        }
+        async function depositSavings(){
+            const amount=bankAmountInput();
+            if(!casinoBank.savingsOpened){setBankStatus('Сначала открой накопительный счёт.');return;}
+            if(amount<1||amount>gameBalance-500){setBankStatus('Можно положить только доступную сумму, оставив на балансе не меньше 500.');return;}
+            const beforeBalance=gameBalance,beforeBank=cloneBankData();gameBalance-=amount;casinoBank.savingsBalance+=amount;
+            await commitBankAction(beforeBalance,beforeBank,'На накопительный счёт положено '+amount.toLocaleString()+' монет.');
+        }
+        async function withdrawSavings(){
+            const amount=bankAmountInput();
+            if(!casinoBank.savingsOpened||amount<1||amount>casinoBank.savingsBalance){setBankStatus('Недостаточно средств на накопительном счёте.');return;}
+            const beforeBalance=gameBalance,beforeBank=cloneBankData();casinoBank.savingsBalance-=amount;gameBalance+=amount;
+            await commitBankAction(beforeBalance,beforeBank,'Со счёта снято '+amount.toLocaleString()+' монет.');
+        }
+        async function takeBankLoan(){
+            const amount=bankAmountInput();
+            if(casinoBank.activeLoan){setBankStatus('Сначала погаси текущий кредит.');return;}
+            if(amount<500||amount>100000){setBankStatus('Сумма кредита должна быть от 500 до 100 000 монет.');return;}
+            const beforeBalance=gameBalance,beforeBank=cloneBankData(),issuedAt=Date.now();
+            gameBalance+=amount;casinoBank.activeLoan={amount,issuedAt,dueAt:issuedAt+30*60000};
+            await commitBankAction(beforeBalance,beforeBank,'Кредит '+amount.toLocaleString()+' монет зачислен. Верни его в течение 30 минут.');
+        }
+        function applyBankPayment(amount){
+            const available=Math.max(0,gameBalance-500)+Math.max(0,casinoBank.savingsBalance||0);
+            if(amount<=0||available<amount)return false;
+            const fromMain=Math.min(Math.max(0,gameBalance-500),amount);gameBalance-=fromMain;amount-=fromMain;
+            if(amount>0){casinoBank.savingsBalance-=amount;}
+            return true;
+        }
+        async function repayBankLoan(){
+            const loan=casinoBank.activeLoan;if(!loan){setBankStatus('Активного кредита нет.');return;}
+            if(Date.now()>=loan.dueAt+5*60000){await collectExpiredBankLoan();setBankStatus('Срок отсрочки истёк: сработало взыскание инкассаторов.');return;}
+            const totalAvailable=Math.max(0,gameBalance-500)+(casinoBank.savingsOpened?casinoBank.savingsBalance:0);
+            if(totalAvailable<loan.amount){setBankStatus('Недостаточно средств. Нужны деньги сверх 500 на балансе и/или накопления.');return;}
+            const beforeBalance=gameBalance,beforeBank=cloneBankData();
+            if(!applyBankPayment(loan.amount))return;
+            casinoBank.activeLoan=null;
+            await commitBankAction(beforeBalance,beforeBank,'Кредит полностью погашен. Просрочка и штраф отменены.');
+        }
+        async function repayOverdraftDebt(){
+            const amount=Math.max(0,Math.floor(Number(casinoBank.overdraftDebt)||0));
+            if(!amount){setBankStatus('Долгов по автопополнению нет.');return;}
+            const available=Math.max(0,gameBalance-500)+(casinoBank.savingsOpened?casinoBank.savingsBalance:0);
+            if(available<amount){setBankStatus('Чтобы погасить весь долг, не хватает доступных средств.');return;}
+            const beforeBalance=gameBalance,beforeBank=cloneBankData();
+            if(!applyBankPayment(amount))return;
+            casinoBank.overdraftDebt=0;
+            await commitBankAction(beforeBalance,beforeBank,'Долг за автопополнение погашен.');
+        }
+        async function collectExpiredBankLoan(){
+            const loan=casinoBank.activeLoan;
+            if(bankCollectionInProgress||!loan||Date.now()<loan.dueAt+5*60000)return;
+            bankCollectionInProgress=true;
+            const beforeBalance=gameBalance,beforeBank=cloneBankData();
+            let remaining=loan.amount;
+            const fromBalance=Math.min(Math.max(0,gameBalance),remaining);gameBalance-=fromBalance;remaining-=fromBalance;
+            const fromSavings=Math.min(Math.max(0,casinoBank.savingsBalance||0),remaining);casinoBank.savingsBalance-=fromSavings;remaining-=fromSavings;
+            casinoBank.activeLoan=null;casinoBank.lastCollectionAt=Date.now();casinoBank.lastCollectionAmount=fromBalance+fromSavings;casinoBank.lastCollectionShortfall=remaining;
+            if(remaining>0)casinoBank.overdraftDebt+=remaining;
+            const ok=await commitBankAction(beforeBalance,beforeBank,'Инкассаторы списали '+(fromBalance+fromSavings).toLocaleString()+' монет. Непокрытый остаток: '+remaining.toLocaleString()+' монет добавлен в долги.');
+            bankCollectionInProgress=false;
+            if(!ok)casinoBank.activeLoan=beforeBank.activeLoan;
+        }
+        async function updateBankClock(){
+            const loan=casinoBank.activeLoan;
+            if(loan&&Date.now()>=loan.dueAt+5*60000&&!isSpinInProgress&&!megaGameActive&&!riskActive)await collectExpiredBankLoan();
+            updateBankUI();
+        }
+        function startBankClock(){
+            if(bankClockInterval)clearInterval(bankClockInterval);
+            updateBankClock();
+            bankClockInterval=setInterval(updateBankClock,1000);
         }
 
         // ==================== НАВИГАЦИЯ ====================
@@ -1407,10 +1603,11 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
         async function updateBalanceDB() {
             if (!casinoDataReady) throw new Error('Баланс ещё не загружен с сервера — сохранение запрещено');
-            gameBalance=Math.max(500,Math.floor(Number(gameBalance)||0));
-            if (currentGlobalId) {
-                await updateBalanceInScore(currentGlobalId, gameBalance);
-            }
+            const requestedBalance=Math.floor(Number(gameBalance)||0);
+            if(requestedBalance<500){casinoBank.overdraftDebt=(Number(casinoBank.overdraftDebt)||0)+(500-requestedBalance);gameBalance=500;}
+            else gameBalance=requestedBalance;
+            if (currentGlobalId) await updateBalanceInScore(currentGlobalId, gameBalance);
+            updateBankUI();
         }
         // Авторизация выполняется в GloBIT Arcade; здесь используется уже существующая сессия.
         window.logout = async () => {
@@ -1559,8 +1756,9 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             }
             const loadedBalance = Number(scoreData.score);
             if (!Number.isFinite(loadedBalance) || loadedBalance < 0) throw new Error('Сервер вернул некорректный баланс');
-            gameBalance = Math.max(500,Math.floor(loadedBalance));
-            if(gameBalance!==Math.floor(loadedBalance)){await scoreRef.set({score:gameBalance,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});}
+            casinoBank=normalizeBankData(scoreData.casinoBank);
+            gameBalance=Math.floor(loadedBalance);
+            if(gameBalance<500){casinoBank.overdraftDebt+=500-gameBalance;gameBalance=500;await scoreRef.set({score:gameBalance,casinoBank:cloneBankData(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});}
             const progress = scoreData.casinoProgress || {};
             casinoProgress = { ...casinoProgress, ...progress, prestige:Math.max(0,Math.floor(Number(progress.prestige)||0)), comboRevealEnabled: progress.comboRevealEnabled !== false, upgradeLevels:{ ...(progress.upgradeLevels || {}) }, superGameCompletedLevels:Array.isArray(progress.superGameCompletedLevels) ? progress.superGameCompletedLevels.map(Number) : (Number(progress.superGameCompletedLevel) > 0 ? [Number(progress.superGameCompletedLevel)] : []) };
             autoSpinUnlocked = progress.autoSpinUnlocked === true || getUpgradeLevel('auto') > 0;
@@ -1572,7 +1770,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             } catch (boardError) { console.warn('Таблица лидеров временно недоступна:', boardError); }
             initGrid(); setupBetSelector(); updateUI();
             casinoDataReady = true; casinoLoadError = '';
-            updateCasinoLoadingUI();
+            updateCasinoLoadingUI();startBankClock();updateUI();
             showScreen('gameScreen');
             setTimeout(checkMegaGameEligibility, 350);
             console.log('✅ Run Casino готов: серверный баланс и прогресс загружены до открытия игры');
@@ -1654,7 +1852,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             const timer = document.getElementById('superTimer');
             const penalty = getSuperGamePenaltyRemaining();
             if (timer) { const status = []; if (penalty > 0) status.push('⚠️ Шанс выигрыша снижен: ' + formatCooldown(penalty)); if (casinoProgress.superGameLuckBoost) status.push('🍀 Постоянная удача +3%'); timer.textContent = status.join(' · '); }
-            refreshMiniCooldownUI();
+            refreshMiniCooldownUI();updateBankUI();
         }
         function toggleAutoSpin() {
             if (megaGameActive) return;
@@ -1700,6 +1898,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             document.querySelectorAll('.bet-option').forEach(o=>o.classList.toggle('selected',Number(o.dataset.bet)===50));
             try{
                 await updateBalanceDB();
+                prestigeFieldReadyState=null;updatePrestigeField();
+                document.querySelectorAll('#slotGrid .slot-cell').forEach((cell,index)=>{cell.classList.add('prestige-return');cell.style.animationDelay=(index*28)+'ms';setTimeout(()=>{cell.classList.remove('prestige-return');cell.style.animationDelay='';},1100+index*28);});
                 document.getElementById('winMessage').textContent='⭐ ПРЕСТИЖ '+nextPrestige+'! Шанс крупного приза: '+chance+'%';
                 playMegaWinSound();triggerHaptic('jackpot');triggerCasinoFX('jackpot');updateUI();
             }catch(error){
@@ -1788,6 +1988,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 if(kind==='coin'){const side=Math.random()<.5?'heads':'tails';multiplier=side===choice?1.7:0;label=(side==='heads'?'🪙 Орёл':'🪙 Решка')+(multiplier?' · угадал!':' · не угадал');}
                 if(kind==='cards'){const red=Math.random()<.5;multiplier=(red?'red':'black')===choice?1.7:0;label=(red?'♥ Красная карта':'♠ Чёрная карта')+(multiplier?' · угадал!':' · не угадал');}
                 let payout=Math.floor(cost*multiplier);
+                if(payout>0&&shouldSuppressWinByLoanPenalty()){payout=0;label+=' · просрочка кредита: −'+getBankLoanPenaltyPercent().toFixed(2).replace('.',',')+'% к шансу';}
                 if(payout>0&&suppressWinBySuperGamePenalty()){payout=0;label+=' · временное снижение шанса';}
                 else if(payout<=0&&casinoProgress.superGameLuckBoost&&Math.random()<0.03){payout=Math.floor(cost*1.05);label+=' · 🍀 постоянная удача';}
                 gameBalance+=payout;casinoProgress.totalSpins=(casinoProgress.totalSpins||0)+1;
@@ -1966,13 +2167,13 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 updateUI();document.getElementById('winMessage').textContent='';
                 const grid=createSlotGrid(false);await animateSlotGrid(grid,getSpinAnimationDuration());
                 let result=checkWin(grid,false,false);
-                let prestigePrizeTriggered=false;
+                let prestigePrizeTriggered=false,beginnerBoostTriggered=false,loanPenaltySuppressed=false;
                 const prestigeChance=getPrestigeHighPrizeChance()/100;
-                const beginnerBoostActive=gameBalance<5000;
-                if(result.win<=0&&beginnerBoostActive&&Math.random()<0.25){
+                const beginnerBoostActive=gameBalance<25000;
+                if(result.win<=0&&beginnerBoostActive&&Math.random()<0.35){
                     const luckyRow=Math.floor(Math.random()*SLOT_ROWS),luckySymbol=['💚','💜','🖤','6'][Math.floor(Math.random()*4)];
                     for(let c=0;c<3;c++){grid[luckyRow][c]=luckySymbol;const node=document.getElementById('cell-'+luckyRow+'-'+c);if(node)node.textContent=luckySymbol;}
-                    result=checkWin(grid,false,false);
+                    result=checkWin(grid,false,false);beginnerBoostTriggered=result.win>0;
                 }
                 if(result.win<=0&&Math.random()<prestigeChance){
                     for(let c=0;c<SLOT_COLS;c++){grid[0][c]='7';const node=document.getElementById('cell-0-'+c);if(node)node.textContent='7';}
@@ -1985,6 +2186,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                     result=checkWin(grid,false,false);permanentLuckTriggered=result.win>0;
                 }
                 if(result.win>0)result.win=Math.min(Math.floor(result.win*getPayoutBoost()),Math.floor(currentBet*MAX_SPIN_PAYOUT_MULTIPLIER));
+                if(beginnerBoostTriggered&&result.win>0){result.win=Math.min(Math.floor(currentBet*MAX_SPIN_PAYOUT_MULTIPLIER),Math.max(result.win,Math.ceil(currentBet*1.5)));result.details.unshift('🍀 Поддержка игрока: выплата не меньше ×1,5');}
+                if(result.win>0&&shouldSuppressWinByLoanPenalty()){loanPenaltySuppressed=true;result.win=0;result.cells=[];result.details=[];}
                 let penaltySuppressed=false;
                 if(result.win>0&&suppressWinBySuperGamePenalty()){result.win=0;result.cells=[];result.details=['⏳ Временное снижение вероятности выигрыша'];penaltySuppressed=true;}
                 if(prestigePrizeTriggered&&result.win>0)result.details.unshift('⭐ ПРЕСТИЖНЫЙ ПРИЗ · шанс '+getPrestigeHighPrizeChance().toFixed(1).replace('.',',')+'%');
@@ -1999,7 +2202,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                     triggerHaptic(result.win>=500000?'jackpot':result.win>=10000?'bigWin':'win');
                     setTimeout(()=>document.querySelectorAll('.slot-cell.win').forEach(cell=>cell.classList.remove('win')),3200);
                 }else{
-                    playLoseSound();document.getElementById('winMessage').textContent=penaltySuppressed?'⏳ Сработал временный штраф суперигры — выигрыш не засчитан.':(freespinsRemaining>0?'🔄 Фриспин готов. Попробуй ещё!':'Почти! Следующий рывок может быть удачнее.');
+                    playLoseSound();document.getElementById('winMessage').textContent=loanPenaltySuppressed?'🏦 Просрочка кредита: шанс выигрыша снижен на '+getBankLoanPenaltyPercent().toFixed(2).replace('.',',')+'%.':(penaltySuppressed?'⏳ Сработал временный штраф суперигры — выигрыш не засчитан.':(freespinsRemaining>0?'🔄 Фриспин готов. Попробуй ещё!':'Почти! Следующий рывок может быть удачнее.'));
                     lastWinAmount=0;triggerHaptic('lose');
                 }
                 await updateBalanceDB();
@@ -2091,11 +2294,11 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         }
         async function initGuestCasino() {
             if (auth.currentUser || !casinoAuthResolved || casinoDataReady) return;
-            menuInitialized=true; casinoDataReady=true; currentGlobalId=null; gameBalance=500;
+            menuInitialized=true; casinoDataReady=true; currentGlobalId=null; gameBalance=500;casinoBank=createDefaultBankData();
             document.getElementById('displayName').textContent='Гость';
             document.getElementById('globalIdDisplay').textContent='Гость';
             document.getElementById('balanceDisplay').textContent=gameBalance.toLocaleString();
-            initGrid(); setupBetSelector(); updateUI(); updateCasinoLoadingUI();
+            initGrid(); setupBetSelector(); updateUI(); updateCasinoLoadingUI();startBankClock();
         }
         async function loadAuthenticatedCasino(user) {
             if(casinoLoadPromise) return casinoLoadPromise;
@@ -2191,7 +2394,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         casinoLever?.addEventListener('pointerup',finishLeverPull);
         casinoLever?.addEventListener('pointercancel',finishLeverPull);
         casinoLever?.addEventListener('lostpointercapture',finishLeverPull);
-        document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMiniArcade();});
+        document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMiniArcade();closeBank();}});
         document.body.addEventListener('click', function firstClick() {
             if (casinoSoundOn) initAudio();
             document.body.removeEventListener('click', firstClick);
