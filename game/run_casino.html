@@ -1099,6 +1099,24 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
         function playButtonClick() { playTone(698.46, 0.07, 'sine', 0.1); }
 
+        function playReelRattle(){
+            if(!audioEnabled||!audioCtx)return;
+            for(let i=0;i<14;i++) setTimeout(()=>{if(audioEnabled)playTone(145+Math.random()*130,.035,'square',.055)},i*78);
+        }
+        function playLeverClunk(){
+            if(!audioEnabled||!audioCtx)return;
+            playTone(92,.14,'sawtooth',.18);setTimeout(()=>playTone(480,.04,'square',.12),70);
+        }
+        function playCoinDrop(){
+            if(!audioEnabled||!audioCtx)return;
+            [1480,1120,1680,1320].forEach((f,i)=>setTimeout(()=>playTone(f,.07,'sine',.12),i*85));
+        }
+        function playCardFlip(){
+            if(!audioEnabled||!audioCtx)return;
+            [420,620,510].forEach((f,i)=>setTimeout(()=>playTone(f,.045,'triangle',.09),i*75));
+        }
+
+
         function playSpinStart() { playTone(1318.52, 0.05, 'triangle', 0.2); }
 
         function playMegaStartSound() { [392, 523.25, 659.25, 783.99, 1046.5].forEach((f, i) => setTimeout(() => playTone(f,
@@ -1612,30 +1630,62 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             document.getElementById('winMessage').textContent = '⚡ Автоспин открыт навсегда для этого аккаунта!';
         }
 
-        function playMiniGame(kind) {
+        let selectedMiniGame = null;
+        let miniGameBusy = false;
+        function openMiniArcade() {
             if (isSpinInProgress || riskActive || superGameActive || megaGameActive) return;
-            if (gameBalance < currentBet) { document.getElementById('winMessage').textContent = 'Недостаточно монет для ставки.'; return; }
-            isSpinInProgress = true;
-            const cost = currentBet;
-            gameBalance -= cost;
-            updateUI();
-            document.getElementById('winMessage').textContent = '🎮 Игра запускается...';
-            setTimeout(async () => {
-                let mult = 0, label = '';
-                if (kind === 'coin') { const win = Math.random() < 0.48; mult = win ? 2 : 0; label = win ? '🪙 Орёл! Выплата ×2' : '🪙 Решка. Не повезло'; }
-                else if (kind === 'dice') { const roll = 1 + Math.floor(Math.random() * 6); mult = roll === 6 ? 5 : (roll >= 4 ? 1.5 : 0); label = '🎲 Выпало ' + roll + (mult ? ' · Выплата ×' + mult : ' · Без выигрыша'); }
-                else { const roll = Math.random(); mult = roll > .94 ? 8 : (roll > .72 ? 2 : 0); label = mult ? '🎡 Сектор удачи! ×' + mult : '🎡 Пустой сектор'; }
-                const payout = Math.floor(cost * mult);
-                gameBalance += payout;
-                casinoProgress.totalSpins = (casinoProgress.totalSpins || 0) + 1;
-                if (payout) { casinoProgress.totalWins = (casinoProgress.totalWins || 0) + 1; casinoProgress.bestWin = Math.max(casinoProgress.bestWin || 0, payout); playWinSound(); } else playLoseSound();
-                document.getElementById('winMessage').textContent = label + (payout ? ' · +' + payout.toLocaleString() + ' монет' : '');
-                await updateBalanceDB();
-                isSpinInProgress = false;
-                updateUI();
-            }, 1400);
+            document.getElementById('miniArcadeScreen').classList.add('open');
+            document.getElementById('miniArcadeScreen').setAttribute('aria-hidden','false');
+            updateMiniBalance(); playButtonClick();
         }
-
+        function closeMiniArcade() {
+            document.getElementById('miniArcadeScreen').classList.remove('open');
+            document.getElementById('miniArcadeScreen').setAttribute('aria-hidden','true');
+            miniGameBusy=false; isSpinInProgress=false; updateUI();
+        }
+        function updateMiniBalance() {
+            const el=document.getElementById('miniBalance');
+            if(el) el.textContent=Number(gameBalance||0).toLocaleString();
+        }
+        function selectMiniGame(kind) {
+            if(miniGameBusy) return;
+            selectedMiniGame=kind;
+            document.querySelectorAll('.mini-game-card').forEach(b=>b.classList.toggle('active',b.dataset.mini===kind));
+            const titles={wheel:'РУЛЕТКА УДАЧИ',dice:'БРОСОК КОСТЕЙ',cards:'КРАСНОЕ ИЛИ ЧЁРНОЕ',coin:'ОРЁЛ ИЛИ РЕШКА'};
+            const art={wheel:'<div class="mini-wheel" id="miniWheel"></div>',dice:'<div class="mini-die" id="miniDie">🎲</div>',cards:'<div><span class="mini-card">A♥</span><span class="mini-card" style="color:#222">K♠</span></div>',coin:'<div class="mini-coin" id="miniCoin">🪙</div>'};
+            const rules={wheel:'Выигрыш ×8 на джекпот, ×2 на удачный сектор.',dice:'Выпало 6 — ×5. Выпало 4 или 5 — ×1,5.',cards:'Угадай цвет следующей карты. Верный цвет — ×2.',coin:'Выбери сторону монеты. Верный выбор — ×2.'};
+            document.getElementById('miniStage').innerHTML='<div class="mini-game-view"><h3>'+titles[kind]+'</h3>'+art[kind]+'<p>'+rules[kind]+'</p><div class="mini-result" id="miniResult">Ставка: '+Number(currentBet).toLocaleString()+' монет</div><div id="miniChoice"></div><button class="mini-play" id="miniPlayButton" onclick="playMiniGame(\''+kind+'\')">ИГРАТЬ · '+Number(currentBet).toLocaleString()+'</button></div>';
+            if(kind==='coin') document.getElementById('miniChoice').innerHTML='<button class="mini-play" onclick="playMiniGame(\'coin\',\'heads\')">ОРЁЛ</button> <button class="mini-play" onclick="playMiniGame(\'coin\',\'tails\')">РЕШКА</button>';
+            if(kind==='cards') document.getElementById('miniChoice').innerHTML='<button class="mini-play" onclick="playMiniGame(\'cards\',\'red\')">КРАСНЫЙ</button> <button class="mini-play" onclick="playMiniGame(\'cards\',\'black\')">ЧЁРНЫЙ</button>';
+            playButtonClick();
+        }
+        async function playMiniGame(kind, choice) {
+            if(miniGameBusy || isSpinInProgress || riskActive || superGameActive || megaGameActive) return;
+            if(gameBalance<currentBet){document.getElementById('miniResult').textContent='Недостаточно монет для ставки.';playLoseSound();return;}
+            if((kind==='coin'||kind==='cards')&&!choice){document.getElementById('miniResult').textContent='Сначала выбери вариант выше.';return;}
+            miniGameBusy=true; isSpinInProgress=true;
+            const cost=currentBet; gameBalance-=cost; updateUI(); updateMiniBalance();
+            const result=document.getElementById('miniResult'), button=document.getElementById('miniPlayButton');
+            if(button) button.disabled=true;
+            const stage=document.getElementById('miniStage');
+            if(kind==='wheel'){document.getElementById('miniWheel')?.classList.add('spinning');playReelRattle();}
+            if(kind==='dice'){document.getElementById('miniDie')?.classList.add('rolling');playReelRattle();}
+            if(kind==='coin'){document.getElementById('miniCoin')?.classList.add('flipping');playCoinDrop();}
+            if(kind==='cards'){stage.querySelectorAll('.mini-card').forEach(c=>c.style.transform='translateY(-8px) rotateY(180deg)');playCardFlip();}
+            await new Promise(r=>setTimeout(r,kind==='wheel'?2200:1500));
+            let mult=0,label='';
+            if(kind==='wheel'){const r=Math.random();mult=r>.96?8:r>.68?2:0;label=mult?'🎡 Сектор ×'+mult:'Пустой сектор';}
+            if(kind==='dice'){const n=1+Math.floor(Math.random()*6);mult=n===6?5:(n>=4?1.5:0);label='🎲 Выпало '+n+(mult?' · ×'+mult:' · мимо');document.getElementById('miniDie').textContent=['⚀','⚁','⚂','⚃','⚄','⚅'][n-1];}
+            if(kind==='coin'){const side=Math.random()<.5?'heads':'tails';mult=side===choice?2:0;label=(side==='heads'?'🪙 Орёл':'🪙 Решка')+(mult?' · угадал!':' · не угадал');}
+            if(kind==='cards'){const red=Math.random()<.5;mult=(red?'red':'black')===choice?2:0;label=(red?'♥ Красная карта':'♠ Чёрная карта')+(mult?' · угадал!':' · не угадал');}
+            const payout=Math.floor(cost*mult);gameBalance+=payout;
+            casinoProgress.totalSpins=(casinoProgress.totalSpins||0)+1;
+            if(payout){casinoProgress.totalWins=(casinoProgress.totalWins||0)+1;casinoProgress.bestWin=Math.max(casinoProgress.bestWin||0,payout);playWinSound();}else playLoseSound();
+            result.textContent=label+(payout?' · +'+payout.toLocaleString()+' монет':'');
+            await updateBalanceDB();updateMiniBalance();
+            if(button){button.disabled=false;button.textContent='ЕЩЁ РАЗ · '+Number(currentBet).toLocaleString();}
+            miniGameBusy=false;isSpinInProgress=false;updateUI();
+        }
         function startAutoSpin() {
             if (!autoSpinUnlocked) { document.getElementById('winMessage').textContent = '🔒 Сначала купи улучшение автоспина в мастерской.'; return; }
             if (autoSpinActive || superGameActive || megaGameActive) return;
@@ -1970,6 +2020,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             updateUI();
             const lever = document.getElementById('casinoLever');
             if (lever) lever.classList.add('pulled');
+            playLeverClunk();
             try {
                 if (wait) await new Promise(resolve => setTimeout(resolve, wait));
                 await _performSpinCore();
@@ -2172,6 +2223,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             } catch (e) { out.textContent = 'Таблица недоступна: проверьте правила Firestore для score/runcasino/records.'; }
         });
         document.getElementById('casinoLever')?.addEventListener('click', () => { if (!isSpinInProgress) spin(); });
+        document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMiniArcade();});
         document.body.addEventListener('click', function firstClick() {
             if (casinoSoundOn) initAudio();
             document.body.removeEventListener('click', firstClick);
