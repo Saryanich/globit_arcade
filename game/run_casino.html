@@ -1224,7 +1224,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             return 1000;
         }
         async function updateBalanceInScore(globalId, newBalance) {
-            if (!auth.currentUser || !globalId) return;
+            if (!auth.currentUser || !globalId) throw new Error('Нет активной авторизации — баланс не сохранён');
             try {
                 const scoreRef = getScoreDocRef(globalId);
                 await scoreRef.set({
@@ -1254,6 +1254,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 casinoDataReady = false;
                 casinoLoadError = 'Сохранение не подтверждено сервером. Игра заблокирована.';
                 updateCasinoLoadingUI();
+                setTimeout(() => { if (auth.currentUser) loadAuthenticatedCasino(auth.currentUser).catch(error => console.error('Повторная синхронизация не удалась:',error)); }, 1200);
                 throw e;
             }
         }
