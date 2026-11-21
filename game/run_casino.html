@@ -872,7 +872,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         .mini-game-card:active,.cabinet-action:active,.mini-play:active {filter:brightness(1.18);}
         .lever-housing:after {content:"";position:absolute;inset:5px;border:1px solid #e5bf7166;border-radius:5px;pointer-events:none;box-shadow:inset 0 0 9px #000;}
         .lever {z-index:1;}
-        @media(max-width:520px){.machine-row{gap:6px}.lever-housing:after{inset:3px}}
+        @media(max-width:520px){.machine-row{gap:6px}.lever-housing:after{inset:3px}.cabinet-lower{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.cabinet-lower .arcade-door{padding:9px 4px;font-size:.68rem}.cabinet-lower .arcade-door span{font-size:.55rem}}
 
         .slot-grid{grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));gap:5px;padding:8px}
         .slot-cell{min-width:0;aspect-ratio:1/.94;border-radius:5px;font-size:clamp(1rem,3.2vw,1.65rem);transition:border-color .12s ease,box-shadow .12s ease}
@@ -884,7 +884,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         .lever{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
         .lever:active{cursor:grabbing}
         .lever-stick{transform:translateX(-50%) rotateX(0deg) translateZ(0);transform-origin:50% 94%;transition:transform .14s ease-out;will-change:transform}
-        .lever.pulled .lever-stick{transform:translateX(-50%) rotateX(48deg) translateY(5px) translateZ(20px)}
+        .lever.pulled .lever-stick{transform:translateX(-50%) rotateX(45deg) translateY(7px) translateZ(23px)}
         .lever-ball{transition:filter .12s ease,box-shadow .12s ease;animation:none!important}
         .lever.pulled .lever-ball{animation:none!important;transform:translateX(-50%);filter:brightness(1.22);box-shadow:0 5px 12px #000,0 0 16px #ff514caa}
         .lever-base{pointer-events:none}
@@ -901,9 +901,29 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         @keyframes cabinetHit{0%{transform:translateX(0)}35%{transform:translateX(-2px)}70%{transform:translateX(2px)}100%{transform:translateX(0)}}
         @media(max-width:520px){.slot-grid{gap:4px;padding:6px}.slot-cell{font-size:clamp(.95rem,4vw,1.35rem)}.lever-housing{min-height:186px}.lever-stick{height:105px}}
         @media(prefers-reduced-motion:reduce){.slot-cell.spinning,.slot-cell.reel-stop,.casino-particle,.casino-fx.active{animation:none!important}}
+        .lever-track{width:22px;border:1px solid #d7c7a3aa;box-shadow:inset 0 0 7px #000,0 0 3px #fff5}
+        .lever-stick{width:11px;height:120px;border:1px solid #eee5;box-shadow:2px 2px 5px #000,0 0 2px #fff8}
+        .lever-ball{width:34px;height:34px;border:2px solid #f5d18b;box-shadow:inset -4px -5px 8px #3b0909, inset 3px 3px 7px #fff8,0 5px 9px #000,0 0 9px #ff4a3b66}
+        .lever.pulled .lever-stick{transform:translateX(-50%) rotateX(45deg) translateY(7px) translateZ(23px)}
+        .slot-grid.prestige-ready{display:flex;align-items:center;justify-content:center;min-height:230px;border:2px solid #e9c75e;background:radial-gradient(ellipse at center,#594015,#161008 72%);box-shadow:inset 0 0 35px #000,0 0 24px #e9b83b66;animation:prestigeFieldGlow 1.8s ease-in-out infinite alternate}
+        .prestige-field-message{display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;color:#ffe7a0;padding:14px}
+        .prestige-field-message span{font-size:42px;filter:drop-shadow(0 0 14px #ffd34d);animation:prestigeStar 1.3s ease-in-out infinite alternate}
+        .prestige-field-message b{font-size:clamp(16px,3vw,24px);letter-spacing:2px;text-shadow:0 0 15px #ffd34d}
+        .prestige-field-message small{font-size:10px;letter-spacing:1.5px;color:#f4d68b}
+        .prestige-field-message em{font-style:normal;font-size:12px;font-weight:900;letter-spacing:3px;color:#fff2bd;animation:prestigePrompt 1s ease-in-out infinite alternate}
+        @keyframes prestigeFieldGlow{to{box-shadow:inset 0 0 45px #000,0 0 38px #e9b83b99}}
+        @keyframes prestigeStar{to{transform:scale(1.12) rotate(8deg)}}@keyframes prestigePrompt{to{opacity:.55;transform:translateY(3px)}}
+        .prestige-overlay{position:fixed;inset:0;z-index:10011;display:none;align-items:center;justify-content:center;padding:12px;background:#050403ed;backdrop-filter:blur(10px)}.prestige-overlay.open{display:flex}
+        .prestige-modal{width:min(560px,100%);max-height:min(88dvh,760px);overflow:auto;padding:16px;border:1px solid #e2bd62;border-radius:16px;background:linear-gradient(145deg,#30220e,#11150f 72%);color:#ffedc1;box-shadow:0 20px 70px #000d,0 0 30px #d9a83d22}
+        .prestige-wallet,.prestige-stats>div{display:flex;justify-content:space-between;gap:12px;padding:12px;margin-top:12px;border:1px solid #d7b75c44;border-radius:10px;background:#0005}.prestige-wallet b,.prestige-stats b{color:#ffe08a;font-variant-numeric:tabular-nums}
+        .prestige-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.prestige-stats>div{flex-direction:column;min-width:0}.prestige-stats small{font-size:10px;color:#c5b58d}.prestige-stats b{font-size:19px}
+        .prestige-description{margin:14px 2px;padding:12px;border-left:3px solid #d7b75c;background:#0004;color:#d9cba9;font-size:13px;line-height:1.55}.prestige-description b{color:#ffe08a}
+        .prestige-ready-note{padding:12px;border-radius:10px;background:#d7b75c12;color:#f4dca0;font-size:12px;line-height:1.5}
+        .prestige-action{width:100%;margin:12px 0;padding:12px;border:1px solid #e2bd62;border-radius:10px;background:linear-gradient(135deg,#71521c,#3d2a0d);color:#fff0bf;font-weight:900;letter-spacing:1px}.prestige-action:disabled{opacity:.48}
+        @media(max-width:420px){.prestige-modal{padding:12px}.prestige-stats{gap:5px}.prestige-stats>div{padding:8px}.prestige-stats b{font-size:16px}.prestige-stats small{font-size:9px}}
 
 
-        .cabinet-lower{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+        .cabinet-lower{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}.cabinet-lower .arcade-door{min-height:58px}.prestige-door{border-color:#d7b75c!important;box-shadow:inset 0 0 12px #d7a83b22,0 0 10px #d7a83b22!important;color:#ffe5a1!important}
         .cabinet-lower .arcade-door{min-width:0;width:100%;padding:12px 8px;font-size:.83rem;line-height:1.25}
         .workshop-overlay{position:fixed;inset:0;z-index:10010;display:none;align-items:center;justify-content:center;padding:12px;background:#030706ef;backdrop-filter:blur(9px)}
         .workshop-overlay.open{display:flex}.workshop-modal{width:min(640px,100%);max-height:min(88dvh,850px);overflow:auto;border:1px solid #b88a4c88;border-radius:16px;padding:14px;background:linear-gradient(145deg,#211b14,#0d1511 70%);box-shadow:0 20px 70px #000c;color:#f6e8ce}
@@ -1032,6 +1052,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
       <div class="workshop-wallet">Баланс: <b id="workshopBalance">0</b> монет</div><div class="workshop-upgrades" id="workshopUpgrades"></div>
       <footer class="workshop-bottom"><span>Уровни сохраняются в аккаунте</span><button type="button" onclick="closeWorkshop()">ГОТОВО</button></footer>
     </section></div>
+    <div class="prestige-overlay" id="prestigeOverlay" aria-hidden="true"><section class="prestige-modal"><header class="workshop-top"><div><small>GLOBIT • ASCENSION</small><h2>⭐ ПРЕСТИЖ</h2><p>Начни заново и навсегда увеличь шанс крупного приза</p></div><button type="button" class="mini-close" onclick="closePrestige()">✕</button></header><div class="prestige-wallet"><span>Текущий баланс</span><b id="prestigeBalance">500</b></div><div class="prestige-stats"><div><small>Текущий престиж</small><b id="prestigeCount">0</b></div><div><small>Шанс крупного приза</small><b id="prestigeChance">1%</b></div><div><small>Следующий шанс</small><b id="prestigeNextChance">1,2%</b></div></div><div class="prestige-description">Для престижа нужно накопить <b>50 000 000 монет</b>. После подтверждения баланс станет <b>500 монет</b>, улучшения и пройденные суперигры сбросятся, а престиж и бонус к шансу останутся навсегда.</div><div class="prestige-ready-note" id="prestigeReadyNote">Пока копи монеты. Когда достигнешь 50 000 000, поле автомата сменится на приглашение к престижу — потяни рычаг.</div><button type="button" class="prestige-action" id="prestigeAction" onclick="closePrestige()" disabled>НУЖНО 50 000 000 МОНЕТ</button><footer class="workshop-bottom"><span>Каждый престиж: +0,2% к шансу</span><button type="button" onclick="closePrestige()">ЗАКРЫТЬ</button></footer></section></div>
     <div id="casinoLoadingOverlay" class="casino-loading-overlay"><div class="casino-loading-card"><div class="casino-loader"></div><b id="casinoLoadingTitle">Подключаемся к GloBIT Arcade…</b><span id="casinoLoadingText">Игра заблокирована до загрузки серверного баланса.</span></div></div>
     <div class="app-container">
 <!-- ИГРА -->
@@ -1059,9 +1080,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
             <div class="balance-display">
                 <span class="balance-label">💰 Баланс</span>
-                <span class="balance-amount" id="balanceDisplay">1000</span>
-                <div id="prestigeStatus" style="font-size:.78rem;color:#ffd700;margin-top:.35rem;">⭐ Престиж 0 · шанс крупного приза 1%</div>
-                <button id="prestigeButton" type="button" onclick="performPrestige()" disabled style="margin-top:.55rem;padding:.55rem 1rem;border:1px solid #ffd700;border-radius:12px;background:linear-gradient(135deg,#493400,#9b6d00);color:#fff;font-weight:800;opacity:.55;">⭐ ПРЕСТИЖ · 50 000 000</button>
+                <span class="balance-amount" id="balanceDisplay">500</span>
             </div>
 
             
@@ -1096,7 +1115,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             <div class="machine-row"><div class="slot-grid" id="slotGrid"></div><div class="lever-housing"><button class="lever" id="casinoLever" type="button" aria-label="Потянуть рычаг вниз и на себя"><span class="lever-track"></span><span class="lever-stick"><i class="lever-ball"></i></span><span class="lever-base">PULL</span></button></div><div class="machine-actions"><button class="cabinet-action" id="autoBtn" onclick="toggleAutoSpin()">AUTO</button></div></div><button id="spinBtn" type="button" hidden aria-hidden="true" tabindex="-1"></button>
             <div class="win-message" id="winMessage"></div>
 
-            <div class="cabinet-lower"><button class="arcade-door" type="button" onclick="openWorkshop()">🛠 МАСТЕРСКАЯ <span>УЛУЧШЕНИЯ · УРОВНИ</span></button><button class="arcade-door" type="button" onclick="openMiniArcade()">🕹 MINI CASINO <span>5 ИГР</span></button></div>
+            <div class="cabinet-lower"><button class="arcade-door" type="button" onclick="openWorkshop()">🛠 МАСТЕРСКАЯ <span>УЛУЧШЕНИЯ · УРОВНИ</span></button><button class="arcade-door" type="button" onclick="openMiniArcade()">🕹 MINI CASINO <span>5 ИГР</span></button><button class="arcade-door prestige-door" type="button" onclick="openPrestige()">⭐ ПРЕСТИЖ <span>СБРОС · УДАЧА</span></button></div>
 
             <button class="btn btn-secondary" onclick="logout()" style="margin-top:0.6rem;">🚪 Выйти</button>
         </div>
@@ -1240,7 +1259,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         const SYMBOL_WEIGHTS = [12, 8, 17, 15, 16, 3, 1];
         const SLOT_ROWS = 4;
         const SLOT_COLS = 6;
-        let gameBalance = 1000,
+        let gameBalance = 500,
             currentBet = 50,
             lastWinAmount = 0;
         let riskActive = false,
@@ -1275,13 +1294,13 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             const scoreDoc = await scoreRef.get({ source: 'server' });
             if (scoreDoc.exists) {
                 const data = scoreDoc.data() || {};
-                const balance = Number.isFinite(Number(data.score)) ? Math.max(0, Math.floor(Number(data.score))) : 1000;
+                const balance = Number.isFinite(Number(data.score)) ? Math.max(0, Math.floor(Number(data.score))) : 500;
                 console.log('💰 Серверный баланс загружен:', globalId, balance);
                 return balance;
             }
-            await scoreRef.set({ score:1000, globalId, uid:auth.currentUser?.uid || '', email:auth.currentUser?.email || '', displayName:globalId, createdAt:firebase.firestore.FieldValue.serverTimestamp(), updatedAt:firebase.firestore.FieldValue.serverTimestamp() });
+            await scoreRef.set({ score:500, globalId, uid:auth.currentUser?.uid || '', email:auth.currentUser?.email || '', displayName:globalId, createdAt:firebase.firestore.FieldValue.serverTimestamp(), updatedAt:firebase.firestore.FieldValue.serverTimestamp() });
             console.log('✅ Создан новый серверный счёт:', globalId);
-            return 1000;
+            return 500;
         }
         async function updateBalanceInScore(globalId, newBalance) {
             if (!auth.currentUser || !globalId) throw new Error('Нет активной авторизации — баланс не сохранён');
@@ -1534,8 +1553,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             const scoreDoc = await scoreRef.get({ source:'server' });
             let scoreData = scoreDoc.exists ? (scoreDoc.data() || {}) : null;
             if (!scoreDoc.exists) {
-                await scoreRef.set({ score:1000, globalId:currentGlobalId, uid:user.uid, email:user.email || '', displayName:data.displayName || currentGlobalId, createdAt:firebase.firestore.FieldValue.serverTimestamp(), updatedAt:firebase.firestore.FieldValue.serverTimestamp() });
-                scoreData = { score:1000, casinoProgress:{} };
+                await scoreRef.set({ score:500, globalId:currentGlobalId, uid:user.uid, email:user.email || '', displayName:data.displayName || currentGlobalId, createdAt:firebase.firestore.FieldValue.serverTimestamp(), updatedAt:firebase.firestore.FieldValue.serverTimestamp() });
+                scoreData = { score:500, casinoProgress:{} };
             }
             const loadedBalance = Number(scoreData.score);
             if (!Number.isFinite(loadedBalance) || loadedBalance < 0) throw new Error('Сервер вернул некорректный баланс');
@@ -1587,12 +1606,31 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         }
 
 
+        let prestigeFieldReadyState=null;
+        function updatePrestigeField(){
+            const ready=casinoDataReady&&gameBalance>=50000000;
+            if(prestigeFieldReadyState===ready)return;
+            prestigeFieldReadyState=ready;
+            const field=document.getElementById('slotGrid');if(!field)return;
+            field.classList.toggle('prestige-ready',ready);
+            if(ready)field.innerHTML='<div class="prestige-field-message"><span>⭐</span><b>ПРЕСТИЖ ДОСТУПЕН</b><small>50 000 000 МОНЕТ НАКОПЛЕНО</small><em>ПОТЯНИ РЫЧАГ</em></div>';
+            else initGrid();
+        }
+        function updatePrestigePanel(){
+            const balance=document.getElementById('prestigeBalance'),count=document.getElementById('prestigeCount'),chance=document.getElementById('prestigeChance'),next=document.getElementById('prestigeNextChance'),note=document.getElementById('prestigeReadyNote'),action=document.getElementById('prestigeAction');
+            const ready=gameBalance>=50000000&&casinoDataReady;
+            if(balance)balance.textContent=Number(gameBalance||0).toLocaleString();
+            if(count)count.textContent=String(getPrestigeCount());
+            if(chance)chance.textContent=getPrestigeHighPrizeChance().toFixed(1).replace('.',',')+'%';
+            if(next)next.textContent=Math.min(100,getPrestigeHighPrizeChance()+.2).toFixed(1).replace('.',',')+'%';
+            if(note)note.textContent=ready?'Престиж доступен! Вернись к автомату и потяни рычаг — после подтверждения прогресс сбросится.':'Пока копи монеты. Когда достигнешь 50 000 000, поле автомата сменится на приглашение к престижу — потяни рычаг.';
+            if(action){action.disabled=!ready||isSpinInProgress||megaGameActive||riskActive||miniGameBusy;action.textContent=ready?'⭐ ПРЕСТИЖ ГОТОВ — ПОТЯНИ РЫЧАГ':'НУЖНО '+Math.max(0,50000000-gameBalance).toLocaleString()+' МОНЕТ';}
+        }
         function updateUI(){
             const balance = document.getElementById('balanceDisplay');
             if (balance) balance.textContent = Number(gameBalance || 0).toLocaleString();
             const prestigeStatus=document.getElementById('prestigeStatus'),prestigeButton=document.getElementById('prestigeButton');
-            if(prestigeStatus)prestigeStatus.textContent='⭐ Престиж '+getPrestigeCount()+' · шанс крупного приза '+getPrestigeHighPrizeChance().toFixed(1).replace('.',',')+'%';
-            if(prestigeButton){prestigeButton.disabled=gameBalance<50000000||!casinoDataReady||isSpinInProgress||megaGameActive||riskActive||miniGameBusy;prestigeButton.style.opacity=prestigeButton.disabled?'.55':'1';prestigeButton.textContent=gameBalance>=50000000?'⭐ ПОВЫСИТЬ ПРЕСТИЖ':'⭐ ПРЕСТИЖ · '+Math.max(0,50000000-gameBalance).toLocaleString()+' ДОСТУПНО';}
+            updatePrestigeField();updatePrestigePanel();
             const autoStatus = document.getElementById('autoUpgradeStatus');
             const autoBuy = document.getElementById('buyAutoUpgrade');
             if (autoStatus) autoStatus.textContent = autoSpinUnlocked ? 'УЛУЧШЕНИЕ АКТИВНО' : 'Автоспин не куплен';
@@ -1652,9 +1690,9 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             if(!casinoDataReady||isSpinInProgress||riskActive||megaGameActive||miniGameBusy||gameBalance<50000000)return;
             const nextPrestige=getPrestigeCount()+1;
             const chance=(1+nextPrestige*.2).toFixed(1).replace(".",",");
-            if(!confirm('Активировать престиж '+nextPrestige+'?\\n\\nБаланс станет 1 000 монет. Все улучшения и пройденные суперигры сбросятся.\\nШанс крупного приза вырастет до '+chance+'%.\\nПрестиж '+nextPrestige+' останется навсегда.'))return;
+            if(!confirm('Активировать престиж '+nextPrestige+'?\\n\\nБаланс станет 500 монет. Все улучшения и пройденные суперигры сбросятся.\\nШанс крупного приза вырастет до '+chance+'%.\\nПрестиж '+nextPrestige+' останется навсегда.'))return;
             const previousBalance=gameBalance,previousProgress={...casinoProgress};
-            stopAutoSpin();gameBalance=1000;
+            stopAutoSpin();gameBalance=500;
             casinoProgress={autoSpinUnlocked:false,totalSpins:0,totalWins:0,bestWin:0,prestige:nextPrestige,upgradeLevels:{},superGameCompletedLevels:[],superGameLuckBoost:false,superGameDebuffPercent:0,superGameDebuffUntil:0,comboRevealEnabled:true};
             autoSpinUnlocked=false;freespinsRemaining=0;lastWinAmount=0;currentBet=50;
             document.querySelectorAll('.bet-option').forEach(o=>o.classList.toggle('selected',Number(o.dataset.bet)===50));
@@ -1667,6 +1705,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 updateUI();document.getElementById('winMessage').textContent='Не удалось сохранить престиж. Изменения отменены.';
             }
         }
+        function openPrestige(){if(!casinoDataReady)return;if(isSpinInProgress||miniGameBusy||megaGameActive||riskActive)return;updatePrestigePanel();document.getElementById('prestigeOverlay').classList.add('open');document.getElementById('prestigeOverlay').setAttribute('aria-hidden','false');playButtonClick();}
+        function closePrestige(){document.getElementById('prestigeOverlay').classList.remove('open');document.getElementById('prestigeOverlay').setAttribute('aria-hidden','true');updateUI();}
         function getUpgradeLevel(key){return Math.max(0,Math.min(5,Number(casinoProgress.upgradeLevels?.[key])||0));}
         function openWorkshop(){
             if(!casinoDataReady)return;if(isSpinInProgress||miniGameBusy)return;renderWorkshop();document.getElementById('workshopOverlay').classList.add('open');document.getElementById('workshopOverlay').setAttribute('aria-hidden','false');playButtonClick();}
@@ -1965,6 +2005,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
         async function performSpin(){
             if(!casinoDataReady||isSpinInProgress||riskActive)return;
+            if(gameBalance>=50000000){stopAutoSpin();return;}
             const wait=Math.max(0,SPIN_MIN_GAP-(Date.now()-lastSpinFinishedAt));
             isSpinInProgress=true;updateUI();const lever=document.getElementById('casinoLever');
             if(lever)lever.classList.add('pulled');playLeverClunk();triggerHaptic('lever');
@@ -2042,7 +2083,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         }
         async function initGuestCasino() {
             if (auth.currentUser || !casinoAuthResolved || casinoDataReady) return;
-            menuInitialized=true; casinoDataReady=true; currentGlobalId=null; gameBalance=1000;
+            menuInitialized=true; casinoDataReady=true; currentGlobalId=null; gameBalance=500;
             document.getElementById('displayName').textContent='Гость';
             document.getElementById('globalIdDisplay').textContent='Гость';
             document.getElementById('balanceDisplay').textContent=gameBalance.toLocaleString();
@@ -2137,7 +2178,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         function finishLeverPull(event){
             if(!leverPointerStart||(event&&event.pointerId!==leverPointerStart.id))return;
             const shouldSpin=leverPullTriggered;leverPointerStart=null;leverPullTriggered=false;
-            if(shouldSpin&&!isSpinInProgress)performSpin();else casinoLever?.classList.remove('pulled');
+            if(shouldSpin&&!isSpinInProgress){if(gameBalance>=50000000)performPrestige();else performSpin();}else casinoLever?.classList.remove('pulled');
         }
         casinoLever?.addEventListener('pointerup',finishLeverPull);
         casinoLever?.addEventListener('pointercancel',finishLeverPull);
