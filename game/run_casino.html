@@ -928,6 +928,22 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             .mega-mode-indicator { animation-duration:1.2s; }
             .logo { animation-duration:5s; }
         }
+        .casino-loading-overlay{position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(3,8,17,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+        .casino-loading-overlay.ready{display:none}
+        .casino-loading-card{width:min(100%,360px);padding:28px 22px;text-align:center;border-radius:22px;background:linear-gradient(145deg,#14283a,#101729);border:1px solid #00e67666;box-shadow:0 15px 55px #000b,0 0 30px #00e67618;color:#fff;display:flex;align-items:center;flex-direction:column;gap:12px}
+        .casino-loading-card span{font-size:13px;line-height:1.5;color:#aab6cf}
+        .casino-loader{width:42px;height:42px;border-radius:50%;border:4px solid #ffffff22;border-top-color:#00e676;border-right-color:#2979ff;animation:casinoLoadSpin .8s linear infinite}
+        @keyframes casinoLoadSpin{to{transform:rotate(360deg)}}
+        .start-menu-btn:disabled{opacity:.45;filter:grayscale(.6);cursor:wait}
+        body.super-theme-1{--accent-green:#00e676;--accent-red:#ff1744;--accent-gold:#ffd700;--accent-blue:#2979ff}
+        body.super-theme-1 .mega-mode-indicator,body.super-theme-1 .slot-grid.mega-active{background:linear-gradient(135deg,#006b3b,#063d72,#a00025)!important;border-color:#00e676!important}
+        body.super-theme-1 .slot-grid.mega-active{box-shadow:0 0 38px #00e67688,inset 0 0 25px #000!important}
+        body.super-theme-2{--accent-green:#00e5ff;--accent-red:#ff9100;--accent-gold:#40c4ff;--accent-blue:#7c4dff}
+        body.super-theme-2 .mega-mode-indicator,body.super-theme-2 .slot-grid.mega-active{background:linear-gradient(135deg,#004d68,#31106e,#9a3500)!important;border-color:#00e5ff!important}
+        body.super-theme-2 .slot-grid.mega-active{box-shadow:0 0 42px #00e5ff88,inset 0 0 25px #000!important}
+        body.super-theme-3{--accent-green:#f5f5f5;--accent-red:#ff1744;--accent-gold:#e040fb;--accent-blue:#651fff}
+        body.super-theme-3 .mega-mode-indicator,body.super-theme-3 .slot-grid.mega-active{background:linear-gradient(135deg,#111,#4a148c,#b71c1c,#eee)!important;border-color:#e040fb!important}
+        body.super-theme-3 .slot-grid.mega-active{box-shadow:0 0 50px #e040fb99,0 0 80px #ff174455,inset 0 0 25px #000!important}
 </style>
 </head>
 <body>
@@ -948,7 +964,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
     <button type="button" class="start-menu-btn" id="casinoLeaderboardToggle">🏆 Таблица лидеров</button>
     <div id="casinoLeaderboardPanel" class="casino-leaderboard hidden"><div class="start-label">🏆 Лучшие игроки</div><div id="casinoLeaderboardContent">Нажмите, чтобы загрузить таблицу</div></div>
     <button type="button" class="start-menu-btn primary" id="casinoStartButton">▶ НАЧАТЬ ИГРУ</button>
-    <div class="start-note">Вход не требуется. Если GloBIT Arcade уже авторизовал вас, аккаунт будет использован автоматически.</div>
+    <div class="start-note" id="casinoLoadStatus">Подключаемся к аккаунту и загружаем сохранённый баланс…</div>
   </div>
 </div>
 
@@ -958,6 +974,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
       <div class="workshop-wallet">Баланс: <b id="workshopBalance">0</b> монет</div><div class="workshop-upgrades" id="workshopUpgrades"></div>
       <footer class="workshop-bottom"><span>Уровни сохраняются в аккаунте</span><button type="button" onclick="closeWorkshop()">ГОТОВО</button></footer>
     </section></div>
+    <div id="casinoLoadingOverlay" class="casino-loading-overlay"><div class="casino-loading-card"><div class="casino-loader"></div><b id="casinoLoadingTitle">Подключаемся к GloBIT Arcade…</b><span id="casinoLoadingText">Игра заблокирована до загрузки серверного баланса.</span></div></div>
     <div class="app-container">
 <!-- ИГРА -->
         <div id="gameScreen" class="screen">
@@ -1181,7 +1198,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         let isSpinInProgress = false;
         let lastSpinFinishedAt = 0;
         const SPIN_MIN_GAP = 1300;
-        let casinoProgress = { autoSpinUnlocked: false, totalSpins: 0, totalWins: 0, bestWin: 0, superGameCompletedLevel: 0, superGameLuckBoost: false, superGameDebuffPercent: 0, superGameDebuffUntil: 0 };
+        let casinoProgress = { autoSpinUnlocked: false, totalSpins: 0, totalWins: 0, bestWin: 0, superGameCompletedLevels: [], superGameLuckBoost: false, superGameDebuffPercent: 0, superGameDebuffUntil: 0 };
         const MAX_PRIZE = Number.MAX_SAFE_INTEGER;
         const MEGA_THRESHOLD = 1000000;
         const AUTO_SPIN_DELAY = 2000;
@@ -1193,33 +1210,19 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         }
 
         async function getBalanceFromScore(globalId) {
-            try {
-                const scoreRef = getScoreDocRef(globalId);
-                const scoreDoc = await scoreRef.get();
-
-                if (scoreDoc.exists) {
-                    const data = scoreDoc.data();
-                    const balance = data.score || 1000;
-                    console.log(`💰 Баланс загружен из score для ${globalId}: ${balance}`);
-                    return balance;
-                } else {
-                    await scoreRef.set({
-                        score: 1000,
-                        globalId: globalId,
-                        email: auth.currentUser?.email || '',
-                        displayName: globalId,
-                        createdAt: new Date(),
-                        updatedAt: new Date()
-                    });
-                    console.log(`✅ Создан новый счет для ${globalId}: 1000`);
-                    return 1000;
-                }
-            } catch (e) {
-                console.error('❌ Ошибка получения баланса из score:', e);
-                return 1000;
+            if (!globalId) throw new Error('Global ID не найден — баланс не загружен');
+            const scoreRef = getScoreDocRef(globalId);
+            const scoreDoc = await scoreRef.get({ source: 'server' });
+            if (scoreDoc.exists) {
+                const data = scoreDoc.data() || {};
+                const balance = Number.isFinite(Number(data.score)) ? Math.max(0, Math.floor(Number(data.score))) : 1000;
+                console.log('💰 Серверный баланс загружен:', globalId, balance);
+                return balance;
             }
+            await scoreRef.set({ score:1000, globalId, uid:auth.currentUser?.uid || '', email:auth.currentUser?.email || '', displayName:globalId, createdAt:firebase.firestore.FieldValue.serverTimestamp(), updatedAt:firebase.firestore.FieldValue.serverTimestamp() });
+            console.log('✅ Создан новый серверный счёт:', globalId);
+            return 1000;
         }
-
         async function updateBalanceInScore(globalId, newBalance) {
             if (!auth.currentUser || !globalId) return;
             try {
@@ -1232,7 +1235,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                     displayName: document.getElementById('displayName').textContent || globalId,
                     casinoProgress: { ...casinoProgress, autoSpinUnlocked },
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
                 try {
                     const user = auth.currentUser;
@@ -1320,6 +1323,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         }
 
         async function updateBalanceDB() {
+            if (!casinoDataReady) throw new Error('Баланс ещё не загружен с сервера — сохранение запрещено');
             if (currentGlobalId) {
                 await updateBalanceInScore(currentGlobalId, gameBalance);
             }
@@ -1355,10 +1359,14 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             return chance > 0 && Math.random() < chance;
         }
         function getEligibleSuperGameLevel() {
-            const completed = Math.max(0, Number(casinoProgress.superGameCompletedLevel) || 0);
-            let eligible = 0;
-            for (const item of SUPER_GAME_LEVELS) if (gameBalance >= item.threshold) eligible = item.level;
-            return eligible > completed ? eligible : 0;
+            const completed = new Set((Array.isArray(casinoProgress.superGameCompletedLevels) ? casinoProgress.superGameCompletedLevels : []).map(Number));
+            const legacy = Number(casinoProgress.superGameCompletedLevel) || 0;
+            if (legacy > 0 && !completed.has(legacy)) completed.add(legacy);
+            for (let i = SUPER_GAME_LEVELS.length - 1; i >= 0; i--) {
+                const item = SUPER_GAME_LEVELS[i];
+                if (gameBalance >= item.threshold && !completed.has(item.level)) return item.level;
+            }
+            return 0;
         }
         function checkMegaGameEligibility() {
             const level = getEligibleSuperGameLevel();
@@ -1370,6 +1378,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             stopAutoSpin();
             megaGameActive = true; megaGameLevel = level; megaGameSpins = 0; megaGameWins = 0;
             superGameGreen = 0; superGameRed = 0;
+            document.body.classList.remove('super-theme-1','super-theme-2','super-theme-3');
+            document.body.classList.add('super-theme-' + level);
             const indicator = document.getElementById('megaIndicator');
             indicator.textContent = '🟩 СУПЕРИГРА · УРОВЕНЬ ' + level + ' 🟥';
             indicator.classList.add('active');
@@ -1414,9 +1424,13 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 document.getElementById('winMessage').textContent = '🤝 НИЧЬЯ! Баланс не изменился. Уровень завершён без штрафа.';
                 playLoseSound(); triggerHaptic('medium');
             }
+            const completedLevels = new Set((Array.isArray(casinoProgress.superGameCompletedLevels) ? casinoProgress.superGameCompletedLevels : []).map(Number));
+            completedLevels.add(level);
+            casinoProgress.superGameCompletedLevels = [...completedLevels].sort((a,b)=>a-b);
             casinoProgress.superGameCompletedLevel = Math.max(Number(casinoProgress.superGameCompletedLevel) || 0, level);
             megaGameActive = false; megaGameSpins = 0; megaGameWins = 0; megaGameLevel = 0;
             document.getElementById('megaIndicator').classList.remove('active');
+            document.body.classList.remove('super-theme-1','super-theme-2','super-theme-3');
             document.getElementById('megaProgress').style.display = 'none';
             document.getElementById('slotGrid').classList.remove('mega-active');
             document.querySelectorAll('.slot-cell').forEach(cell => { cell.classList.remove('super-green','super-red'); cell.style.background = ''; cell.textContent = getRandomSymbol(); });
@@ -1448,44 +1462,38 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         }
         // ==================== ИГРА ====================
         async function loadGame(user) {
-            const doc = await db.collection('users').doc(user.uid).get();
-            const data = doc.data() || {};
-            currentGlobalId = data.globalId || user.email?.split('@')[0] || 'player';
-
+            if (!user || !user.uid) throw new Error('Firebase Auth ещё не готов');
+            const userDoc = await db.collection('users').doc(user.uid).get({ source:'server' });
+            if (!userDoc.exists) throw new Error('Профиль пользователя ещё не найден на сервере');
+            const data = userDoc.data() || {};
+            currentGlobalId = data.globalId || user.email?.split('@')[0];
+            if (!currentGlobalId) throw new Error('Global ID отсутствует в профиле');
+            const scoreRef = getScoreDocRef(currentGlobalId);
+            const scoreDoc = await scoreRef.get({ source:'server' });
+            let scoreData = scoreDoc.exists ? (scoreDoc.data() || {}) : null;
+            if (!scoreDoc.exists) {
+                await scoreRef.set({ score:1000, globalId:currentGlobalId, uid:user.uid, email:user.email || '', displayName:data.displayName || currentGlobalId, createdAt:firebase.firestore.FieldValue.serverTimestamp(), updatedAt:firebase.firestore.FieldValue.serverTimestamp() });
+                scoreData = { score:1000, casinoProgress:{} };
+            }
+            const loadedBalance = Number(scoreData.score);
+            if (!Number.isFinite(loadedBalance) || loadedBalance < 0) throw new Error('Сервер вернул некорректный баланс');
+            gameBalance = Math.floor(loadedBalance);
+            const progress = scoreData.casinoProgress || {};
+            casinoProgress = { ...casinoProgress, ...progress, upgradeLevels:{ ...(progress.upgradeLevels || {}) }, superGameCompletedLevels:Array.isArray(progress.superGameCompletedLevels) ? progress.superGameCompletedLevels.map(Number) : (Number(progress.superGameCompletedLevel) > 0 ? [Number(progress.superGameCompletedLevel)] : []) };
+            autoSpinUnlocked = progress.autoSpinUnlocked === true || getUpgradeLevel('auto') > 0;
             document.getElementById('displayName').textContent = data.displayName || user.email?.split('@')[0] || 'Игрок';
             document.getElementById('globalIdDisplay').textContent = currentGlobalId;
-
-            gameBalance = await getBalanceFromScore(currentGlobalId);
+            document.getElementById('balanceDisplay').textContent = gameBalance.toLocaleString();
             try {
-                const saved = await getScoreDocRef(currentGlobalId).get();
-                const progress = saved.exists ? (saved.data().casinoProgress || {}) : {};
-                casinoProgress = { ...casinoProgress, ...progress, upgradeLevels: { ...(progress.upgradeLevels || {}) } };
-                autoSpinUnlocked = progress.autoSpinUnlocked === true || getUpgradeLevel('auto')>0;
-            } catch (e) { console.warn('Не удалось загрузить улучшения', e); }
-
-            if (gameBalance < 10) {
-                gameBalance = 1000;
-                await updateBalanceInScore(currentGlobalId, gameBalance);
-            }
-
-            document.getElementById('balanceDisplay').textContent = gameBalance;
-            try {
-                await db.collection('arcade_leaderboards').doc('runcasino').collection('entries').doc(currentGlobalId).set({
-                    uid: user.uid, globalId: currentGlobalId,
-                    displayName: data.displayName || user.email?.split('@')[0] || 'Игрок',
-                    score: gameBalance, updatedAt: new Date()
-                }, { merge: true });
-            } catch (boardError) { console.warn('Не удалось синхронизировать таблицу:', boardError); }
+                await db.collection('arcade_leaderboards').doc('runcasino').collection('entries').doc(currentGlobalId).set({ uid:user.uid, globalId:currentGlobalId, displayName:data.displayName || user.email?.split('@')[0] || 'Игрок', score:gameBalance, updatedAt:firebase.firestore.FieldValue.serverTimestamp() }, { merge:true });
+            } catch (boardError) { console.warn('Таблица лидеров временно недоступна:', boardError); }
+            initGrid(); setupBetSelector(); updateUI();
+            casinoDataReady = true; casinoLoadError = '';
+            updateCasinoLoadingUI();
             showScreen('gameScreen');
-            initGrid();
-            setupBetSelector();
-            updateUI();
-            setTimeout(checkMegaGameEligibility, 900);
-            // Звук включается только по настройке стартового меню.
-
-            // Проверка супер-режима отложена до начала игры.
+            setTimeout(checkMegaGameEligibility, 350);
+            console.log('✅ Run Casino готов: серверный баланс и прогресс загружены до открытия игры');
         }
-
         function setupBetSelector() {
             document.querySelectorAll('.bet-option').forEach(o => {
                 o.addEventListener('click', function() {
@@ -1573,7 +1581,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             auto:{title:'🔄 Автопривод',desc:'Открывает автоспин и ускоряет его.',costs:[5000,15000,40000,85000,170000]}
         };
         function getUpgradeLevel(key){return Math.max(0,Math.min(5,Number(casinoProgress.upgradeLevels?.[key])||0));}
-        function openWorkshop(){if(isSpinInProgress||miniGameBusy)return;renderWorkshop();document.getElementById('workshopOverlay').classList.add('open');document.getElementById('workshopOverlay').setAttribute('aria-hidden','false');playButtonClick();}
+        function openWorkshop(){
+            if(!casinoDataReady)return;if(isSpinInProgress||miniGameBusy)return;renderWorkshop();document.getElementById('workshopOverlay').classList.add('open');document.getElementById('workshopOverlay').setAttribute('aria-hidden','false');playButtonClick();}
         function closeWorkshop(){document.getElementById('workshopOverlay').classList.remove('open');document.getElementById('workshopOverlay').setAttribute('aria-hidden','true');updateUI();}
         function renderWorkshop(){const host=document.getElementById('workshopUpgrades');if(!host)return;document.getElementById('workshopBalance').textContent=Number(gameBalance||0).toLocaleString();host.innerHTML=Object.entries(WORKSHOP_UPGRADES).map(([key,item])=>{const level=getUpgradeLevel(key),cost=item.costs[level]||0,full=level>=5;return '<article class="workshop-card"><h3>'+item.title+'</h3><p>'+item.desc+'</p><div class="workshop-level"><span>Уровень '+level+'/5</span><b>'+(full?'MAX':cost.toLocaleString()+' монет')+'</b></div><div class="workshop-meter"><i style="width:'+(level*20)+'%"></i></div><button class="workshop-buy" '+(full||gameBalance<cost?'disabled':'')+' onclick="buyWorkshopUpgrade(\''+key+'\')">'+(full?'✓ МАКСИМУМ':gameBalance<cost?'Не хватает монет':'УЛУЧШИТЬ · '+cost.toLocaleString())+'</button></article>';}).join('');}
         async function buyWorkshopUpgrade(key){const item=WORKSHOP_UPGRADES[key];if(!item)return;const level=getUpgradeLevel(key);if(level>=5)return;const cost=item.costs[level];if(gameBalance<cost)return;gameBalance-=cost;casinoProgress.upgradeLevels=casinoProgress.upgradeLevels||{};casinoProgress.upgradeLevels[key]=level+1;if(key==='auto'){autoSpinUnlocked=true;casinoProgress.autoSpinUnlocked=true;}await updateBalanceDB();renderWorkshop();updateUI();playSfx('sfxWin');triggerHaptic('medium');document.getElementById('winMessage').textContent=item.title+' улучшено до уровня '+(level+1)+'!';}
@@ -1591,6 +1600,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             document.querySelectorAll('#miniChoice button,#miniPlayButton').forEach(button=>{button.disabled=remain>0;});
         }
         function openMiniArcade(){
+            if(!casinoDataReady)return;
             if(isSpinInProgress||riskActive||megaGameActive)return;
             document.getElementById('miniArcadeScreen').classList.add('open');document.getElementById('miniArcadeScreen').setAttribute('aria-hidden','false');
             updateMiniBalance();startMiniCooldownTicker();playButtonClick();
@@ -1821,7 +1831,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
 
         async function performSpin(){
-            if(isSpinInProgress||riskActive)return;
+            if(!casinoDataReady||isSpinInProgress||riskActive)return;
             const wait=Math.max(0,SPIN_MIN_GAP-(Date.now()-lastSpinFinishedAt));
             isSpinInProgress=true;updateUI();const lever=document.getElementById('casinoLever');
             if(lever)lever.classList.add('pulled');playLeverClunk();triggerHaptic('lever');
@@ -1839,7 +1849,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
 
         function startRiskMini(){
-            if(riskActive||lastWinAmount<=0||getMiniCooldownRemaining('risk')>0)return;
+            if(!casinoDataReady||riskActive||lastWinAmount<=0||getMiniCooldownRemaining('risk')>0)return;
             riskActive=true;stopAutoSpin();playButtonClick();triggerHaptic('medium');
             const host=document.getElementById('miniRiskCards');if(!host)return;
             const winIdx=Math.floor(Math.random()*4);host.innerHTML='';
@@ -1869,6 +1879,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             megaGameActive = false; megaGameSpins = 0; megaGameWins = 0; megaGameSavedBalance = 0; megaGameLevel = 0; superGameGreen = 0; superGameRed = 0;
             document.getElementById('superTimer').textContent = '';
             const indicator = document.getElementById('megaIndicator'); if (indicator) indicator.classList.remove('active');
+            document.body.classList.remove('super-theme-1','super-theme-2','super-theme-3');
             document.getElementById('megaProgress').style.display = 'none';
             document.getElementById('slotGrid').classList.remove('mega-active');
             document.querySelectorAll('.slot-cell').forEach(cell => { cell.classList.remove('super-green','super-red'); cell.style.background = ''; });
@@ -1879,23 +1890,64 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             const defaultBet = document.querySelector('.bet-option[data-bet="10"]'); if (defaultBet) defaultBet.classList.add('selected');
         }
         let menuInitialized = false;
+        let casinoDataReady = false;
+        let casinoAuthResolved = false;
+        let casinoLoadError = '';
+        let casinoLoadAttempt = 0;
+        let casinoLoadPromise = null;
+        function updateCasinoLoadingUI() {
+            const overlay=document.getElementById('casinoLoadingOverlay');
+            const title=document.getElementById('casinoLoadingTitle');
+            const message=document.getElementById('casinoLoadingText');
+            const status=document.getElementById('casinoLoadStatus');
+            const start=document.getElementById('casinoStartButton');
+            if(overlay) overlay.classList.toggle('ready',casinoDataReady);
+            if(start) start.disabled=!casinoDataReady;
+            if(title) title.textContent=casinoDataReady?'Данные загружены':'Подключаемся к GloBIT Arcade…';
+            if(message) message.textContent=casinoDataReady?'Серверный баланс и прогресс синхронизированы.':'Игра заблокирована до загрузки серверного баланса. Не закрывайте страницу.';
+            if(status) status.textContent=casinoDataReady?'✓ Аккаунт подключён. Баланс и прогресс загружены.':(casinoLoadError?'Ожидание соединения… '+casinoLoadError:'Подключаемся к аккаунту и загружаем сохранённый баланс…');
+        }
         async function initGuestCasino() {
-            if (menuInitialized) return;
-            menuInitialized = true;
-            currentGlobalId = null;
-            gameBalance = 1000;
-            document.getElementById('displayName').textContent = 'Гость';
-            document.getElementById('globalIdDisplay').textContent = 'Гость';
-            document.getElementById('balanceDisplay').textContent = gameBalance;
-            initGrid();
-            setupBetSelector();
-            updateUI();
+            if (auth.currentUser || !casinoAuthResolved || casinoDataReady) return;
+            menuInitialized=true; casinoDataReady=true; currentGlobalId=null; gameBalance=1000;
+            document.getElementById('displayName').textContent='Гость';
+            document.getElementById('globalIdDisplay').textContent='Гость';
+            document.getElementById('balanceDisplay').textContent=gameBalance.toLocaleString();
+            initGrid(); setupBetSelector(); updateUI(); updateCasinoLoadingUI();
+        }
+        async function loadAuthenticatedCasino(user) {
+            if(casinoLoadPromise) return casinoLoadPromise;
+            casinoLoadPromise=(async()=>{
+                casinoDataReady=false; casinoLoadError=''; updateCasinoLoadingUI();
+                const myAttempt=++casinoLoadAttempt;
+                let lastError=null;
+                for(let attempt=1;attempt<=30;attempt++){
+                    if(myAttempt!==casinoLoadAttempt || !auth.currentUser || auth.currentUser.uid!==user.uid) return;
+                    try {
+                        await loadGame(user);
+                        menuInitialized=true; casinoDataReady=true; casinoLoadError=''; updateCasinoLoadingUI(); return;
+                    } catch(error) {
+                        lastError=error; casinoLoadError='Попытка '+attempt+'/30'; updateCasinoLoadingUI();
+                        console.warn('Ожидание серверных данных Run Casino:',error);
+                        await new Promise(resolve=>setTimeout(resolve,Math.min(1000+attempt*500,5000)));
+                    }
+                }
+                casinoLoadError='Не удалось получить данные. Игра остаётся заблокированной, баланс не сбрасывается.';
+                updateCasinoLoadingUI();
+                throw lastError || new Error(casinoLoadError);
+            })().finally(()=>{casinoLoadPromise=null;});
+            return casinoLoadPromise;
         }
         auth.onAuthStateChanged(async user => {
-            if (user) {
-                try { await loadGame(user); menuInitialized = true; }
-                catch (e) { console.warn('Аккаунт недоступен, гостевой режим:', e); await initGuestCasino(); }
-            } else { await initGuestCasino(); }
+            casinoAuthResolved=true;
+            if(user){
+                casinoDataReady=false; menuInitialized=false; updateCasinoLoadingUI();
+                try { await loadAuthenticatedCasino(user); }
+                catch(error){ console.error('Run Casino не открылся: серверные данные не подтверждены.',error); }
+            } else {
+                casinoLoadAttempt++; casinoLoadPromise=null;
+                await initGuestCasino();
+            }
         });
         let casinoSoundOn = true;
         document.getElementById('casinoSoundToggle').addEventListener('click', () => {
@@ -1922,7 +1974,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         });
         updateHapticsToggleUI();
         document.getElementById('casinoStartButton').addEventListener('click', () => {
-            if (!menuInitialized) initGuestCasino();
+            if (!casinoDataReady) { updateCasinoLoadingUI(); return; }
             document.getElementById('startMenu').style.display = 'none';
             showScreen('gameScreen');
             if (casinoSoundOn) initAudio();
