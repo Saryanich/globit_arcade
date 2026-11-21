@@ -1090,7 +1090,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
       <p id="bankSavingsState">Счёт не открыт. Открытие стоит 5 000 монет. Деньги на счёте не используются для ставок.</p>
       <button class="bank-action gold" id="bankOpenSavingsButton" type="button" onclick="openSavingsAccount()">ОТКРЫТЬ СЧЁТ · 5 000</button>
       <label for="bankAmountInput" style="display:block;margin-top:10px;color:#bcebd0;font-size:10px">Сумма операции</label>
-      <input class="bank-amount" id="bankAmountInput" type="number" min="1" max="100000" step="1" value="1000" inputmode="numeric">
+      <input class="bank-amount" id="bankAmountInput" type="number" min="1" max="100000" step="1" value="1000" inputmode="numeric" oninput="updateBankUI()">
       <div class="bank-actions">
         <button class="bank-action" id="bankDepositButton" type="button" onclick="depositSavings()">ПОЛОЖИТЬ</button>
         <button class="bank-action" id="bankWithdrawButton" type="button" onclick="withdrawSavings()">СНЯТЬ</button>
@@ -1104,7 +1104,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         <button class="bank-action" id="bankRepayLoanButton" type="button" onclick="repayBankLoan()" disabled>ПОГАСИТЬ КРЕДИТ</button>
         <button class="bank-action danger" id="bankRepayDebtButton" type="button" onclick="repayOverdraftDebt()" disabled>ПОГАСИТЬ ДОЛГИ</button>
       </div>
-      <p>Без процентов. Срок возврата — 30 минут, затем 5 минут отсрочки. За каждую полную минуту отсрочки шанс выигрыша уменьшается на 0,05%. После этого инкассаторы сначала списывают игровой баланс, затем накопления.</p>
+      <p>Без процентов. Срок возврата — 30 минут, затем 5 минут отсрочки. За каждую полную минуту отсрочки 0,05% потенциальных выигрышей отменяется (максимум 0,25%). После этого инкассаторы сначала списывают игровой баланс, затем накопления.</p>
       <p>Можно оформить один кредит одновременно, от 500 до 100 000 монет.</p>
     </section>
     <div class="bank-status" id="bankStatus" role="status">Банк готов.</div>
@@ -1438,7 +1438,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 else if(Date.now()<active.dueAt)loanStatus.textContent='К возврату: '+active.amount.toLocaleString()+' монет · осталось '+bankFormatTime(active.dueAt-Date.now())+'.';
                 else{
                     const elapsed=Date.now()-active.dueAt, penalty=getBankLoanPenaltyPercent();
-                    loanStatus.textContent='ПРОСРОЧКА '+bankFormatTime(elapsed)+' / 05:00 · штраф к шансу выигрыша −'+penalty.toFixed(2).replace('.',',')+'%. Инкассаторы придут через '+bankFormatTime(5*60000-elapsed)+'.';
+                    loanStatus.textContent='ПРОСРОЧКА '+bankFormatTime(elapsed)+' / 05:00 · шанс отмены выигрыша '+penalty.toFixed(2).replace('.',',')+'%. Инкассаторы придут через '+bankFormatTime(5*60000-elapsed)+'.';
                 }
             }
             const loanButton=document.getElementById('bankLoanButton'),repayLoan=document.getElementById('bankRepayLoanButton'),repayDebt=document.getElementById('bankRepayDebtButton');
@@ -1988,7 +1988,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 if(kind==='coin'){const side=Math.random()<.5?'heads':'tails';multiplier=side===choice?1.7:0;label=(side==='heads'?'🪙 Орёл':'🪙 Решка')+(multiplier?' · угадал!':' · не угадал');}
                 if(kind==='cards'){const red=Math.random()<.5;multiplier=(red?'red':'black')===choice?1.7:0;label=(red?'♥ Красная карта':'♠ Чёрная карта')+(multiplier?' · угадал!':' · не угадал');}
                 let payout=Math.floor(cost*multiplier);
-                if(payout>0&&shouldSuppressWinByLoanPenalty()){payout=0;label+=' · просрочка кредита: −'+getBankLoanPenaltyPercent().toFixed(2).replace('.',',')+'% к шансу';}
+                if(payout>0&&shouldSuppressWinByLoanPenalty()){payout=0;label+=' · просрочка кредита: шанс отмены выигрыша '+getBankLoanPenaltyPercent().toFixed(2).replace('.',',')+'%';}
                 if(payout>0&&suppressWinBySuperGamePenalty()){payout=0;label+=' · временное снижение шанса';}
                 else if(payout<=0&&casinoProgress.superGameLuckBoost&&Math.random()<0.03){payout=Math.floor(cost*1.05);label+=' · 🍀 постоянная удача';}
                 gameBalance+=payout;casinoProgress.totalSpins=(casinoProgress.totalSpins||0)+1;
@@ -2202,7 +2202,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                     triggerHaptic(result.win>=500000?'jackpot':result.win>=10000?'bigWin':'win');
                     setTimeout(()=>document.querySelectorAll('.slot-cell.win').forEach(cell=>cell.classList.remove('win')),3200);
                 }else{
-                    playLoseSound();document.getElementById('winMessage').textContent=loanPenaltySuppressed?'🏦 Просрочка кредита: шанс выигрыша снижен на '+getBankLoanPenaltyPercent().toFixed(2).replace('.',',')+'%.':(penaltySuppressed?'⏳ Сработал временный штраф суперигры — выигрыш не засчитан.':(freespinsRemaining>0?'🔄 Фриспин готов. Попробуй ещё!':'Почти! Следующий рывок может быть удачнее.'));
+                    playLoseSound();document.getElementById('winMessage').textContent=loanPenaltySuppressed?'🏦 Просрочка кредита: шанс отмены выигрыша '+getBankLoanPenaltyPercent().toFixed(2).replace('.',',')+'%.':(penaltySuppressed?'⏳ Сработал временный штраф суперигры — выигрыш не засчитан.':(freespinsRemaining>0?'🔄 Фриспин готов. Попробуй ещё!':'Почти! Следующий рывок может быть удачнее.'));
                     lastWinAmount=0;triggerHaptic('lose');
                 }
                 await updateBalanceDB();
