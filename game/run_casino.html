@@ -525,8 +525,6 @@
         .slot-cell.spinning {
             animation: spinAnim 0.1s linear infinite;
         }
-        .slot-cell.prestige-return{animation:prestigeCellReturn .68s cubic-bezier(.2,.85,.25,1) both}
-        @keyframes prestigeCellReturn{0%{opacity:0;transform:translateY(-18px) scale(.55) rotateX(90deg);filter:blur(4px)}70%{opacity:1;transform:translateY(3px) scale(1.08) rotateX(0);filter:blur(0)}100%{opacity:1;transform:translateY(0) scale(1) rotateX(0);filter:blur(0)}}
         @keyframes spinAnim {
             0% {
                 transform: rotateX(0deg);
@@ -1900,7 +1898,6 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             try{
                 await updateBalanceDB();
                 prestigeFieldReadyState=null;updatePrestigeField();
-                document.querySelectorAll('#slotGrid .slot-cell').forEach((cell,index)=>{cell.classList.add('prestige-return');cell.style.animationDelay=(index*28)+'ms';setTimeout(()=>{cell.classList.remove('prestige-return');cell.style.animationDelay='';},1100+index*28);});
                 document.getElementById('winMessage').textContent='⭐ ПРЕСТИЖ '+nextPrestige+'! Шанс крупного приза: '+chance+'%';
                 playMegaWinSound();triggerHaptic('jackpot');triggerCasinoFX('jackpot');updateUI();
             }catch(error){
@@ -2118,7 +2115,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         async function animateWinningCombinations(result){
             const gridNode=document.getElementById('slotGrid');
             const cells=Array.from(document.querySelectorAll('.slot-cell'));
-            if(!gridNode||!result||!result.combinations?.length||getUpgradeLevel('turbo')<5||casinoProgress.comboRevealEnabled===false)return false;
+            if(!gridNode||!result||!result.combinations?.length||(getUpgradeLevel('turbo')<5&&getPrestigeCount()===0)||casinoProgress.comboRevealEnabled===false)return false;
             const rawTotal=result.combinations.reduce((sum,item)=>sum+item.amount,0),factor=rawTotal>0?result.win/rawTotal:1;
             for(const combo of result.combinations){
                 const color=COMBO_COLORS[Math.floor(Math.random()*COMBO_COLORS.length)];
