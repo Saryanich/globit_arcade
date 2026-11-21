@@ -1294,7 +1294,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             const scoreDoc = await scoreRef.get({ source: 'server' });
             if (scoreDoc.exists) {
                 const data = scoreDoc.data() || {};
-                const balance = Number.isFinite(Number(data.score)) ? Math.max(0, Math.floor(Number(data.score))) : 500;
+                const balance = Number.isFinite(Number(data.score)) ? Math.max(500, Math.floor(Number(data.score))) : 500;
                 console.log('💰 Серверный баланс загружен:', globalId, balance);
                 return balance;
             }
@@ -1407,6 +1407,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
         async function updateBalanceDB() {
             if (!casinoDataReady) throw new Error('Баланс ещё не загружен с сервера — сохранение запрещено');
+            gameBalance=Math.max(500,Math.floor(Number(gameBalance)||0));
             if (currentGlobalId) {
                 await updateBalanceInScore(currentGlobalId, gameBalance);
             }
@@ -1558,7 +1559,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             }
             const loadedBalance = Number(scoreData.score);
             if (!Number.isFinite(loadedBalance) || loadedBalance < 0) throw new Error('Сервер вернул некорректный баланс');
-            gameBalance = Math.floor(loadedBalance);
+            gameBalance = Math.max(500,Math.floor(loadedBalance));
+            if(gameBalance!==Math.floor(loadedBalance)){await scoreRef.set({score:gameBalance,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});}
             const progress = scoreData.casinoProgress || {};
             casinoProgress = { ...casinoProgress, ...progress, prestige:Math.max(0,Math.floor(Number(progress.prestige)||0)), comboRevealEnabled: progress.comboRevealEnabled !== false, upgradeLevels:{ ...(progress.upgradeLevels || {}) }, superGameCompletedLevels:Array.isArray(progress.superGameCompletedLevels) ? progress.superGameCompletedLevels.map(Number) : (Number(progress.superGameCompletedLevel) > 0 ? [Number(progress.superGameCompletedLevel)] : []) };
             autoSpinUnlocked = progress.autoSpinUnlocked === true || getUpgradeLevel('auto') > 0;
@@ -1966,6 +1968,12 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 let result=checkWin(grid,false,false);
                 let prestigePrizeTriggered=false;
                 const prestigeChance=getPrestigeHighPrizeChance()/100;
+                const beginnerBoostActive=gameBalance<5000&&getPrestigeCount()===0;
+                if(result.win<=0&&beginnerBoostActive&&Math.random()<0.25){
+                    const luckyRow=Math.floor(Math.random()*SLOT_ROWS),luckySymbol=['💚','💜','🖤','6'][Math.floor(Math.random()*4)];
+                    for(let c=0;c<3;c++){grid[luckyRow][c]=luckySymbol;const node=document.getElementById('cell-'+luckyRow+'-'+c);if(node)node.textContent=luckySymbol;}
+                    result=checkWin(grid,false,false);
+                }
                 if(result.win<=0&&Math.random()<prestigeChance){
                     for(let c=0;c<SLOT_COLS;c++){grid[0][c]='7';const node=document.getElementById('cell-0-'+c);if(node)node.textContent='7';}
                     result=checkWin(grid,false,false);prestigePrizeTriggered=result.win>0;
