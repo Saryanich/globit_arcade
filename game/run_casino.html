@@ -1009,7 +1009,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
   </div>
 </div>
 
-    <div class="mini-arcade-overlay" id="miniArcadeScreen" aria-hidden="true"><section class="mini-arcade-cabinet"><header class="mini-arcade-header"><div><small>GLOBIT • RETRO HALL</small><h2>MINI CASINO</h2></div><button class="mini-close" type="button" aria-label="Закрыть мини-казино" onclick="closeMiniArcade()">✕</button></header><div class="mini-wallet">ВАШ БАЛАНС <b id="miniBalance">0</b> COINS</div><div class="mini-game-tabs"><button onclick="selectMiniGame('wheel')" class="mini-game-card" data-mini="wheel"><i>🎡</i><b>РУЛЕТКА</b><small>× до 8</small><small data-mini-cooldown="wheel"></small></button><button onclick="selectMiniGame('dice')" class="mini-game-card" data-mini="dice"><i>🎲</i><b>КОСТИ</b><small>× до 5</small><small data-mini-cooldown="dice"></small></button><button onclick="selectMiniGame('cards')" class="mini-game-card" data-mini="cards"><i>🂡</i><b>КАРТЫ</b><small>Красное / чёрное</small><small data-mini-cooldown="cards"></small></button><button onclick="selectMiniGame('coin')" class="mini-game-card" data-mini="coin"><i>🪙</i><b>МОНЕТКА</b><small>Орёл / решка</small><small data-mini-cooldown="coin"></small></button><button onclick="selectMiniGame('risk')" class="mini-game-card" data-mini="risk"><i>🃏</i><b>РИСК</b><small>Удвой выигрыш</small><small data-mini-cooldown="risk"></small></button></div><div class="mini-stage" id="miniStage"><div class="mini-stage-idle"><span>🎰</span><h3>ВЫБЕРИ АВТОМАТ</h3><p>Все игры используют текущую ставку.</p></div></div><div class="mini-footer"><span>RETRO ARCADE • 1986</span><button onclick="closeMiniArcade()">← НАЗАД К СЛОТАМ</button></div></section></div>
+    <div class="mini-arcade-overlay" id="miniArcadeScreen" aria-hidden="true"><section class="mini-arcade-cabinet"><header class="mini-arcade-header"><div><small>GLOBIT • RETRO HALL</small><h2>MINI CASINO</h2></div><button class="mini-close" type="button" aria-label="Закрыть мини-казино" onclick="closeMiniArcade()">✕</button></header><div class="mini-wallet">ВАШ БАЛАНС <b id="miniBalance">0</b> COINS</div><div class="mini-game-tabs"><button onclick="selectMiniGame('wheel')" class="mini-game-card" data-mini="wheel"><i>🎡</i><b>РУЛЕТКА</b><small>× до 8</small><small data-mini-cooldown="wheel"></small></button><button onclick="selectMiniGame('dice')" class="mini-game-card" data-mini="dice"><i>🎲</i><b>КОСТИ</b><small>× до 5</small><small data-mini-cooldown="dice"></small></button><button onclick="selectMiniGame('cards')" class="mini-game-card" data-mini="cards"><i>🂡</i><b>КАРТЫ</b><small>Красное / чёрное</small><small data-mini-cooldown="cards"></small></button><button onclick="selectMiniGame('coin')" class="mini-game-card" data-mini="coin"><i>🪙</i><b>МОНЕТКА</b><small>Орёл / решка</small><small data-mini-cooldown="coin"></small></button><button onclick="selectMiniGame('risk')" class="mini-game-card" data-mini="risk"><i>🃏</i><b>РИСК</b><small>Удвой выигрыш</small><small data-mini-cooldown="risk"></small></button><button onclick="selectMiniGame('risk')" class="mini-game-card" data-mini="risk"><i>🃏</i><b>РИСК</b><small>Удвой выигрыш</small><small data-mini-cooldown="risk"></small></button></div><div class="mini-stage" id="miniStage"><div class="mini-stage-idle"><span>🎰</span><h3>ВЫБЕРИ АВТОМАТ</h3><p>Все игры используют текущую ставку.</p></div></div><div class="mini-footer"><span>RETRO ARCADE • 1986</span><button onclick="closeMiniArcade()">← НАЗАД К СЛОТАМ</button></div></section></div>
     <div class="workshop-overlay" id="workshopOverlay" aria-hidden="true"><section class="workshop-modal">
       <header class="workshop-top"><div><small>GLOBIT • UPGRADES</small><h2>🛠 МАСТЕРСКАЯ</h2><p>Прокачивай автомат по уровням</p></div><button type="button" class="mini-close" onclick="closeWorkshop()">✕</button></header>
       <div class="workshop-wallet">Баланс: <b id="workshopBalance">0</b> монет</div><div class="workshop-upgrades" id="workshopUpgrades"></div>
@@ -1133,7 +1133,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         // ==================== PERSISTENT COOLDOWNS ====================
         const MINI_GAME_COOLDOWN_MS=5*60*1000;
         const SUPER_COOLDOWN_MS=15*60*1000;
-        const MINI_GAME_IDS=['wheel','dice','cards','coin'];
+        const MINI_GAME_IDS=['wheel','dice','cards','coin','risk'];
         let miniCooldownInterval=null,superCooldownInterval=null,superPreviousBet=10;
         function cooldownStorageId(){return String(currentGlobalId||(auth.currentUser&&auth.currentUser.uid)||'guest').replace(/[^a-zA-Z0-9_-]/g,'_');}
         function readCooldown(key){try{return Math.max(0,Number(localStorage.getItem(key))||0);}catch(e){return 0;}}
@@ -1648,12 +1648,13 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         function selectMiniGame(kind){
             if(miniGameBusy)return;selectedMiniGame=kind;
             document.querySelectorAll('.mini-game-card').forEach(button=>button.classList.toggle('active',button.dataset.mini===kind));
-            const titles={wheel:'РУЛЕТКА УДАЧИ',dice:'БРОСОК КОСТЕЙ',cards:'КРАСНОЕ ИЛИ ЧЁРНОЕ',coin:'ОРЁЛ ИЛИ РЕШКА'};
-            const art={wheel:'<div class="mini-wheel" id="miniWheel"></div>',dice:'<div class="mini-die" id="miniDie">🎲</div>',cards:'<div><span class="mini-card">A♥</span><span class="mini-card" style="color:#222">K♠</span></div>',coin:'<div class="mini-coin" id="miniCoin">🪙</div>'};
-            const rules={wheel:'Выигрыш ×8 на джекпот, ×2 на удачный сектор.',dice:'6 — ×5, 4–5 — ×1,5, 3 — небольшой возврат.',cards:'Угадай цвет следующей карты. Верный цвет — ×1,85.',coin:'Выбери сторону монеты. Верный выбор — ×1,85.'};
+            const titles={wheel:'РУЛЕТКА УДАЧИ',dice:'БРОСОК КОСТЕЙ',cards:'КРАСНОЕ ИЛИ ЧЁРНОЕ',coin:'ОРЁЛ ИЛИ РЕШКА',risk:'РИСК · УДВОЕНИЕ'};
+            const art={wheel:'<div class="mini-wheel" id="miniWheel"></div>',dice:'<div class="mini-die" id="miniDie">🎲</div>',cards:'<div><span class="mini-card">A♥</span><span class="mini-card" style="color:#222">K♠</span></div>',coin:'<div class="mini-coin" id="miniCoin">🪙</div>',risk:'<div class="mini-risk-cards" id="miniRiskCards"></div>'};
+            const rules={wheel:'Выигрыш ×8 на джекпот, ×2 на удачный сектор.',dice:'6 — ×5, 4–5 — ×1,5, 3 — небольшой возврат.',cards:'Угадай цвет следующей карты. Верный цвет — ×1,85.',coin:'Выбери сторону монеты. Верный выбор — ×1,85.',risk:'Удвой последний выигрыш: найди ❤️ среди четырёх карт. Ошибка заберёт выигрыш.'};
             const remain=getMiniCooldownRemaining(kind);
             document.getElementById('miniStage').innerHTML='<div class="mini-game-view"><h3>'+titles[kind]+'</h3>'+art[kind]+'<p>'+rules[kind]+'</p><div class="mini-result" id="miniResult">'+(remain?'⏳ Доступ через '+formatCooldown(remain):'Ставка: '+Number(currentBet).toLocaleString()+' монет')+'</div><div id="miniChoice"></div><button class="mini-play" id="miniPlayButton" onclick="playMiniGame(\''+kind+'\')" '+(remain?'disabled':'')+'>ИГРАТЬ · '+Number(currentBet).toLocaleString()+'</button></div>';
             if(kind==='coin'){document.getElementById('miniPlayButton').style.display='none';document.getElementById('miniChoice').innerHTML='<button class="mini-play" type="button" onclick="playMiniGame(\'coin\',\'heads\')" '+(remain?'disabled':'')+'>ОРЁЛ</button> <button class="mini-play" type="button" onclick="playMiniGame(\'coin\',\'tails\')" '+(remain?'disabled':'')+'>РЕШКА</button>';}
+            if(kind==='risk'){document.getElementById('miniPlayButton').style.display='none';document.getElementById('miniChoice').innerHTML='<button class="mini-play" type="button" onclick="startRiskMini()" '+(remain||lastWinAmount<=0?'disabled':'')+'>НАЧАТЬ РИСК</button>';}
             if(kind==='cards'){document.getElementById('miniPlayButton').style.display='none';document.getElementById('miniChoice').innerHTML='<button class="mini-play" type="button" onclick="playMiniGame(\'cards\',\'red\')" '+(remain?'disabled':'')+'>КРАСНЫЙ</button> <button class="mini-play" type="button" onclick="playMiniGame(\'cards\',\'black\')" '+(remain?'disabled':'')+'>ЧЁРНЫЙ</button>';}
             playButtonClick();
         }
@@ -1893,57 +1894,27 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             updateBalanceDB();updateUI();
         }
 
-        function startRiskGame() {
-            if (lastWinAmount <= 0 || riskActive || superGameActive || megaGameActive) return;
-            playButtonClick();
-            riskActive = true;
-            stopAutoSpin();
-            document.getElementById('riskGameArea').classList.add('active');
-            document.getElementById('riskAmount').textContent = lastWinAmount;
-            const div = document.getElementById('riskCards');
-            div.innerHTML = '';
-            const winIdx = Math.floor(Math.random() * 4);
-            for (let i = 0; i < 4; i++) {
-                const card = document.createElement('div');
-                card.className = 'risk-card';
-                card.textContent = '?';
-                card.onclick = () => revealRisk(i, winIdx);
-                div.appendChild(card);
-            }
+        function startRiskMini(){
+            if(riskActive||lastWinAmount<=0||getMiniCooldownRemaining('risk')>0)return;
+            riskActive=true;stopAutoSpin();playButtonClick();triggerHaptic('medium');
+            const host=document.getElementById('miniRiskCards');if(!host)return;
+            const winIdx=Math.floor(Math.random()*4);host.innerHTML='';
+            for(let i=0;i<4;i++){const card=document.createElement('button');card.type='button';card.className='risk-card mini-risk-card';card.textContent='?';card.onclick=()=>revealRisk(i,winIdx);host.appendChild(card);}
+            const out=document.getElementById('miniResult');if(out)out.textContent='На кону '+lastWinAmount.toLocaleString()+' монет. Выбери одну карту.';
+            const choice=document.getElementById('miniChoice');if(choice)choice.innerHTML='<button class="mini-play" onclick="cancelRisk()">ОТМЕНА</button>';
             updateUI();
         }
-
-        function revealRisk(chosen, winIdx) {
-            if (!riskActive) return;
-            riskActive = false;
-            document.querySelectorAll('.risk-card').forEach((c, i) => {
-                c.textContent = i === winIdx ? '❤️' : '💙';
-                c.classList.add(i === winIdx ? 'revealed' : 'revealed-lose');
-                c.style.pointerEvents = 'none';
-            });
-            if (chosen === winIdx) {
-                gameBalance += lastWinAmount;
-                document.getElementById('winMessage').textContent =
-                `🎯 РИСК! +${(lastWinAmount*2).toLocaleString()} всего!`;
-                playRiskWinSound();
-            } else {
-                document.getElementById('winMessage').textContent =
-                `💔 Потеряно ${lastWinAmount.toLocaleString()}`;
-                playRiskLoseSound();
-            }
-            lastWinAmount = 0;
-            updateBalanceDB();
-            updateUI();
-            setTimeout(() => { document.getElementById('riskGameArea').classList.remove('active'); }, 2500);
+        function revealRisk(chosen,winIdx){
+            if(!riskActive)return;riskActive=false;startMiniCooldown('risk');
+            document.querySelectorAll('.mini-risk-card').forEach((card,i)=>{card.textContent=i===winIdx?'❤️':'💙';card.classList.add(i===winIdx?'revealed':'revealed-lose');card.disabled=true;});
+            const amount=lastWinAmount;
+            if(chosen===winIdx){gameBalance+=amount;document.getElementById('winMessage').textContent='🎯 РИСК! Выигрыш удвоен: '+(amount*2).toLocaleString();playRiskWinSound();triggerHaptic('heavy');triggerCasinoFX('win');}
+            else{gameBalance=Math.max(0,gameBalance-amount);document.getElementById('winMessage').textContent='💔 Риск проигран: −'+amount.toLocaleString();playRiskLoseSound();triggerHaptic('medium');triggerCasinoFX('lose');}
+            lastWinAmount=0;const out=document.getElementById('miniResult');if(out)out.textContent=chosen===winIdx?'🎉 Угадал! Выигрыш удвоен.':'💔 Не угадал. Выигрыш потерян.';
+            const choice=document.getElementById('miniChoice');if(choice)choice.innerHTML='<span class="mini-result">Следующая игра через 05:00</span>';
+            updateBalanceDB();updateMiniBalance();refreshMiniCooldownUI();updateUI();
         }
-
-        function cancelRisk() {
-            riskActive = false;
-            document.getElementById('winMessage').textContent = 'Риск отменён';
-            lastWinAmount = 0;
-            updateUI();
-            playButtonClick();
-        }
+        function cancelRisk(){riskActive=false;document.getElementById('winMessage').textContent='Риск отменён';const out=document.getElementById('miniResult');if(out)out.textContent='Можно попробовать позже.';updateUI();playButtonClick();}
 
         function resetGame() {
             stopAutoSpin();
