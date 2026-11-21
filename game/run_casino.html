@@ -82,6 +82,7 @@
             overflow-y: auto;
         }
 
+        @media (max-width:600px){:root{--blur:blur(11px)}.screen{box-shadow:0 12px 30px rgba(0,0,0,.48),0 0 18px rgba(0,230,118,.08)}.logo{animation-duration:5s}.slot-cell{transition:border-color .18s,background-color .18s}.slot-cell.win{animation-duration:.55s;animation-iteration-count:3}.mega-mode-indicator,.slot-grid.mega-active{animation-duration:1.2s}}
         .screen.active {
             display: block;
             animation: fadeSlideIn 0.4s ease-out;
@@ -618,6 +619,7 @@
             border-color: #ff1744 !important;
             box-shadow: 0 0 20px rgba(255, 23, 68, 0.7) !important;
         }
+        .slot-cell.super-green{background:linear-gradient(145deg,#087f3d,#064522)!important;border-color:#69f0ae!important;box-shadow:0 0 14px #00e67677!important}.slot-cell.super-red{background:linear-gradient(145deg,#a40020,#510012)!important;border-color:#ff526f!important;box-shadow:0 0 14px #ff174477!important}
         .slot-cell.scatter {
             border-color: #d500f9 !important;
             box-shadow: 0 0 20px rgba(213, 0, 249, 0.7) !important;
@@ -865,10 +867,10 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 .lever-ball{position:absolute;top:-17px;left:50%;width:31px;height:31px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle at 28% 23%,#fff8df 0,#ff6660 18%,#b51c19 57%,#4c0908 100%);border:2px solid #f0b66b;box-shadow:0 3px 8px #000,0 0 10px #f33a2b88}
 .lever-base{position:absolute;bottom:6px;left:0;right:0;color:#f4d18b;font-size:9px;letter-spacing:2px;font-weight:900}
 
-.machine-actions{display:flex;flex-direction:column;justify-content:center;gap:7px}
-.cabinet-action{min-height:38px;border:1px solid #a77a3b;border-radius:6px;background:linear-gradient(#57402a,#24180f);color:#f7d99b;font:900 10px ui-monospace,monospace;letter-spacing:1px;box-shadow:0 3px 0 #100b07,inset 0 1px #fff3}
+.machine-actions{display:flex;flex-direction:column;justify-content:center;gap:7px;min-width:82px;position:relative;z-index:40}
+.cabinet-action{min-width:78px;min-height:58px;padding:10px 8px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;border:1px solid #a77a3b;border-radius:6px;background:linear-gradient(#57402a,#24180f);color:#f7d99b;font:900 10px ui-monospace,monospace;letter-spacing:1px;box-shadow:0 3px 0 #100b07,inset 0 1px #fff3}
 .cabinet-action.primary{background:linear-gradient(#f4c75f,#9b5b19);color:#291709;font-size:12px}
-.cabinet-action:disabled{opacity:.35}
+.cabinet-action:disabled{opacity:.35;pointer-events:none}.cabinet-action.active{background:linear-gradient(#a42d2d,#591414);border-color:#ff6868;color:#fff;font-size:11px;box-shadow:0 0 14px #ff383866}
 .cabinet-lower{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
 .arcade-door{min-height:72px;border:2px solid #c09247;border-radius:9px;background:repeating-linear-gradient(0deg,#302015 0 3px,#3b291b 3px 6px);color:#ffdb8d;font:900 12px ui-monospace,monospace;letter-spacing:1px;box-shadow:inset 0 0 16px #000}
 .arcade-door span{display:block;margin-top:5px;color:#9fe9a6;font-size:9px}
@@ -1010,7 +1012,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
   </div>
 </div>
 
-    <div class="mini-arcade-overlay" id="miniArcadeScreen" aria-hidden="true"><section class="mini-arcade-cabinet"><header class="mini-arcade-header"><div><small>GLOBIT • RETRO HALL</small><h2>MINI CASINO</h2></div><button class="mini-close" type="button" aria-label="Закрыть мини-казино" onclick="closeMiniArcade()">✕</button></header><div class="mini-wallet">ВАШ БАЛАНС <b id="miniBalance">0</b> COINS</div><div class="mini-game-tabs"><button onclick="selectMiniGame('wheel')" class="mini-game-card" data-mini="wheel"><i>🎡</i><b>РУЛЕТКА</b><small>× до 8</small><small data-mini-cooldown="wheel"></small></button><button onclick="selectMiniGame('dice')" class="mini-game-card" data-mini="dice"><i>🎲</i><b>КОСТИ</b><small>× до 5</small><small data-mini-cooldown="dice"></small></button><button onclick="selectMiniGame('cards')" class="mini-game-card" data-mini="cards"><i>🂡</i><b>КАРТЫ</b><small>Красное / чёрное</small><small data-mini-cooldown="cards"></small></button><button onclick="selectMiniGame('coin')" class="mini-game-card" data-mini="coin"><i>🪙</i><b>МОНЕТКА</b><small>Орёл / решка</small><small data-mini-cooldown="coin"></small></button><button onclick="selectMiniGame('risk')" class="mini-game-card" data-mini="risk"><i>🃏</i><b>РИСК</b><small>Удвой выигрыш</small><small data-mini-cooldown="risk"></small></button><button onclick="selectMiniGame('risk')" class="mini-game-card" data-mini="risk"><i>🃏</i><b>РИСК</b><small>Удвой выигрыш</small><small data-mini-cooldown="risk"></small></button></div><div class="mini-stage" id="miniStage"><div class="mini-stage-idle"><span>🎰</span><h3>ВЫБЕРИ АВТОМАТ</h3><p>Все игры используют текущую ставку.</p></div></div><div class="mini-footer"><span>RETRO ARCADE • 1986</span><button onclick="closeMiniArcade()">← НАЗАД К СЛОТАМ</button></div></section></div>
+    <div class="mini-arcade-overlay" id="miniArcadeScreen" aria-hidden="true"><section class="mini-arcade-cabinet"><header class="mini-arcade-header"><div><small>GLOBIT • RETRO HALL</small><h2>MINI CASINO</h2></div><button class="mini-close" type="button" aria-label="Закрыть мини-казино" onclick="closeMiniArcade()">✕</button></header><div class="mini-wallet">ВАШ БАЛАНС <b id="miniBalance">0</b> COINS</div><div class="mini-game-tabs"><button onclick="selectMiniGame('wheel')" class="mini-game-card" data-mini="wheel"><i>🎡</i><b>РУЛЕТКА</b><small>× до 8</small><small data-mini-cooldown="wheel"></small></button><button onclick="selectMiniGame('dice')" class="mini-game-card" data-mini="dice"><i>🎲</i><b>КОСТИ</b><small>× до 5</small><small data-mini-cooldown="dice"></small></button><button onclick="selectMiniGame('cards')" class="mini-game-card" data-mini="cards"><i>🂡</i><b>КАРТЫ</b><small>Красное / чёрное</small><small data-mini-cooldown="cards"></small></button><button onclick="selectMiniGame('coin')" class="mini-game-card" data-mini="coin"><i>🪙</i><b>МОНЕТКА</b><small>Орёл / решка</small><small data-mini-cooldown="coin"></small></button><button onclick="selectMiniGame('risk')" class="mini-game-card" data-mini="risk"><i>🃏</i><b>РИСК</b><small>Удвой выигрыш</small><small data-mini-cooldown="risk"></small></button></div><div class="mini-stage" id="miniStage"><div class="mini-stage-idle"><span>🎰</span><h3>ВЫБЕРИ АВТОМАТ</h3><p>Все игры используют текущую ставку.</p></div></div><div class="mini-footer"><span>RETRO ARCADE • 1986</span><button onclick="closeMiniArcade()">← НАЗАД К СЛОТАМ</button></div></section></div>
     <div class="workshop-overlay" id="workshopOverlay" aria-hidden="true"><section class="workshop-modal">
       <header class="workshop-top"><div><small>GLOBIT • UPGRADES</small><h2>🛠 МАСТЕРСКАЯ</h2><p>Прокачивай автомат по уровням</p></div><button type="button" class="mini-close" onclick="closeWorkshop()">✕</button></header>
       <div class="workshop-wallet">Баланс: <b id="workshopBalance">0</b> монет</div><div class="workshop-upgrades" id="workshopUpgrades"></div>
@@ -1024,20 +1026,20 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 <span>🆔 <strong id="globalIdDisplay">—</strong></span>
             </div>
             <div class="game-title">🎰 RUN CASINO</div>
-            <div class="super-mode-indicator" id="superIndicator" hidden>💥 СУПЕР-ИГРА! 💥</div>
-            <div class="mega-mode-indicator" id="megaIndicator">👑 МЕГА-ИГРА! 👑</div>
+            
+            <div class="mega-mode-indicator" id="megaIndicator">🟩 СУПЕРИГРА 🟥</div>
             <div class="super-timer" id="superTimer"></div>
             <div id="freespinIndicator" style="text-align:center;min-height:1.2rem;"></div>
 
             <!-- Прогресс мега-игры -->
             <div class="mega-progress" id="megaProgress" style="display:none;">
-                <div class="mega-progress-title">👑 МЕГА-ИГРА: Судьба миллиарда 👑</div>
+                <div class="mega-progress-title">🟩 СУПЕРИГРА · 5 РАУНДОВ 🟥</div>
                 <div class="mega-progress-stats">
-                    <span>Спины: <span id="megaSpinsCount" style="color:#ffd700;">0/10</span></span>
-                    <span>Победы: <span id="megaWinsCount" style="color:#69f0ae;">0/7</span></span>
-                    <span class="wins-needed">Нужно: <span id="megaWinsNeeded">7</span></span>
+                    <span>Раунды: <span id="megaSpinsCount" style="color:#ffd700;">0/5</span></span>
+                    <span>🟩: <span id="megaWinsCount" style="color:#69f0ae;">0</span></span>
+                    <span class="wins-needed">🟥: <span id="megaWinsNeeded">0</span></span>
                 </div>
-                <div style="font-size:0.7rem;color:#ff5252;margin-top:0.3rem;">⚠ Меньше 7 побед = баланс 10!</div>
+                <div style="font-size:0.7rem;color:#ff5252;margin-top:0.3rem;">Больше зелёных: приз · больше красных: проигрыш</div>
             </div>
 
             <div class="balance-display">
@@ -1045,10 +1047,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 <span class="balance-amount" id="balanceDisplay">1000</span>
             </div>
 
-            <div class="super-balance-display" id="superBalanceDisplay" style="display:none;">
-                <span class="super-balance-label">💥 Супер-депозит</span>
-                <span class="super-balance-amount" id="superBalanceAmount">150000</span>
-            </div>
+            
 <div class="bet-selector" id="betSelector">
                 <div class="bet-option selected" data-bet="10">10</div>
                 <div class="bet-option" data-bet="50">50</div>
@@ -1078,7 +1077,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 <div class="paytable-row"><span>Супер: 6 подряд</span><span>×18</span></div>
                 <div class="paytable-row"><span>Стоимость суперспина</span><span>150 000 · раз в 15 минут</span></div>            </div>
 
-            <div class="machine-row"><div class="slot-grid" id="slotGrid"></div><div class="lever-housing"><button class="lever" id="casinoLever" type="button" aria-label="Потянуть рычаг вниз и на себя"><span class="lever-track"></span><span class="lever-stick"><i class="lever-ball"></i></span><span class="lever-base">PULL</span></button></div><div class="machine-actions"><button class="cabinet-action" id="autoBtn" onclick="toggleAutoSpin()">AUTO</button><button class="cabinet-action" id="superBtn" type="button" hidden></button><button class="cabinet-action" id="megaBtn" onclick="startMegaGame()" style="display:none">MEGA</button></div></div><button id="spinBtn" type="button" hidden aria-hidden="true" tabindex="-1"></button>
+            <div class="machine-row"><div class="slot-grid" id="slotGrid"></div><div class="lever-housing"><button class="lever" id="casinoLever" type="button" aria-label="Потянуть рычаг вниз и на себя"><span class="lever-track"></span><span class="lever-stick"><i class="lever-ball"></i></span><span class="lever-base">PULL</span></button></div><div class="machine-actions"><button class="cabinet-action" id="autoBtn" onclick="toggleAutoSpin()">AUTO</button><button class="cabinet-action" id="megaBtn" onclick="startMegaGame()" style="display:none">MEGA</button></div></div><button id="spinBtn" type="button" hidden aria-hidden="true" tabindex="-1"></button>
             <div class="win-message" id="winMessage"></div>
 
             <div class="cabinet-lower"><button class="arcade-door" type="button" onclick="openWorkshop()">🛠 МАСТЕРСКАЯ <span>УЛУЧШЕНИЯ · УРОВНИ</span></button><button class="arcade-door" type="button" onclick="openMiniArcade()">🕹 MINI CASINO <span>5 ИГР</span></button></div>
@@ -1205,7 +1204,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         // ==================== PARTICLES ====================
         particlesJS('particles-js', {
             particles: {
-                number: { value: 20, density: { enable: true, value_area: 1000 } },
+                number: { value: (window.matchMedia('(max-width: 600px)').matches || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)) ? 10 : 20, density: { enable: true, value_area: 1000 } },
                 color: { value: ['#00e676', '#2979ff', '#ff1744', '#ffd700', '#d500f9', '#ff6d00'] },
                 shape: { type: 'circle' },
                 opacity: { value: 0.35, random: true },
@@ -1215,10 +1214,10 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             },
             interactivity: {
                 detect_on: 'canvas',
-                events: { onhover: { enable: true, mode: 'grab' }, onclick: { enable: true, mode: 'push' } },
+                events: { onhover: { enable: !('ontouchstart' in window), mode: 'grab' }, onclick: { enable: false, mode: 'push' } },
                 modes: { grab: { distance: 140, line_linked: { opacity: 0.3 } }, push: { particles_nb: 3 } }
             },
-            retina_detect: true
+            retina_detect: !(window.matchMedia('(max-width: 600px)').matches || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4))
         });
 
         // ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
@@ -1243,7 +1242,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         let megaGameActive = false,
             megaGameSpins = 0,
             megaGameWins = 0;
-        let megaGameTotalSpins = 10;
+        let megaGameTotalSpins = 5;
         let megaGameRequiredWins = 7;
         let megaGameSavedBalance = 0;
         let autoSpinActive = false;
@@ -1409,137 +1408,119 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             showScreen('gameScreen');
         };
 
-        // ==================== МЕГА-ИГРА ====================
+        // ==================== SUPER GAME: 3 LEVELS ====================
+        const SUPER_GAME_LEVELS = [
+            { level: 1, threshold: 1000000, prize: 500000, penalty: 0.50 },
+            { level: 2, threshold: 5000000, prize: 750000, penalty: 0.50 },
+            { level: 3, threshold: 10000000, prize: 1000000, penalty: 0.70 }
+        ];
+        const SUPER_GAME_ROUNDS = 5;
+        const SUPER_GAME_PENALTY_MS = 15 * 60 * 1000;
+        let megaGameLevel = 0, superGameGreen = 0, superGameRed = 0;
+
+        function getSuperGamePenaltyRemaining() {
+            const until = Number(casinoProgress.superGameDebuffUntil) || 0;
+            return Math.max(0, until - Date.now());
+        }
+        function getSuperGamePenaltyChance() {
+            return getSuperGamePenaltyRemaining() > 0 ? Math.max(0, Math.min(0.95, Number(casinoProgress.superGameDebuffPercent) || 0)) : 0;
+        }
+        function suppressWinBySuperGamePenalty() {
+            const chance = getSuperGamePenaltyChance();
+            return chance > 0 && Math.random() < chance;
+        }
+        function getEligibleSuperGameLevel() {
+            const completed = Math.max(0, Number(casinoProgress.superGameCompletedLevel) || 0);
+            let eligible = 0;
+            for (const item of SUPER_GAME_LEVELS) if (gameBalance >= item.threshold) eligible = item.level;
+            return eligible > completed ? eligible : 0;
+        }
         function checkMegaGameEligibility() {
-            if (!megaGameActive && gameBalance >= MEGA_THRESHOLD && !superGameActive) {
-                startMegaGame();
-            }
+            const level = getEligibleSuperGameLevel();
+            if (!megaGameActive && !isSpinInProgress && level > 0) startMegaGame(level);
         }
-
-        function startMegaGame() {
-            if (megaGameActive || superGameActive || gameBalance < MEGA_THRESHOLD) return;
-
-            triggerHaptic('heavy');
-            playMegaStartSound();
-            megaGameActive = true;
-            megaGameSpins = 0;
-            megaGameWins = 0;
-            megaGameSavedBalance = gameBalance;
-            currentBet = Math.floor(gameBalance * MEGA_BET_PERCENT);
-
-            document.getElementById('megaIndicator').classList.add('active');
-            document.getElementById('megaProgress').style.display = 'block';
-            document.getElementById('slotGrid').classList.add('mega-active');
-            document.getElementById('megaBtn').style.display = 'none';
-            document.getElementById('superBtn').style.display = 'none';
-            document.getElementById('autoBtn').style.display = 'none';
-            // Risk challenge is now available only from the mini arcade.
-            document.getElementById('betSelector').style.opacity = '0.5';
-            document.getElementById('betSelector').style.pointerEvents = 'none';
-
+        function startMegaGame(level) {
+            const config = SUPER_GAME_LEVELS[level - 1];
+            if (!config || megaGameActive || isSpinInProgress || gameBalance < config.threshold) return;
             stopAutoSpin();
-            updateMegaProgress();
-            updateUI();
-
-            document.getElementById('winMessage').textContent =
-                `👑 МЕГА-ИГРА! Ставка: ${currentBet.toLocaleString()}. Нужно 7/10 побед!`;
+            megaGameActive = true; megaGameLevel = level; megaGameSpins = 0; megaGameWins = 0;
+            superGameGreen = 0; superGameRed = 0;
+            const indicator = document.getElementById('megaIndicator');
+            indicator.textContent = '🟩 СУПЕРИГРА · УРОВЕНЬ ' + level + ' 🟥';
+            indicator.classList.add('active');
+            document.getElementById('megaProgress').style.display = 'block';
+            document.querySelector('.mega-progress-title').textContent = '🟩 СУПЕРИГРА · УРОВЕНЬ ' + level + ' · 5 РАУНДОВ 🟥';
+            document.querySelector('.mega-progress-stats').innerHTML = '<span>Раунды: <b id="megaSpinsCount">0/5</b></span><span>🟩 <b id="megaWinsCount">0</b></span><span>🟥 <b id="megaWinsNeeded">0</b></span>';
+            document.querySelector('#megaProgress > div:last-child').textContent = 'Приз: +' + config.prize.toLocaleString() + ' / проигрыш: −' + config.prize.toLocaleString();
+            document.getElementById('slotGrid').classList.add('mega-active');
+            document.getElementById('betSelector').style.opacity = '0.45';
+            document.getElementById('betSelector').style.pointerEvents = 'none';
+            updateMegaProgress(); updateUI();
+            document.getElementById('winMessage').textContent = 'Потяни рычаг 5 раз. За игру монеты не списываются.';
+            triggerHaptic('heavy'); playMegaStartSound();
         }
-
         function updateMegaProgress() {
-            document.getElementById('megaSpinsCount').textContent = `${megaGameSpins}/${megaGameTotalSpins}`;
-            document.getElementById('megaWinsCount').textContent = `${megaGameWins}/${megaGameRequiredWins}`;
-            document.getElementById('megaWinsNeeded').textContent =
-                `${Math.max(0, megaGameRequiredWins - megaGameWins)}`;
+            const spins = document.getElementById('megaSpinsCount');
+            const green = document.getElementById('megaWinsCount');
+            const red = document.getElementById('megaWinsNeeded');
+            if (spins) spins.textContent = megaGameSpins + '/' + SUPER_GAME_ROUNDS;
+            if (green) green.textContent = superGameGreen;
+            if (red) red.textContent = superGameRed;
         }
-
-        function endMegaGame(success) {
-            triggerHaptic(success?'jackpot':'lose');
-            megaGameActive = false;
+        async function endMegaGame() {
+            const config = SUPER_GAME_LEVELS[megaGameLevel - 1];
+            if (!config) return;
+            const level = megaGameLevel;
+            const won = superGameGreen > superGameRed;
+            const lost = superGameRed > superGameGreen;
+            if (won) {
+                gameBalance += config.prize;
+                if (level === 3) casinoProgress.superGameLuckBoost = true;
+                document.getElementById('winMessage').textContent = '🟩 ЗЕЛЁНЫХ БОЛЬШЕ! +' + config.prize.toLocaleString() + ' монет' + (level === 3 ? ' · УДАЧА +20% НАВСЕГДА' : '');
+                playMegaWinSound(); triggerHaptic('jackpot'); triggerCasinoFX('jackpot');
+            } else if (lost) {
+                gameBalance = Math.max(0, gameBalance - config.prize);
+                const currentPenalty = getSuperGamePenaltyRemaining() > 0 ? getSuperGamePenaltyChance() : 0;
+                casinoProgress.superGameDebuffPercent = Math.max(currentPenalty, config.penalty);
+                casinoProgress.superGameDebuffUntil = Date.now() + SUPER_GAME_PENALTY_MS;
+                document.getElementById('winMessage').textContent = '🟥 КРАСНЫХ БОЛЬШЕ! −' + config.prize.toLocaleString() + ' монет · шанс выигрыша снижен на ' + Math.round(config.penalty * 100) + '% на 15 минут';
+                playMegaLoseSound(); triggerHaptic('lose'); triggerCasinoFX('lose');
+            } else {
+                document.getElementById('winMessage').textContent = '🤝 НИЧЬЯ! Баланс не изменился. Уровень завершён без штрафа.';
+                playLoseSound(); triggerHaptic('medium');
+            }
+            casinoProgress.superGameCompletedLevel = Math.max(Number(casinoProgress.superGameCompletedLevel) || 0, level);
+            megaGameActive = false; megaGameSpins = 0; megaGameWins = 0; megaGameLevel = 0;
             document.getElementById('megaIndicator').classList.remove('active');
             document.getElementById('megaProgress').style.display = 'none';
             document.getElementById('slotGrid').classList.remove('mega-active');
+            document.querySelectorAll('.slot-cell').forEach(cell => { cell.classList.remove('super-green','super-red'); cell.style.background = ''; cell.textContent = getRandomSymbol(); });
             document.getElementById('betSelector').style.opacity = '1';
             document.getElementById('betSelector').style.pointerEvents = 'auto';
-
-            if (success) {
-                document.getElementById('winMessage').textContent =
-                    `🎉 МЕГА-ИГРА ПРОЙДЕНА! ${megaGameWins}/10 побед! Баланс: ${gameBalance.toLocaleString()}`;
-                playMegaWinSound();
-            } else {
-                gameBalance = 10;
-                document.getElementById('winMessage').textContent =
-                    `💀 МЕГА-ИГРА ПРОВАЛЕНА! ${megaGameWins}/10 побед. Баланс: 10`;
-                playMegaLoseSound();
-                updateBalanceDB();
-            }
-
-            megaGameSpins = 0;
-            megaGameWins = 0;
-            megaGameSavedBalance = 0;
-            currentBet = 10;
-            document.querySelectorAll('.bet-option').forEach(o => o.classList.remove('selected'));
-            const defaultBet = document.querySelector('.bet-option[data-bet="10"]');
-            if (defaultBet) defaultBet.classList.add('selected');
-
-            updateUI();
+            updateUI(); await updateBalanceDB();
+            setTimeout(checkMegaGameEligibility, 900);
         }
-
         async function megaGameSpin() {
-            if (!megaGameActive) return;
-            if (megaGameSpins >= megaGameTotalSpins) {
-                if (megaGameWins >= megaGameRequiredWins) {
-                    endMegaGame(true);
-                } else {
-                    endMegaGame(false);
-                }
-                return;
-            }
-
+            if (!megaGameActive || megaGameSpins >= SUPER_GAME_ROUNDS) return;
             megaGameSpins++;
+            const grid = Array.from({ length: SLOT_ROWS }, () => Array.from({ length: SLOT_COLS }, () => Math.random() < 0.5 ? '🟩' : '🟥'));
+            playReelRattle(); triggerHaptic('spin');
+            await animateSlotGrid(grid, 1500);
+            const cells = document.querySelectorAll('.slot-cell');
+            cells.forEach((cell, index) => {
+                const value = grid[Math.floor(index / SLOT_COLS)][index % SLOT_COLS];
+                cell.classList.toggle('super-green', value === '🟩');
+                cell.classList.toggle('super-red', value === '🟥');
+            });
+            const greens = grid.flat().filter(value => value === '🟩').length;
+            superGameGreen += greens; superGameRed += grid.length * SLOT_COLS - greens;
             updateMegaProgress();
-
-            gameBalance -= currentBet;
-            document.getElementById('balanceDisplay').textContent = gameBalance;
-
-            const grid=createSlotGrid(false);
-            triggerHaptic('spin');playReelRattle();await animateSlotGrid(grid,1800);
-            const result = checkWin(grid, false, true);
-
-            if (result.win > 0) {
-                megaGameWins++;
-                gameBalance += result.win;
-                document.getElementById('winMessage').innerHTML =
-                    `👑 МЕГА-ПОБЕДА! +${result.win.toLocaleString()}! (${megaGameWins}/${megaGameRequiredWins})<br><small>${result.details.join(' | ')}</small>`;
-                playWinSound();triggerHaptic(result.win>=500000?'jackpot':'bigWin');
-                result.cells.forEach(({ row, col }) => document.getElementById(`cell-${row}-${col}`).classList.add(
-                    'win'));
-                setTimeout(() => document.querySelectorAll('.slot-cell.win').forEach(c => c.classList.remove('win')),
-                    3500);
-            } else {
-                document.getElementById('winMessage').textContent =
-                    `👑 Спин ${megaGameSpins}/${megaGameTotalSpins} | Побед: ${megaGameWins}/${megaGameRequiredWins}`;
-                playLoseSound();triggerHaptic('lose');
-            }
-
-            updateMegaProgress();
-            document.getElementById('balanceDisplay').textContent = gameBalance;
-            casinoProgress.totalSpins = (casinoProgress.totalSpins || 0) + 1;
-            if (result.win > 0) {
-                casinoProgress.totalWins = (casinoProgress.totalWins || 0) + 1;
-                casinoProgress.bestWin = Math.max(casinoProgress.bestWin || 0, result.win);
-            }
-            await updateBalanceDB();
-
-            if (megaGameSpins >= megaGameTotalSpins) {
-                await new Promise(r => setTimeout(r, 1500));
-                if (megaGameWins >= megaGameRequiredWins) {
-                    endMegaGame(true);
-                } else {
-                    endMegaGame(false);
-                }
+            document.getElementById('winMessage').textContent = 'Раунд ' + megaGameSpins + '/5 · 🟩 ' + superGameGreen + ' · 🟥 ' + superGameRed;
+            if (megaGameSpins >= SUPER_GAME_ROUNDS) {
+                await new Promise(resolve => setTimeout(resolve, 550));
+                await endMegaGame();
             }
         }
-
         // ==================== ИГРА ====================
         async function loadGame(user) {
             const doc = await db.collection('users').doc(user.uid).get();
@@ -1574,6 +1555,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             initGrid();
             setupBetSelector();
             updateUI();
+            setTimeout(checkMegaGameEligibility, 900);
             // Звук включается только по настройке стартового меню.
 
             // Проверка супер-режима отложена до начала игры.
@@ -1617,34 +1599,31 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
 
         function updateUI(){
-            document.getElementById('balanceDisplay').textContent=gameBalance;
-            const autoStatus=document.getElementById('autoUpgradeStatus'),autoBuy=document.getElementById('buyAutoUpgrade');
-            if(autoStatus)autoStatus.textContent=autoSpinUnlocked?'УЛУЧШЕНИЕ АКТИВНО':'Автоспин не куплен';
-            if(autoBuy){autoBuy.disabled=autoSpinUnlocked;autoBuy.textContent=autoSpinUnlocked?'✓ АВТОСПИН КУПЛЕН':'⚡ Купить автоспин · 5 000';}
-            updateSuperBalanceDisplay();
-            const sb=document.getElementById('spinBtn');
-            const superBtn=document.getElementById('superBtn'),megaBtn=document.getElementById('megaBtn'),autoBtn=document.getElementById('autoBtn');
-            const superInd=document.getElementById('superIndicator'),superRemaining=getSuperCooldownRemaining();
-            if(sb)sb.disabled=isSpinInProgress||riskActive||superGameActive||megaGameActive;
-            if(megaGameActive){if(sb)sb.textContent='👑 МЕГА-СПИН ('+megaGameSpins+'/'+megaGameTotalSpins+')';superBtn.style.display='none';megaBtn.style.display='none';autoBtn.style.display='none';superInd.classList.remove('active');return;}
-            megaBtn.style.display=gameBalance>=MEGA_THRESHOLD?'block':'none';
-            superBtn.style.display=superGameActive?'none':'block';
-            superBtn.disabled=superRemaining>0||isSpinInProgress||gameBalance<SUPER_COST;
-            superBtn.textContent=superRemaining>0?'SUPER · '+formatCooldown(superRemaining):gameBalance<SUPER_COST?'SUPER · НУЖНО 150K':'💥 SUPER SPIN · 150K';
-            if(superGameActive){superInd.classList.add('active');if(sb)sb.textContent='💥 СУПЕР-СПИН ИДЁТ…';superBtn.style.display='none';megaBtn.style.display='none';autoBtn.style.display='none';}
-            else{superInd.classList.remove('active');autoBtn.style.display='block';if(sb)sb.textContent=freespinsRemaining>0?'🎰 ФРИСПИН ('+freespinsRemaining+')':'🎲 Крутить ('+currentBet+')';autoBtn.disabled=riskActive||(!autoSpinActive&&isSpinInProgress);autoBtn.textContent=autoSpinActive?'⏹ СТОП':'🔄 АВТО';autoBtn.className=autoSpinActive?'btn btn-auto active':'btn btn-auto';}
-            document.getElementById('freespinIndicator').innerHTML=freespinsRemaining>0?'<span class="freespin-badge">🔥 '+freespinsRemaining+' ФРИСПИНОВ</span>':'';
-            const timer=document.getElementById('superTimer');
-            if(timer&&!superGameActive&&superRemaining>0)timer.textContent='⏱ Супер-спин через '+formatCooldown(superRemaining);
-            if(timer&&!superGameActive&&superRemaining<=0)timer.textContent='';
+            const balance = document.getElementById('balanceDisplay');
+            if (balance) balance.textContent = Number(gameBalance || 0).toLocaleString();
+            const autoStatus = document.getElementById('autoUpgradeStatus');
+            const autoBuy = document.getElementById('buyAutoUpgrade');
+            if (autoStatus) autoStatus.textContent = autoSpinUnlocked ? 'УЛУЧШЕНИЕ АКТИВНО' : 'Автоспин не куплен';
+            if (autoBuy) { autoBuy.disabled = autoSpinUnlocked; autoBuy.textContent = autoSpinUnlocked ? '✓ АВТОСПИН КУПЛЕН' : '⚡ Купить автоспин · 5 000'; }
+            const autoBtn = document.getElementById('autoBtn');
+            const megaBtn = document.getElementById('megaBtn');
+            const spinButton = document.getElementById('spinBtn');
+            if (spinButton) spinButton.disabled = isSpinInProgress || riskActive || megaGameActive;
+            if (megaBtn) megaBtn.style.display = 'none';
+            if (autoBtn) {
+                autoBtn.style.display = megaGameActive ? 'none' : 'block';
+                autoBtn.disabled = riskActive || (!autoSpinActive && isSpinInProgress);
+                autoBtn.textContent = autoSpinActive ? '⏹ СТОП АВТО' : 'AUTO';
+                autoBtn.setAttribute('aria-label', autoSpinActive ? 'Немедленно остановить автоспин' : 'Запустить автоспин');
+                autoBtn.className = autoSpinActive ? 'cabinet-action active' : 'cabinet-action';
+            }
+            const frees = document.getElementById('freespinIndicator');
+            if (frees) frees.innerHTML = freespinsRemaining > 0 ? '<span class="freespin-badge">🔥 ' + freespinsRemaining + ' ФРИСПИНОВ</span>' : '';
+            const timer = document.getElementById('superTimer');
+            const penalty = getSuperGamePenaltyRemaining();
+            if (timer) timer.textContent = penalty > 0 ? '⚠️ Шанс выигрыша снижен: ' + formatCooldown(penalty) : (casinoProgress.superGameLuckBoost ? '🍀 Постоянная удача +20%' : '');
             refreshMiniCooldownUI();
-            if(!superCooldownInterval)superCooldownInterval=setInterval(()=>{
-                const remain=getSuperCooldownRemaining(),button=document.getElementById('superBtn'),time=document.getElementById('superTimer');
-                if(button&&button.style.display!=='none'){button.disabled=remain>0||isSpinInProgress||gameBalance<SUPER_COST;button.textContent=remain>0?'SUPER · '+formatCooldown(remain):gameBalance<SUPER_COST?'SUPER · НУЖНО 150K':'💥 SUPER SPIN · 150K';}
-                if(time&&!superGameActive)time.textContent=remain>0?'⏱ Супер-спин через '+formatCooldown(remain):'';
-            },1000);
         }
-
         function toggleAutoSpin() {
             if (superGameActive || megaGameActive) return;
             if (autoSpinActive) {
@@ -1780,10 +1759,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 autoSpinInterval = setTimeout(autoSpinLoop, 1000);
                 return;
             }
-            performSpin().then(() => {
-                if (autoSpinActive) {
-                    autoSpinInterval = setTimeout(autoSpinLoop, getAutoSpinDelay());
-                }
+            performSpin().catch(error => { console.error('Auto spin failed:', error); stopAutoSpin(); }).then(() => {
+                if (autoSpinActive) autoSpinInterval = setTimeout(autoSpinLoop, getAutoSpinDelay());
             });
         }
 
@@ -1887,22 +1864,22 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 if(!superGameActive&&freespinsRemaining<=0){gameBalance-=currentBet;await updateBalanceDB();}
                 else if(!superGameActive&&freespinsRemaining>0)freespinsRemaining--;
                 updateUI();document.getElementById('winMessage').textContent='';
-                const grid=createSlotGrid(superGameActive);await animateSlotGrid(grid,superGameActive?2200:getSpinAnimationDuration());
-                const result=checkWin(grid,superGameActive,false);if(result.win>0&&!superGameActive)result.win=Math.floor(result.win*getPayoutBoost());lastWinAmount=result.win;
+                const grid=createSlotGrid(false);await animateSlotGrid(grid,getSpinAnimationDuration());
+                let result=checkWin(grid,false,false);\n                let permanentLuckTriggered=false;\n                if(result.win<=0&&casinoProgress.superGameLuckBoost&&Math.random()<0.20){\n                    const luckyRow=Math.floor(Math.random()*SLOT_ROWS);\n                    for(let c=0;c<3;c++){grid[luckyRow][c]='💚';const node=document.getElementById('cell-'+luckyRow+'-'+c);if(node)node.textContent='💚';}\n                    result=checkWin(grid,false,false);permanentLuckTriggered=result.win>0;\n                }\n                if(result.win>0)result.win=Math.floor(result.win*getPayoutBoost());\n                if(result.win>0&&suppressWinBySuperGamePenalty()){result.win=0;result.cells=[];result.details=['⏳ Временное снижение вероятности выигрыша'];}\n                if(permanentLuckTriggered&&result.win>0)result.details.unshift('🍀 Постоянная удача +20%');\n                lastWinAmount=result.win;
                 if(result.win>0){
                     gameBalance+=result.win;if(superGameActive)superTotalWon+=result.win;
                     if(result.win>=500000)playSuperWinSound();else if(result.win>=10000)playBigWinSound();else playWinSound();
                     document.getElementById('winMessage').textContent=(superGameActive?'💥 СУПЕР-СПИН':'🎉 ВЫИГРЫШ')+' +'+result.win.toLocaleString()+' · '+result.details.join(' | ');
                     result.cells.forEach(cell=>{const node=document.getElementById('cell-'+cell.row+'-'+cell.col);if(node)node.classList.add('win');});
-                    triggerCasinoFX(superGameActive&&result.win>=SUPER_COST*4?'jackpot':'win');
+                    triggerCasinoFX(result.win>=500000?'jackpot':'win');
                     triggerHaptic(result.win>=500000?'jackpot':result.win>=10000?'bigWin':'win');
                     setTimeout(()=>document.querySelectorAll('.slot-cell.win').forEach(cell=>cell.classList.remove('win')),3200);
                 }else{
-                    playLoseSound();document.getElementById('winMessage').textContent=superGameActive?'💥 Супер-спин не принёс выигрыш.':(freespinsRemaining>0?'🔄 Фриспин готов. Попробуй ещё!':'Почти! Следующий рывок может быть удачнее.');
+                    playLoseSound();document.getElementById('winMessage').textContent=freespinsRemaining>0?'🔄 Фриспин готов. Попробуй ещё!':'Почти! Следующий рывок может быть удачнее.';
                     lastWinAmount=0;triggerHaptic('lose');
                 }
                 await updateBalanceDB();
-                if(superGameActive){superGameSpins++;endSuperGame();}
+                
                 if(!megaGameActive&&!superGameActive&&gameBalance>=MEGA_THRESHOLD)setTimeout(()=>checkMegaGameEligibility(),800);
                 casinoProgress.totalSpins=(casinoProgress.totalSpins||0)+1;
                 if(result.win>0){casinoProgress.totalWins=(casinoProgress.totalWins||0)+1;casinoProgress.bestWin=Math.max(casinoProgress.bestWin||0,result.win);}
@@ -1929,28 +1906,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         }
 
 
-        async function startSuperGame(){
-            if(superGameActive||megaGameActive||isSpinInProgress)return;
-            const remaining=getSuperCooldownRemaining();
-            if(remaining>0){document.getElementById('winMessage').textContent='⏳ Супер-спин доступен через '+formatCooldown(remaining);updateUI();return;}
-            if(gameBalance<SUPER_COST){document.getElementById('winMessage').textContent='Нужно '+SUPER_COST.toLocaleString()+' монет для супер-спина.';return;}
-            stopAutoSpin();superPreviousBet=currentBet;currentBet=SUPER_COST;superDeposit=SUPER_COST;superTotalWon=0;superGameSpins=0;superGameActive=true;
-            gameBalance-=SUPER_COST;startSuperCooldown();
-            document.getElementById('superIndicator').classList.add('active');
-            document.getElementById('superTimer').textContent='⏱ Следующий суперспин через 15:00';
-            document.getElementById('winMessage').textContent='💥 СУПЕРСПИН · шанс выигрыша 8% · ставка 150 000';
-            triggerHaptic('jackpot');playSpinStart();isSpinInProgress=true;updateUI();
-            try{await updateBalanceDB();await _performSpinCore();}
-            catch(error){console.error('Super spin failed:',error);gameBalance+=SUPER_COST;document.getElementById('winMessage').textContent='Ошибка суперспина. Ставка возвращена.';endSuperGame();}
-            finally{isSpinInProgress=false;updateUI();}
-        }
-        function endSuperGame(){
-            const won=superTotalWon;superGameActive=false;superGameTimer=null;superDeposit=0;superTotalWon=0;superGameSpins=0;currentBet=superPreviousBet||10;
-            document.getElementById('superTimer').textContent='';document.getElementById('superIndicator').classList.remove('active');document.getElementById('superBalanceDisplay').style.display='none';
-            if(!won)document.getElementById('winMessage').textContent='💥 Супер-спин проигран. Новый доступ появится через 15 минут.';
-            else document.getElementById('winMessage').textContent+=' · Следующий супер-спин через 15 минут.';
-            updateBalanceDB();updateUI();
-        }
+        async function startSuperGame(){ return; }
 
         function startRiskMini(){
             if(riskActive||lastWinAmount<=0||getMiniCooldownRemaining('risk')>0)return;
@@ -1975,33 +1931,19 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         function cancelRisk(){riskActive=false;document.getElementById('winMessage').textContent='Риск отменён';const out=document.getElementById('miniResult');if(out)out.textContent='Можно попробовать позже.';updateUI();playButtonClick();}
 
         function resetGame() {
-            stopAutoSpin();
-            riskActive = false;
-            freespinsRemaining = 0;
-            lastWinAmount = 0;
-            if (superGameTimer) clearInterval(superGameTimer);
-            superGameActive = false;
-            superGameSpins = 0;
-            superGameTimer = null;
-            superDeposit = 0;
-            superTotalWon = 0;
-            megaGameActive = false;
-            megaGameSpins = 0;
-            megaGameWins = 0;
-            megaGameSavedBalance = 0;
+            stopAutoSpin(); riskActive = false; freespinsRemaining = 0; lastWinAmount = 0;
+            superGameActive = false; superGameSpins = 0; superGameTimer = null; superDeposit = 0; superTotalWon = 0;
+            megaGameActive = false; megaGameSpins = 0; megaGameWins = 0; megaGameSavedBalance = 0; megaGameLevel = 0; superGameGreen = 0; superGameRed = 0;
             document.getElementById('superTimer').textContent = '';
-            document.getElementById('superIndicator').classList.remove('active');
-            document.getElementById('megaIndicator').classList.remove('active');
+            const indicator = document.getElementById('megaIndicator'); if (indicator) indicator.classList.remove('active');
             document.getElementById('megaProgress').style.display = 'none';
             document.getElementById('slotGrid').classList.remove('mega-active');
-            document.getElementById('superBalanceDisplay').style.display = 'none';
+            document.querySelectorAll('.slot-cell').forEach(cell => { cell.classList.remove('super-green','super-red'); cell.style.background = ''; });
             document.getElementById('winMessage').textContent = '';
-            document.getElementById('betSelector').style.opacity = '1';
-            document.getElementById('betSelector').style.pointerEvents = 'auto';
+            document.getElementById('betSelector').style.opacity = '1'; document.getElementById('betSelector').style.pointerEvents = 'auto';
             currentBet = 10;
             document.querySelectorAll('.bet-option').forEach(o => o.classList.remove('selected'));
-            const defaultBet = document.querySelector('.bet-option[data-bet="10"]');
-            if (defaultBet) defaultBet.classList.add('selected');
+            const defaultBet = document.querySelector('.bet-option[data-bet="10"]'); if (defaultBet) defaultBet.classList.add('selected');
         }
         let menuInitialized = false;
         async function initGuestCasino() {
@@ -2067,7 +2009,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         const casinoLever=document.getElementById('casinoLever');
         let leverPointerStart=null,leverPullTriggered=false;
         casinoLever?.addEventListener('pointerdown',event=>{
-            if(isSpinInProgress||riskActive||superGameActive||megaGameActive||autoSpinActive)return;
+            if(isSpinInProgress||riskActive||superGameActive||autoSpinActive)return;
             initAudio();leverPointerStart={id:event.pointerId,y:event.clientY};leverPullTriggered=false;casinoLever.setPointerCapture?.(event.pointerId);
         });
         casinoLever?.addEventListener('pointermove',event=>{
