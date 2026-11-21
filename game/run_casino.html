@@ -1608,8 +1608,9 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             document.getElementById('workshopBalance').textContent=Number(gameBalance||0).toLocaleString();
             host.innerHTML=Object.entries(WORKSHOP_UPGRADES).map(([key,item])=>{
                 const level=getUpgradeLevel(key),cost=item.costs[level]||0,full=level>=5;
-                return '<article class="workshop-card"><h3>'+item.title+'</h3><p>'+item.desc+'</p><div class="workshop-level"><span>Уровень '+level+'/5</span><b>'+(full?'MAX':cost.toLocaleString()+' монет')+'</b></div><div class="workshop-meter"><i style="width:'+(level*20)+'%"></i></div><button class="workshop-buy" '+(full||gameBalance<cost?'disabled':'')+' onclick="buyWorkshopUpgrade(\\''+key+'\\')">'+(full?'✓ МАКСИМУМ':gameBalance<cost?'Не хватает монет':'УЛУЧШИТЬ · '+cost.toLocaleString())+'</button></article>';
+                return '<article class="workshop-card"><h3>'+item.title+'</h3><p>'+item.desc+'</p><div class="workshop-level"><span>Уровень '+level+'/5</span><b>'+(full?'MAX':cost.toLocaleString()+' монет')+'</b></div><div class="workshop-meter"><i style="width:'+(level*20)+'%"></i></div><button class="workshop-buy" data-upgrade-key="'+key+'" '+(full||gameBalance<cost?'disabled':'')+'>'+(full?'✓ МАКСИМУМ':gameBalance<cost?'Не хватает монет':'УЛУЧШИТЬ · '+cost.toLocaleString())+'</button></article>';
             }).join('');
+            host.querySelectorAll('[data-upgrade-key]').forEach(button=>button.addEventListener('click',()=>buyWorkshopUpgrade(button.dataset.upgradeKey)));
             if(getUpgradeLevel('turbo')>=5){
                 const setting=document.createElement('article');setting.className='workshop-card combo-setting';
                 setting.innerHTML='<h3>✨ Анимация комбинаций</h3><p>Показывать каждую выигрышную комбинацию отдельно перед итоговым выигрышем.</p><label class="casino-switch"><input type="checkbox" '+(casinoProgress.comboRevealEnabled!==false?'checked':'')+' onchange="setComboRevealEnabled(this.checked)"><span class="casino-switch-track"></span><b>'+(casinoProgress.comboRevealEnabled!==false?'ВКЛ':'ВЫКЛ')+'</b></label>';
