@@ -1904,7 +1904,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                     for(let c=0;c<3;c++){grid[luckyRow][c]='💚';const node=document.getElementById('cell-'+luckyRow+'-'+c);if(node)node.textContent='💚';}
                     result=checkWin(grid,false,false);permanentLuckTriggered=result.win>0;
                 }
-                if(result.win>0)result.win=Math.floor(result.win*getPayoutBoost());
+                if(result.win>0)result.win=Math.min(Math.floor(result.win*getPayoutBoost()),Math.floor(currentBet*MAX_SPIN_PAYOUT_MULTIPLIER));
                 let penaltySuppressed=false;
                 if(result.win>0&&suppressWinBySuperGamePenalty()){result.win=0;result.cells=[];result.details=['⏳ Временное снижение вероятности выигрыша'];penaltySuppressed=true;}
                 if(permanentLuckTriggered&&result.win>0)result.details.unshift('🍀 Постоянная удача +3%');
