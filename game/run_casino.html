@@ -1298,9 +1298,9 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         function moveNext(cur, next) { if (cur.value.length === 1) document.getElementById(next)?.focus(); }
 
         function getRandomSymbol() {
-            const total = SYMBOL_WEIGHTS.reduce((a, b) => a + b, 0);
-            let r = Math.random() * total;
-            for (let i = 0; i < SYMBOLS.length; i++) { r -= SYMBOL_WEIGHTS[i]; if (r <= 0) return SYMBOLS[i]; }
+            const weights=SYMBOL_WEIGHTS.slice(),lucky=getUpgradeLevel('lucky');weights[0]+=lucky*1.2;weights[1]+=lucky*1.5;weights[2]+=lucky*1.1;
+            const total=weights.reduce((a,b)=>a+b,0);let r=Math.random()*total;
+            for(let i=0;i<SYMBOLS.length;i++){r-=weights[i];if(r<=0)return SYMBOLS[i];}
             return SYMBOLS[0];
         }
 
@@ -1495,8 +1495,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             try {
                 const saved = await getScoreDocRef(currentGlobalId).get();
                 const progress = saved.exists ? (saved.data().casinoProgress || {}) : {};
-                casinoProgress = { ...casinoProgress, ...progress };
-                autoSpinUnlocked = progress.autoSpinUnlocked === true;
+                casinoProgress = { ...casinoProgress, ...progress, upgradeLevels: { ...(progress.upgradeLevels || {}) } };
+                autoSpinUnlocked = progress.autoSpinUnlocked === true || getUpgradeLevel('auto')>0;
             } catch (e) { console.warn('Не удалось загрузить улучшения', e); }
 
             if (gameBalance < 10) {
@@ -1611,6 +1611,22 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         }
 
 
+
+        const WORKSHOP_UPGRADES={
+            lucky:{title:'🍀 Удача',desc:'Немного повышает шанс ценных символов.',costs:[5000,15000,35000,75000,150000]},
+            payout:{title:'💎 Премия',desc:'Повышает выплаты на 2% за уровень.',costs:[8000,20000,45000,90000,180000]},
+            turbo:{title:'⚙️ Турбо-механизм',desc:'Ускоряет остановку барабанов.',costs:[4000,12000,30000,65000,130000]},
+            auto:{title:'🔄 Автопривод',desc:'Открывает автоспин и ускоряет его.',costs:[5000,15000,40000,85000,170000]}
+        };
+        function getUpgradeLevel(key){return Math.max(0,Math.min(5,Number(casinoProgress.upgradeLevels?.[key])||0));}
+        function openWorkshop(){if(isSpinInProgress||miniGameBusy)return;renderWorkshop();document.getElementById('workshopOverlay').classList.add('open');document.getElementById('workshopOverlay').setAttribute('aria-hidden','false');playButtonClick();}
+        function closeWorkshop(){document.getElementById('workshopOverlay').classList.remove('open');document.getElementById('workshopOverlay').setAttribute('aria-hidden','true');updateUI();}
+        function renderWorkshop(){const host=document.getElementById('workshopUpgrades');if(!host)return;document.getElementById('workshopBalance').textContent=Number(gameBalance||0).toLocaleString();host.innerHTML=Object.entries(WORKSHOP_UPGRADES).map(([key,item])=>{const level=getUpgradeLevel(key),cost=item.costs[level]||0,full=level>=5;return '<article class="workshop-card"><h3>'+item.title+'</h3><p>'+item.desc+'</p><div class="workshop-level"><span>Уровень '+level+'/5</span><b>'+(full?'MAX':cost.toLocaleString()+' монет')+'</b></div><div class="workshop-meter"><i style="width:'+(level*20)+'%"></i></div><button class="workshop-buy" '+(full||gameBalance<cost?'disabled':'')+' onclick="buyWorkshopUpgrade(\''+key+'\')">'+(full?'✓ МАКСИМУМ':gameBalance<cost?'Не хватает монет':'УЛУЧШИТЬ · '+cost.toLocaleString())+'</button></article>';}).join('');}
+        async function buyWorkshopUpgrade(key){const item=WORKSHOP_UPGRADES[key];if(!item)return;const level=getUpgradeLevel(key);if(level>=5)return;const cost=item.costs[level];if(gameBalance<cost)return;gameBalance-=cost;casinoProgress.upgradeLevels=casinoProgress.upgradeLevels||{};casinoProgress.upgradeLevels[key]=level+1;if(key==='auto'){autoSpinUnlocked=true;casinoProgress.autoSpinUnlocked=true;}await updateBalanceDB();renderWorkshop();updateUI();playSfx('sfxWin');triggerHaptic('medium');document.getElementById('winMessage').textContent=item.title+' улучшено до уровня '+(level+1)+'!';}
+        function getAutoSpinDelay(){return Math.max(700,AUTO_SPIN_DELAY-getUpgradeLevel('auto')*250);}
+        function getSpinAnimationDuration(){return Math.max(850,1850-getUpgradeLevel('turbo')*180);}
+        function getPayoutBoost(){return 1+getUpgradeLevel('payout')*.02;}
+
         let selectedMiniGame=null,miniGameBusy=false;
         function startMiniCooldownTicker(){if(miniCooldownInterval)return;miniCooldownInterval=setInterval(refreshMiniCooldownUI,1000);refreshMiniCooldownUI();}
         function stopMiniCooldownTicker(){if(miniCooldownInterval)clearInterval(miniCooldownInterval);miniCooldownInterval=null;}
@@ -1708,7 +1724,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             }
             performSpin().then(() => {
                 if (autoSpinActive) {
-                    autoSpinInterval = setTimeout(autoSpinLoop, AUTO_SPIN_DELAY);
+                    autoSpinInterval = setTimeout(autoSpinLoop, getAutoSpinDelay());
                 }
             });
         }
