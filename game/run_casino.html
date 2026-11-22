@@ -1947,7 +1947,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         function getAutoSpinDelay(){return Math.max(1200,AUTO_SPIN_DELAY-getUpgradeLevel('auto')*200);}
         function getSpinAnimationDuration(){return Math.max(850,1850-getUpgradeLevel('turbo')*180);}
         function getPayoutBoost(){return 1+getUpgradeLevel('payout')*.03;}
-        function getSpinWinChance(){return Math.min(70,60+getUpgradeLevel('lucky')*1.5+getPrestigeCount()*.15);}
+        function getSpinWinChance(){return Math.min(75,60+getUpgradeLevel('lucky')*1.5+getPrestigeCount()*.15+(casinoProgress.superGameLuckBoost?3:0));}
         function rollSlotPayout(symbol,length){
             const ranges={3:[.10,.80],4:[.35,1.50],5:[1.00,3.50],6:[2.00,7.00]};
             const range=ranges[Math.max(3,Math.min(6,length))]||ranges[3];
@@ -2009,7 +2009,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             target.addEventListener('input',()=>{const v=Number(target.value),label=(v>0?'+':'')+v+'%';document.getElementById('rocketTargetValue').textContent=label;document.getElementById('rocketTargetLabel').textContent='Цель: '+label;});
             drawRocketChart([0],0);
         }
-        function drawRocketChart(values,current){
+        function drawRocketChart(values,current,progress=1){
             const canvas=document.getElementById('rocketCanvas');if(!canvas)return;
             const rect=canvas.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
             canvas.width=Math.max(1,Math.floor(rect.width*dpr));canvas.height=Math.max(1,Math.floor(rect.height*dpr));
@@ -2019,8 +2019,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             for(let i=0;i<5;i++){const y=pad+(h-pad*2)*i/4;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-pad,y);ctx.stroke();}
             const yFor=v=>h-pad-(Math.max(min,Math.min(max,v))-min)/(max-min)*(h-pad*2);
             const zero=yFor(0);ctx.strokeStyle='rgba(255,255,255,.35)';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(pad,zero);ctx.lineTo(w-pad,zero);ctx.stroke();ctx.setLineDash([]);
-            if(values.length>1){ctx.beginPath();values.forEach((v,i)=>{const x=pad+(w-pad*2)*i/Math.max(1,values.length-1);if(i===0)ctx.moveTo(x,yFor(v));else ctx.lineTo(x,yFor(v));});ctx.strokeStyle=current>=0?'#8cf5a1':'#ff7777';ctx.lineWidth=3;ctx.shadowColor=ctx.strokeStyle;ctx.shadowBlur=9;ctx.stroke();ctx.shadowBlur=0;
-                const x=pad+(w-pad*2)*(values.length-1)/Math.max(1,values.length-1);ctx.font='24px sans-serif';ctx.fillText('🚀',Math.max(pad,x-12),Math.max(25,Math.min(h-8,yFor(current)-8)));}
+            if(values.length>1){ctx.beginPath();values.forEach((v,i)=>{const x=pad+(w-pad*2)*i/40;if(i===0)ctx.moveTo(x,yFor(v));else ctx.lineTo(x,yFor(v));});ctx.strokeStyle=current>=0?'#8cf5a1':'#ff7777';ctx.lineWidth=3;ctx.shadowColor=ctx.strokeStyle;ctx.shadowBlur=9;ctx.stroke();ctx.shadowBlur=0;
+                const x=pad+(w-pad*2)*Math.min(1,(values.length-1)/40);ctx.font='24px sans-serif';ctx.fillText('🚀',Math.max(pad,x-12),Math.max(25,Math.min(h-8,yFor(current)-8)));}
             ctx.fillStyle='#b8c9b8';ctx.font='10px ui-monospace';ctx.fillText('+300%',4,14);ctx.fillText('0%',4,zero-5);ctx.fillText('−100%',4,h-7);
         }
         function makeRocketPath(){
@@ -2049,7 +2049,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                         const progress=Math.min(1,(now-started)/duration),position=progress*(path.length-1),idx=Math.floor(position),fraction=position-idx;
                         const shown=path[idx]+((path[Math.min(idx+1,path.length-1)]-path[idx])*fraction);
                         const visible=path.slice(0,idx+1);if(fraction>0)visible.push(shown);
-                        drawRocketChart(visible,shown);
+                        drawRocketChart(visible,shown,progress);
                         live.textContent=(shown>0?'+':'')+shown.toFixed(1)+'%';live.classList.toggle('down',shown<0);
                         if(progress<1)requestAnimationFrame(frame);else resolve();
                     };requestAnimationFrame(frame);
