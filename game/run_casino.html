@@ -1953,15 +1953,18 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             const range=ranges[Math.max(3,Math.min(6,length))]||ranges[3];
             const rarity=Math.max(0,Object.keys(PAYOUTS).indexOf(symbol));
             const raw=range[0]+Math.random()*(range[1]-range[0]);
-            const rarityFactor=1+rarity*.105;
+            const rarityFactor=1+rarity*.16;
             const excitement=Math.random()<.035?1.35:1;
             return Math.min(10,Math.max(.1,raw*rarityFactor*excitement*getPayoutBoost()));
         }
         function createRandomWinningGrid(){
             const grid=Array.from({length:SLOT_ROWS},()=>Array.from({length:SLOT_COLS},()=>getRandomSymbol()));
-            const row=Math.floor(Math.random()*SLOT_ROWS),length=3+Math.floor(Math.random()*4);
+            const row=Math.floor(Math.random()*SLOT_ROWS),lengthRoll=Math.random();
+            const length=lengthRoll<.50?3:lengthRoll<.80?4:lengthRoll<.95?5:6;
             const start=Math.floor(Math.random()*(SLOT_COLS-length+1));
-            const symbols=Object.keys(PAYOUTS),symbol=symbols[Math.floor(Math.random()*symbols.length)];
+            const symbols=Object.keys(PAYOUTS),weights=SYMBOL_WEIGHTS.slice(0,symbols.length);
+            let symbolRoll=Math.random()*weights.reduce((a,b)=>a+b,0),symbol=symbols[0];
+            for(let i=0;i<symbols.length;i++){symbolRoll-=weights[i];if(symbolRoll<=0){symbol=symbols[i];break;}}
             for(let c=start;c<start+length;c++)grid[row][c]=symbol;
             grid._plannedSymbol=symbol;grid._plannedLength=length;
             return grid;
