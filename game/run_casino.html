@@ -2215,6 +2215,16 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 await resolveGiftBoxes(grid);
                 if(guaranteedPrize)forceGuaranteedPrize(grid);
                 let result=checkWin(grid,false,false);
+                let prestigePrizeTriggered=false,permanentLuckTriggered=false;
+                if(result.win<=0&&!guaranteedPrize&&Math.random()<getPrestigeHighPrizeChance()/100){
+                    for(let c=0;c<SLOT_COLS;c++){grid[0][c]='💚';const node=document.getElementById('cell-0-'+c);if(node)node.textContent='💚';}
+                    result=checkWin(grid,false,false);prestigePrizeTriggered=result.win>0;
+                }
+                if(result.win<=0&&!guaranteedPrize&&casinoProgress.superGameLuckBoost&&Math.random()<0.03){
+                    const luckyRow=Math.floor(Math.random()*SLOT_ROWS);
+                    for(let c=0;c<3;c++){grid[luckyRow][c]='💚';const node=document.getElementById('cell-'+luckyRow+'-'+c);if(node)node.textContent='💚';}
+                    result=checkWin(grid,false,false);permanentLuckTriggered=result.win>0;
+                }
                 if(result.win>0){
                     if(guaranteedPrize){
                         // Обычный гарантированный приз: без премиума, удачи и престижа.
@@ -2225,6 +2235,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                         result.win=Math.min(Math.floor(currentBet*MAX_SPIN_PAYOUT_MULTIPLIER),Math.max(Math.ceil(currentBet/3),Math.floor(result.win*getPayoutBoost())));
                     }
                 }
+                if(prestigePrizeTriggered&&result.win>0)result.details.unshift('⭐ ПРЕСТИЖНЫЙ ПРИЗ · шанс '+getPrestigeHighPrizeChance().toFixed(1).replace('.',',')+'%');
+                if(permanentLuckTriggered&&result.win>0)result.details.unshift('🍀 Постоянная удача +3%');
                 lastWinAmount=result.win;
                 if(result.win>0){
                     casinoProgress.consecutiveLosses=0;
