@@ -2088,7 +2088,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 gameBalance-=500;
                 message='⏰ Время вышло! Ставка сгорела и дополнительно списан штраф 500 монет.';
             }else if(correct){
-                payout=Math.floor(state.stake*multiplier);gameBalance+=payout;
+                payout=Math.floor(state.stake*multiplier*getPayoutBoost());gameBalance+=payout;
                 message='🎯 Верно! Выплата '+payout.toLocaleString('ru-RU')+' монет · множитель ×'+multiplier.toFixed(2).replace('.',',')+'.';
             }else message='Не угадал. Ставка '+state.stake.toLocaleString('ru-RU')+' монет сгорела.';
             const result=document.getElementById('ballResult');if(result)result.textContent=message;
@@ -2145,7 +2145,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                     };requestAnimationFrame(frame);
                 });
                 const finalPercent=path[path.length-1];
-                let payout=Math.floor(stake*Math.max(0,1+finalPercent/100));
+                let payout=Math.floor(stake*Math.max(0,1+finalPercent/100)*getPayoutBoost());
                 const exact=Math.abs(finalPercent-target)<=1;
                 if(exact)payout*=2;
                 gameBalance+=payout;lastWinAmount=payout;
@@ -2178,7 +2178,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 if(kind==='dice'){const n=1+Math.floor(Math.random()*6);multiplier=n===6?3:n>=4?.8:n===3?.25:0;label='🎲 Выпало '+n+(multiplier?' · ×'+multiplier:' · мимо');document.getElementById('miniDie').textContent=['⚀','⚁','⚂','⚃','⚄','⚅'][n-1];}
                 if(kind==='coin'){const side=Math.random()<.5?'heads':'tails';multiplier=side===choice?1.7:0;label=(side==='heads'?'🪙 Орёл':'🪙 Решка')+(multiplier?' · угадал!':' · не угадал');}
                 if(kind==='cards'){const red=Math.random()<.5;multiplier=(red?'red':'black')===choice?1.7:0;label=(red?'♥ Красная карта':'♠ Чёрная карта')+(multiplier?' · угадал!':' · не угадал');}
-                let payout=Math.floor(cost*multiplier);
+                let payout=Math.floor(cost*multiplier*getPayoutBoost());
                 if(payout>0&&shouldSuppressWinByLoanPenalty()){payout=0;label+=' · просрочка кредита: шанс отмены выигрыша '+getBankLoanPenaltyPercent().toFixed(2).replace('.',',')+'%';}
                 if(payout>0&&suppressWinBySuperGamePenalty()){payout=0;label+=' · временное снижение шанса';}
                 else if(payout<=0&&casinoProgress.superGameLuckBoost&&Math.random()<0.03){payout=Math.floor(cost*1.05);label+=' · 🍀 постоянная удача';}
