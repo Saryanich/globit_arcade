@@ -481,8 +481,8 @@
 
         .slot-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(3, 1fr);
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            grid-template-rows: repeat(4, minmax(0, 1fr));
             gap: 6px;
             background: rgba(0, 0, 0, 0.5);
             border-radius: 18px;
@@ -1154,13 +1154,14 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             <div class="paytable" id="paytable">
                 <h4>🏆 ВЫПЛАТЫ (множитель × ставка)</h4>
                 <div class="paytable-row"><span>2 символа подряд</span><span>не оплачиваются</span></div>
-                <div class="paytable-row"><span>3 символа подряд</span><span>×0,6–0,95</span></div>
-                <div class="paytable-row"><span>4 символа подряд</span><span>×2,4–3,8</span></div>
-                <div class="paytable-row"><span>5 символов подряд</span><span>×7,5–11,5</span></div>
-                <div class="paytable-row"><span>6 символов подряд</span><span>×21–30</span></div>
-                <div class="paytable-row"><span>💀 WILD</span><span>Заменяет обычный символ</span></div>
-                <div class="paytable-row"><span>3–4 ⭐ на поле</span><span>×0,15 + 1 фриспин</span></div>
-                <div class="paytable-row"><span>5+ ⭐ на поле</span><span>×0,75 + 2 фриспина</span></div>
+                <div class="paytable-row"><span>🍒 🍋 🍇 🍉 🍊</span><span>Обычные символы · ×0,5–7,5</span></div>
+                <div class="paytable-row"><span>🔔 💎 👑 🐉 💚</span><span>Редкие символы · ×0,8–19</span></div>
+                <div class="paytable-row"><span>Горизонталь / вертикаль</span><span>От 3 одинаковых</span></div>
+                <div class="paytable-row"><span>🔺 Треугольник</span><span>6 одинаковых · повышенная выплата</span></div>
+                <div class="paytable-row"><span>💀 Череп</span><span>Уменьшает общий приз в 2 раза</span></div>
+                <div class="paytable-row"><span>⭐ Звезда</span><span>3+ звезды дают фриспины</span></div>
+                <div class="paytable-row"><span>📦 Коробка</span><span>Через 0,5 сек превращается в символ</span></div>
+                <div class="paytable-row"><span>Гарантия</span><span>После 3 проигрышей — приз не меньше ×0,5</span></div>
                 <div class="paytable-row"><span>Суперигра · 1 уровень (от 1 млн)</span><span>5 раундов · ±200 000</span></div>
                 <div class="paytable-row"><span>Суперигра · 2 уровень (от 5 млн)</span><span>5 раундов · ±350 000</span></div>
                 <div class="paytable-row"><span>Суперигра · 3 уровень (от 10 млн)</span><span>5 раундов · ±500 000</span></div>
@@ -1311,8 +1312,16 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         let pendingUser = null,
             currentIP = 'unknown',
             deviceFingerprint = 'unknown';
-        const SYMBOLS = ['6', '7', '💚', '💜', '🖤', '💀', '⭐'];
-        const SYMBOL_WEIGHTS = [12, 8, 17, 15, 16, 3, 1];
+        // 10 обычных символов + 3 специальных = 13 вариантов.
+        const SYMBOLS = ['🍒','🍋','🍇','🍉','🍊','🔔','💎','👑','🐉','💚','💀','⭐','📦'];
+        const SYMBOL_WEIGHTS = [20,17,14,12,10,8,6,4,2,1,3,2,1];
+        const PAYOUTS = {
+            '🍒':{3:.5,4:1.1,5:2.2,6:4.5}, '🍋':{3:.55,4:1.2,5:2.5,6:5},
+            '🍇':{3:.6,4:1.35,5:2.8,6:5.8}, '🍉':{3:.65,4:1.5,5:3.2,6:6.5},
+            '🍊':{3:.7,4:1.7,5:3.6,6:7.5}, '🔔':{3:.8,4:1.9,5:4.2,6:9},
+            '💎':{3:.95,4:2.3,5:5.2,6:11}, '👑':{3:1.1,4:2.8,5:6.5,6:13},
+            '🐉':{3:1.35,4:3.5,5:8,6:16}, '💚':{3:1.6,4:4,5:9.5,6:19}
+        };
         const SLOT_ROWS = 4;
         const SLOT_COLS = 6;
         let gameBalance = 500,
@@ -1332,7 +1341,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         let isSpinInProgress = false;
         let lastSpinFinishedAt = 0;
         const SPIN_MIN_GAP = 1800;
-        let casinoProgress = { autoSpinUnlocked: false, totalSpins: 0, totalWins: 0, bestWin: 0, prestige: 0, superGameCompletedLevels: [], superGameLuckBoost: false, superGameDebuffPercent: 0, superGameDebuffUntil: 0, comboRevealEnabled: true };
+        let casinoProgress = { autoSpinUnlocked: false, totalSpins: 0, totalWins: 0, bestWin: 0, consecutiveLosses: 0, prestige: 0, superGameCompletedLevels: [], superGameLuckBoost: false, superGameDebuffPercent: 0, superGameDebuffUntil: 0, comboRevealEnabled: true };
         const MAX_PRIZE = Number.MAX_SAFE_INTEGER;
         const MAX_SPIN_PAYOUT_MULTIPLIER = 30;
         const MEGA_THRESHOLD = 1000000;
@@ -1560,7 +1569,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         function moveNext(cur, next) { if (cur.value.length === 1) document.getElementById(next)?.focus(); }
 
         function getRandomSymbol() {
-            const weights=SYMBOL_WEIGHTS.slice(),lucky=getUpgradeLevel('lucky');weights[0]+=lucky*.4;weights[1]+=lucky*.5;weights[2]+=lucky*.3;
+            const weights=SYMBOL_WEIGHTS.slice(),lucky=getUpgradeLevel('lucky');
+            for(let i=5;i<=9;i++)weights[i]+=lucky*(i-4)*0.22;
             const total=weights.reduce((a,b)=>a+b,0);let r=Math.random()*total;
             for(let i=0;i<SYMBOLS.length;i++){r-=weights[i];if(r<=0)return SYMBOLS[i];}
             return SYMBOLS[0];
@@ -2042,7 +2052,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         }
 
 
-        function checkWin(grid,isSuper=false,isMega=false){
+        function checkWin(grid,isSuper=false,isMega=false,applyEffects=true){
             let total=0;const cells=[],details=[],combinations=[],paid=new Set();
             function addWin(amount,line,description){
                 const safe=isMega||isSuper?Math.max(0,Math.floor(amount)):Math.max(0,Math.min(Math.floor(amount),Math.floor(currentBet*MAX_SPIN_PAYOUT_MULTIPLIER)-total));
@@ -2053,66 +2063,98 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             if(isSuper){
                 let best=null;
                 for(let r=0;r<SLOT_ROWS;r++)for(let c=0;c<SLOT_COLS;){
-                    const row=grid[r];if(row[c]==='⭐'){c++;continue;}
-                    const symbol=row[c]==='💀'?row.slice(c+1).find(v=>v!=='💀'&&v!=='⭐'):row[c];
-                    if(!symbol||symbol==='💀'){c++;continue;}
-                    let end=c;const line=[];
-                    while(end<SLOT_COLS&&(row[end]===symbol||row[end]==='💀')){line.push({row:r,col:end});end++;}
-                    if(line.length>=3&&(!best||line.length>best.cells.length))best={symbol:symbol,cells:line};
+                    const symbol=grid[r][c];if(!PAYOUTS[symbol]){c++;continue;}
+                    let end=c;const line=[];while(end<SLOT_COLS&&grid[r][end]===symbol){line.push({row:r,col:end});end++;}
+                    if(line.length>=3&&(!best||line.length>best.cells.length))best={symbol,cells:line};
                     c=Math.max(c+1,end);
                 }
-                if(best){const multiplier=({3:.4,4:1.25,5:4,6:18})[best.cells.length]||0;const prize=Math.floor(currentBet*multiplier);addWin(prize,best.cells,'💥 СУПЕР ×'+multiplier+': +'+prize.toLocaleString());}
-                return {win:total,cells:cells,details:details,combinations:combinations};
+                if(best){const mult=({3:.5,4:1.25,5:4,6:18})[best.cells.length]||0;addWin(currentBet*mult,best.cells,'💥 СУПЕР ×'+mult);}
+                return {win:total,cells,details,combinations};
             }
-            const normal={
-                '💚':{3:.7,4:2.8,5:9,6:25},'💜':{3:.65,4:2.6,5:8,6:23},
-                '🖤':{3:.6,4:2.4,5:7.5,6:21},'6':{3:.85,4:3.4,5:10.5,6:28},
-                '7':{3:.95,4:3.8,5:11.5,6:30}};
-            const mega={
-                '💚':{2:0,3:5,4:30,5:100,6:350},'💜':{2:0,3:4,4:25,5:85,6:300},
-                '🖤':{2:0,3:3,4:20,5:70,6:250},'6':{2:0,3:7,4:40,5:130,6:450},
-                '7':{2:0,3:9,4:55,5:175,6:600}};
-            for(let r=0;r<SLOT_ROWS;r++){
-                const row=grid[r];
-                for(let c=0;c<SLOT_COLS;){
-                    if(row[c]==='⭐'){c++;continue;}
-                    const symbol=row[c]==='💀'?row.slice(c+1).find(v=>v!=='💀'&&v!=='⭐'):row[c];
-                    if(!symbol||symbol==='💀'){c++;continue;}
-                    let end=c;const line=[];
-                    while(end<SLOT_COLS&&(row[end]===symbol||row[end]==='💀')){line.push({row:r,col:end});end++;}
-                    const length=line.length;
-                    if(length>=3){const table=isMega?mega:normal;const multiplier=(table[symbol]||table['🖤'])[Math.min(length,6)]||0;
-                        if(multiplier>0){const amount=currentBet*multiplier;addWin(amount,line,length+'×'+symbol+': +'+Math.floor(amount).toLocaleString());}}
+            const multiplierFor=(symbol,length)=>{const base=PAYOUTS[symbol];const value=base?.[Math.min(length,6)]||0;return isMega?value*3:value;};
+            for(const symbol of Object.keys(PAYOUTS)){
+                for(let r=0;r<SLOT_ROWS;r++)for(let c=0;c<SLOT_COLS;){
+                    if(grid[r][c]!==symbol){c++;continue;}
+                    let end=c;const line=[];while(end<SLOT_COLS&&grid[r][end]===symbol){line.push({row:r,col:end});end++;}
+                    if(line.length>=3)addWin(currentBet*multiplierFor(symbol,line.length),line,'↔ '+line.length+'×'+symbol);
                     c=Math.max(c+1,end);
                 }
-                const six=row.indexOf('6'),seven=row.indexOf('7');
-                if(isMega&&six>=0&&seven>six){const amount=currentBet*12;addWin(amount,[{row:r,col:six},{row:r,col:seven}],'6 → 7: +'+Math.floor(amount).toLocaleString());}
+                for(let c=0;c<SLOT_COLS;c++)for(let r=0;r<SLOT_ROWS;){
+                    if(grid[r][c]!==symbol){r++;continue;}
+                    let end=r;const line=[];while(end<SLOT_ROWS&&grid[end][c]===symbol){line.push({row:end,col:c});end++;}
+                    if(line.length>=3)addWin(currentBet*multiplierFor(symbol,line.length),line,'↕ '+line.length+'×'+symbol);
+                    r=Math.max(r+1,end);
+                }
             }
-            const scatters=[];
-            for(let r=0;r<SLOT_ROWS;r++)for(let c=0;c<SLOT_COLS;c++)if(grid[r][c]==='⭐')scatters.push({row:r,col:c});
-            if(scatters.length>=3){
-                const fs=isMega?(scatters.length>=5?5:3):(scatters.length>=5?2:1);
-                const multiplier=isMega?(scatters.length>=5?180:55):(scatters.length>=5?.75:.15);
-                const amount=currentBet*multiplier;freespinsRemaining+=fs;
-                addWin(amount,scatters,'⭐ SCATTER ×'+scatters.length+': +'+Math.floor(amount).toLocaleString()+' +'+fs+' FS');
+            const triangles=[];
+            for(let r=0;r<=SLOT_ROWS-3;r++)for(let c=0;c<=SLOT_COLS-3;c++){
+                triangles.push([[r,c+1],[r+1,c],[r+1,c+1],[r+1,c+2],[r+2,c],[r+2,c+1]]);
+                triangles.push([[r,c],[r,c+1],[r,c+2],[r+1,c],[r+1,c+1],[r+2,c+1]]);
+                triangles.push([[r,c],[r+1,c],[r+2,c],[r,c+1],[r+1,c+1],[r+1,c+2]]);
+                triangles.push([[r,c+2],[r+1,c+2],[r+2,c+2],[r,c+1],[r+1,c+1],[r+1,c]]);
             }
-            return {win:Math.floor(total),cells:cells,details:details,combinations:combinations};
+            for(const positions of triangles){
+                const symbol=grid[positions[0][0]][positions[0][1]];
+                if(!PAYOUTS[symbol]||!positions.every(([r,c])=>grid[r][c]===symbol))continue;
+                addWin(currentBet*multiplierFor(symbol,6)*2.5,positions.map(([row,col])=>({row,col})),'🔺 ТРЕУГОЛЬНИК '+symbol);
+            }
+            const skullCount=grid.flat().filter(symbol=>symbol==='💀').length;
+            if(total>0&&skullCount>0){
+                total=Math.floor(total/2);
+                combinations.forEach(combo=>combo.amount=Math.floor(combo.amount/2));
+                for(let i=0;i<details.length;i++)details[i]+=' · 💀 ×0,5';
+                total=Math.max(Math.ceil(currentBet*0.5),total);
+            }
+            const stars=[];
+            for(let r=0;r<SLOT_ROWS;r++)for(let c=0;c<SLOT_COLS;c++)if(grid[r][c]==='⭐')stars.push({row:r,col:c});
+            if(applyEffects&&stars.length>=3){
+                const fs=stars.length>=6?3:stars.length>=4?2:1;freespinsRemaining+=fs;
+                details.push('⭐ '+stars.length+' звёзд: +'+fs+' фриспин(а)');
+                combinations.push({description:'⭐ ФРИСПИНЫ',amount:0,cells:stars});
+                stars.forEach(cell=>{if(!paid.has(cell.row+':'+cell.col))cells.push(cell);});
+            }
+            return {win:Math.floor(total),cells,details,combinations};
         }
 
         function createSlotGrid(isSuper=false){
             if(!isSuper)return Array.from({length:SLOT_ROWS},()=>Array.from({length:SLOT_COLS},()=>getRandomSymbol()));
-            const safe=['💚','💜','🖤','6','7','💚'];
+            const safe=['🍒','🍋','🍇','🍉','🍊','🔔'];
             const grid=Array.from({length:SLOT_ROWS},(_,r)=>safe.map((_,c)=>safe[(c+r)%safe.length]));
             if(Math.random()<.08){
                 const row=Math.floor(Math.random()*SLOT_ROWS),roll=Math.random();
                 const length=roll<.50?3:roll<.82?4:roll<.96?5:6;
-                const symbol=['💚','💜','🖤','6','7'][Math.floor(Math.random()*5)];
+                const symbol=['🍒','🍇','🍊','💎','👑'][Math.floor(Math.random()*5)];
                 for(let c=0;c<length;c++)grid[row][c]=symbol;
             }
             return grid;
         }
 
-        const COMBO_COLORS=['#ffd166','#69f0ae','#64b5f6','#ff8a65','#ce93d8','#fff176'];
+        async function resolveGiftBoxes(grid){
+            const boxes=[];for(let r=0;r<SLOT_ROWS;r++)for(let c=0;c<SLOT_COLS;c++)if(grid[r][c]==='📦')boxes.push({row:r,col:c});
+            for(const box of boxes){
+                const node=document.getElementById('cell-'+box.row+'-'+box.col);
+                if(node){node.textContent='📦';node.classList.add('wild');}
+                await waitMs(500);
+                const candidates=Object.keys(PAYOUTS);let bestSymbol=candidates[0],bestScore=-1;
+                for(const symbol of candidates){
+                    const test=grid.map(row=>row.slice());test[box.row][box.col]=symbol;
+                    const score=checkWin(test,false,false,false).win;
+                    if(score>bestScore){bestScore=score;bestSymbol=symbol;}
+                }
+                const chosen=Math.random()<0.75?bestSymbol:candidates[Math.floor(Math.random()*candidates.length)];
+                grid[box.row][box.col]=chosen;
+                if(node){node.textContent=chosen;node.classList.remove('wild');node.classList.add('scatter');}
+                await waitMs(100);
+            }
+        }
+
+        function forceGuaranteedPrize(grid){
+            const row=Math.floor(Math.random()*SLOT_ROWS);
+            const symbol=['🍒','🍋','🍇','🍉','🍊','🔔'][Math.floor(Math.random()*6)];
+            for(let c=0;c<3;c++){grid[row][c]=symbol;const node=document.getElementById('cell-'+row+'-'+c);if(node)node.textContent=symbol;}
+        }
+
+                const COMBO_COLORS=['#ffd166','#69f0ae','#64b5f6','#ff8a65','#ce93d8','#fff176'];
         const waitMs=ms=>new Promise(resolve=>setTimeout(resolve,ms));
         async function animateWinningCombinations(result){
             const gridNode=document.getElementById('slotGrid');
@@ -2156,57 +2198,50 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
 
         async function _performSpinCore(){
-            if(riskActive)return;if(megaGameActive){await megaGameSpin();return;}
+            if(riskActive)return;
+            if(megaGameActive){await megaGameSpin();return;}
             const spinButton=document.getElementById('spinBtn');
             if(gameBalance<currentBet&&freespinsRemaining<=0){stopAutoSpin();return;}
             if(spinButton)spinButton.disabled=true;
             playReelRattle();triggerHaptic('spin');
             try{
                 if(freespinsRemaining<=0){gameBalance-=currentBet;await updateBalanceDB();}
-                else if(freespinsRemaining>0)freespinsRemaining--;
+                else freespinsRemaining--;
                 updateUI();document.getElementById('winMessage').textContent='';
-                const grid=createSlotGrid(false);await animateSlotGrid(grid,getSpinAnimationDuration());
+                const guaranteedPrize=(Number(casinoProgress.consecutiveLosses)||0)>=3;
+                const grid=createSlotGrid(false);
+                await animateSlotGrid(grid,getSpinAnimationDuration());
+                await resolveGiftBoxes(grid);
+                if(guaranteedPrize)forceGuaranteedPrize(grid);
                 let result=checkWin(grid,false,false);
-                let prestigePrizeTriggered=false,beginnerBoostTriggered=false,loanPenaltySuppressed=false;
-                const prestigeChance=getPrestigeHighPrizeChance()/100;
-                const beginnerBoostActive=gameBalance<25000;
-                if(result.win<=0&&beginnerBoostActive&&Math.random()<0.35){
-                    const luckyRow=Math.floor(Math.random()*SLOT_ROWS),luckySymbol=['💚','💜','🖤','6'][Math.floor(Math.random()*4)];
-                    for(let c=0;c<3;c++){grid[luckyRow][c]=luckySymbol;const node=document.getElementById('cell-'+luckyRow+'-'+c);if(node)node.textContent=luckySymbol;}
-                    result=checkWin(grid,false,false);beginnerBoostTriggered=result.win>0;
+                if(result.win>0){
+                    if(guaranteedPrize){
+                        result.win=Math.ceil(currentBet*0.5);
+                        result.details.unshift('🎁 ГАРАНТИРОВАННЫЙ ПРИЗ · после трёх проигрышей');
+                    }else{
+                        result.win=Math.max(Math.ceil(currentBet*0.5),Math.floor(result.win*getPayoutBoost()));
+                    }
                 }
-                if(result.win<=0&&Math.random()<prestigeChance){
-                    for(let c=0;c<SLOT_COLS;c++){grid[0][c]='7';const node=document.getElementById('cell-0-'+c);if(node)node.textContent='7';}
-                    result=checkWin(grid,false,false);prestigePrizeTriggered=result.win>0;
-                }
-                let permanentLuckTriggered=false;
-                if(result.win<=0&&casinoProgress.superGameLuckBoost&&Math.random()<0.03){
-                    const luckyRow=Math.floor(Math.random()*SLOT_ROWS);
-                    for(let c=0;c<3;c++){grid[luckyRow][c]='💚';const node=document.getElementById('cell-'+luckyRow+'-'+c);if(node)node.textContent='💚';}
-                    result=checkWin(grid,false,false);permanentLuckTriggered=result.win>0;
-                }
-                if(result.win>0)result.win=Math.min(Math.floor(result.win*getPayoutBoost()),Math.floor(currentBet*MAX_SPIN_PAYOUT_MULTIPLIER));
-                if(beginnerBoostTriggered&&result.win>0){result.win=Math.min(Math.floor(currentBet*MAX_SPIN_PAYOUT_MULTIPLIER),Math.max(result.win,Math.ceil(currentBet*1.5)));result.details.unshift('🍀 Поддержка игрока: выплата не меньше ×1,5');}
-                if(result.win>0&&shouldSuppressWinByLoanPenalty()){loanPenaltySuppressed=true;result.win=0;result.cells=[];result.details=[];}
-                let penaltySuppressed=false;
-                if(result.win>0&&suppressWinBySuperGamePenalty()){result.win=0;result.cells=[];result.details=['⏳ Временное снижение вероятности выигрыша'];penaltySuppressed=true;}
-                if(prestigePrizeTriggered&&result.win>0)result.details.unshift('⭐ ПРЕСТИЖНЫЙ ПРИЗ · шанс '+getPrestigeHighPrizeChance().toFixed(1).replace('.',',')+'%');
-                if(permanentLuckTriggered&&result.win>0)result.details.unshift('🍀 Постоянная удача +3%');
                 lastWinAmount=result.win;
                 if(result.win>0){
+                    casinoProgress.consecutiveLosses=0;
                     gameBalance+=result.win;
                     if(result.win>=500000)playSuperWinSound();else if(result.win>=10000)playBigWinSound();else playWinSound();
-                    const shownInField=await animateWinningCombinations(result);document.getElementById('winMessage').textContent=shownInField?'':'🎉 ИТОГОВЫЙ ВЫИГРЫШ  +'+result.win.toLocaleString()+' монет';
+                    const shownInField=await animateWinningCombinations(result);
+                    document.getElementById('winMessage').textContent=shownInField?'':'🎉 ИТОГОВЫЙ ВЫИГРЫШ  +'+result.win.toLocaleString()+' монет';
                     result.cells.forEach(cell=>{const node=document.getElementById('cell-'+cell.row+'-'+cell.col);if(node)node.classList.add('win');});
                     triggerCasinoFX(result.win>=500000?'jackpot':'win');
                     triggerHaptic(result.win>=500000?'jackpot':result.win>=10000?'bigWin':'win');
                     setTimeout(()=>document.querySelectorAll('.slot-cell.win').forEach(cell=>cell.classList.remove('win')),3200);
                 }else{
-                    playLoseSound();document.getElementById('winMessage').textContent=loanPenaltySuppressed?'🏦 Просрочка кредита: шанс отмены выигрыша '+getBankLoanPenaltyPercent().toFixed(2).replace('.',',')+'%.':(penaltySuppressed?'⏳ Сработал временный штраф суперигры — выигрыш не засчитан.':(freespinsRemaining>0?'🔄 Фриспин готов. Попробуй ещё!':'Почти! Следующий рывок может быть удачнее.'));
+                    casinoProgress.consecutiveLosses=Math.min(3,(Number(casinoProgress.consecutiveLosses)||0)+1);
+                    playLoseSound();
+                    document.getElementById('winMessage').textContent=freespinsRemaining>0
+                        ?'🔄 Фриспин готов. Проигрышей подряд: '+casinoProgress.consecutiveLosses+'/3'
+                        :'Почти! Проигрышей подряд: '+casinoProgress.consecutiveLosses+'/3. После третьего следующий спин принесёт приз.';
                     lastWinAmount=0;triggerHaptic('lose');
                 }
                 await updateBalanceDB();
-                
                 casinoProgress.totalSpins=(casinoProgress.totalSpins||0)+1;
                 if(result.win>0){casinoProgress.totalWins=(casinoProgress.totalWins||0)+1;casinoProgress.bestWin=Math.max(casinoProgress.bestWin||0,result.win);}
                 await updateBalanceDB();
