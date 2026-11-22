@@ -1042,6 +1042,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
           .arcade-door{min-height:44px}
           .btn{margin-top:2px;padding:5px}
         }
+
+        .rocket-panel{width:100%;max-width:560px;text-align:center}.rocket-chart-wrap{position:relative;width:100%;height:220px;margin:12px auto;border:1px solid #568a62;border-radius:10px;background:linear-gradient(180deg,#10251b,#080f0c);overflow:hidden}.rocket-chart{width:100%;height:100%;display:block}.rocket-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:left}.rocket-controls label{display:flex;flex-direction:column;gap:6px;color:#c9d7c8;font-size:11px}.rocket-controls select,.rocket-controls input{width:100%;min-height:38px;border:1px solid #8caa79;border-radius:6px;background:#101b14;color:#fff;padding:7px}.rocket-live{font:900 24px ui-monospace,monospace;color:#a4f5ae}.rocket-live.down{color:#ff8585}.rocket-target{font-size:11px;color:#e7cf94}.rocket-result{min-height:24px;font-weight:900;color:#ffe18a;margin-top:8px}@media(max-width:420px){.rocket-chart-wrap{height:185px}.rocket-controls{gap:6px}}
 </style>
 </head>
 <body>
@@ -1066,7 +1068,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
   </div>
 </div>
 
-    <div class="mini-arcade-overlay" id="miniArcadeScreen" aria-hidden="true"><section class="mini-arcade-cabinet"><header class="mini-arcade-header"><div><small>GLOBIT • RETRO HALL</small><h2>MINI CASINO</h2></div><button class="mini-close" type="button" aria-label="Закрыть мини-казино" onclick="closeMiniArcade()">✕</button></header><div class="mini-wallet">ВАШ БАЛАНС <b id="miniBalance">0</b> COINS</div><div class="mini-game-tabs"><button onclick="selectMiniGame('wheel')" class="mini-game-card" data-mini="wheel"><i>🎡</i><b>РУЛЕТКА</b><small>× до 6</small><small data-mini-cooldown="wheel"></small></button><button onclick="selectMiniGame('dice')" class="mini-game-card" data-mini="dice"><i>🎲</i><b>КОСТИ</b><small>× до 3</small><small data-mini-cooldown="dice"></small></button><button onclick="selectMiniGame('cards')" class="mini-game-card" data-mini="cards"><i>🂡</i><b>КАРТЫ</b><small>Красное / чёрное</small><small data-mini-cooldown="cards"></small></button><button onclick="selectMiniGame('coin')" class="mini-game-card" data-mini="coin"><i>🪙</i><b>МОНЕТКА</b><small>Орёл / решка</small><small data-mini-cooldown="coin"></small></button><button onclick="selectMiniGame('risk')" class="mini-game-card" data-mini="risk"><i>🃏</i><b>РИСК</b><small>Удвой выигрыш</small><small data-mini-cooldown="risk"></small></button></div><div class="mini-stage" id="miniStage"><div class="mini-stage-idle"><span>🎰</span><h3>ВЫБЕРИ АВТОМАТ</h3><p>Все игры используют текущую ставку.</p></div></div><div class="mini-footer"><span>RETRO ARCADE • 1986</span><button onclick="closeMiniArcade()">← НАЗАД К СЛОТАМ</button></div></section></div>
+    <div class="mini-arcade-overlay" id="miniArcadeScreen" aria-hidden="true"><section class="mini-arcade-cabinet"><header class="mini-arcade-header"><div><small>GLOBIT • RETRO HALL</small><h2>MINI CASINO</h2></div><button class="mini-close" type="button" aria-label="Закрыть мини-казино" onclick="closeMiniArcade()">✕</button></header><div class="mini-wallet">ВАШ БАЛАНС <b id="miniBalance">0</b> COINS</div><div class="mini-game-tabs"><button onclick="selectMiniGame('wheel')" class="mini-game-card" data-mini="wheel"><i>🎡</i><b>РУЛЕТКА</b><small>× до 6</small><small data-mini-cooldown="wheel"></small></button><button onclick="selectMiniGame('dice')" class="mini-game-card" data-mini="dice"><i>🎲</i><b>КОСТИ</b><small>× до 3</small><small data-mini-cooldown="dice"></small></button><button onclick="selectMiniGame('cards')" class="mini-game-card" data-mini="cards"><i>🂡</i><b>КАРТЫ</b><small>Красное / чёрное</small><small data-mini-cooldown="cards"></small></button><button onclick="selectMiniGame('coin')" class="mini-game-card" data-mini="coin"><i>🪙</i><b>МОНЕТКА</b><small>Орёл / решка</small><small data-mini-cooldown="coin"></small></button><button onclick="selectMiniGame('risk')" class="mini-game-card" data-mini="risk"><i>🃏</i><b>РИСК</b><small>Удвой выигрыш</small><small data-mini-cooldown="risk"></small></button><button onclick="selectMiniGame('rocket')" class="mini-game-card" data-mini="rocket"><i>🚀</i><b>РАКЕТА</b><small>Инвестиция · 10 сек</small><small data-mini-cooldown="rocket"></small></button></div><div class="mini-stage" id="miniStage"><div class="mini-stage-idle"><span>🎰</span><h3>ВЫБЕРИ АВТОМАТ</h3><p>Все игры используют текущую ставку.</p></div></div><div class="mini-footer"><span>RETRO ARCADE • 1986</span><button onclick="closeMiniArcade()">← НАЗАД К СЛОТАМ</button></div></section></div>
     <div class="workshop-overlay" id="workshopOverlay" aria-hidden="true"><section class="workshop-modal">
       <header class="workshop-top"><div><small>GLOBIT • UPGRADES</small><h2>🛠 МАСТЕРСКАЯ</h2><p>Прокачивай автомат по уровням</p></div><button type="button" class="mini-close" onclick="closeWorkshop()">✕</button></header>
       <div class="workshop-wallet">Баланс: <b id="workshopBalance">0</b> монет</div><div class="workshop-upgrades" id="workshopUpgrades"></div>
@@ -1945,7 +1947,26 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         function getAutoSpinDelay(){return Math.max(1200,AUTO_SPIN_DELAY-getUpgradeLevel('auto')*200);}
         function getSpinAnimationDuration(){return Math.max(850,1850-getUpgradeLevel('turbo')*180);}
         function getPayoutBoost(){return 1+getUpgradeLevel('payout')*.03;}
-        function getSpinWinChance(){return Math.min(80,60+getUpgradeLevel('lucky')*2+getPrestigeCount()*.2);}
+        function getSpinWinChance(){return Math.min(70,60+getUpgradeLevel('lucky')*1.5+getPrestigeCount()*.15);}
+        function rollSlotPayout(){
+            const tiers=[
+                {w:15,min:.10,max:.40},{w:20,min:.40,max:.80},
+                {w:25,min:.80,max:1.20},{w:20,min:1.20,max:2.00},
+                {w:12,min:2.00,max:4.00},{w:7,min:4.00,max:10.00},{w:1,min:10,max:10}
+            ];
+            const total=tiers.reduce((n,t)=>n+t.w,0);let roll=Math.random()*total,tier=tiers[0];
+            for(const t of tiers){roll-=t.w;if(roll<=0){tier=t;break;}}
+            const multiplier=tier.min===tier.max?tier.min:tier.min+Math.random()*(tier.max-tier.min);
+            return Math.min(10,Math.max(.1,multiplier*getPayoutBoost()));
+        }
+        function createRandomWinningGrid(){
+            const grid=Array.from({length:SLOT_ROWS},()=>Array.from({length:SLOT_COLS},()=>getRandomSymbol()));
+            const row=Math.floor(Math.random()*SLOT_ROWS),length=3+Math.floor(Math.random()*4);
+            const start=Math.floor(Math.random()*(SLOT_COLS-length+1));
+            const symbols=Object.keys(PAYOUTS),symbol=symbols[Math.floor(Math.random()*symbols.length)];
+            for(let c=start;c<start+length;c++)grid[row][c]=symbol;
+            return grid;
+        }
 
         let selectedMiniGame=null,miniGameBusy=false;
         function startMiniCooldownTicker(){if(miniCooldownInterval)return;miniCooldownInterval=setInterval(refreshMiniCooldownUI,1000);refreshMiniCooldownUI();}
@@ -1970,6 +1991,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         function selectMiniGame(kind){
             if(miniGameBusy)return;selectedMiniGame=kind;
             document.querySelectorAll('.mini-game-card').forEach(button=>button.classList.toggle('active',button.dataset.mini===kind));
+            if(kind==='rocket'){renderRocketPanel();playButtonClick();return;}
             const titles={wheel:'РУЛЕТКА УДАЧИ',dice:'БРОСОК КОСТЕЙ',cards:'КРАСНОЕ ИЛИ ЧЁРНОЕ',coin:'ОРЁЛ ИЛИ РЕШКА',risk:'РИСК · УДВОЕНИЕ'};
             const art={wheel:'<div class="mini-wheel" id="miniWheel"></div>',dice:'<div class="mini-die" id="miniDie">🎲</div>',cards:'<div><span class="mini-card">A♥</span><span class="mini-card" style="color:#222">K♠</span></div>',coin:'<div class="mini-coin" id="miniCoin">🪙</div>',risk:'<div class="mini-risk-cards" id="miniRiskCards"></div>'};
             const rules={wheel:'Редкий джекпот ×6, удачный сектор ×1,5, небольшой возврат ×0,4.',dice:'6 — ×3, 4–5 — ×0,8, 3 — ×0,25.',cards:'Угадай цвет следующей карты. Верный цвет — ×1,7.',coin:'Выбери сторону монеты. Верный выбор — ×1,7.',risk:'Удвой последний выигрыш: найди ❤️ среди четырёх карт. Ошибка заберёт выигрыш.'};
@@ -1979,6 +2001,72 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             if(kind==='risk'){document.getElementById('miniPlayButton').style.display='none';document.getElementById('miniChoice').innerHTML='<button class="mini-play" type="button" onclick="startRiskMini()" '+(remain||lastWinAmount<=0?'disabled':'')+'>НАЧАТЬ РИСК</button>';}
             if(kind==='cards'){document.getElementById('miniPlayButton').style.display='none';document.getElementById('miniChoice').innerHTML='<button class="mini-play" type="button" onclick="playMiniGame(\'cards\',\'red\')" '+(remain?'disabled':'')+'>КРАСНЫЙ</button> <button class="mini-play" type="button" onclick="playMiniGame(\'cards\',\'black\')" '+(remain?'disabled':'')+'>ЧЁРНЫЙ</button>';}
             playButtonClick();
+        }
+        let rocketRunning=false;
+        function renderRocketPanel(){
+            const stage=document.getElementById('miniStage');
+            stage.innerHTML='<div class="rocket-panel"><h3>🚀 РАКЕТА · 10 СЕКУНД</h3><p>Выбери ставку и прогноз. График может резко взлететь или просесть.</p><div class="rocket-chart-wrap"><canvas id="rocketCanvas" class="rocket-chart"></canvas></div><div class="rocket-live" id="rocketLive">0.0%</div><div class="rocket-target" id="rocketTargetLabel">Цель: +25%</div><div class="rocket-controls"><label>Ставка (1 000–10 000)<select id="rocketStake"><option value="1000" selected>1 000</option><option value="2000" >2 000</option><option value="3000" >3 000</option><option value="4000" >4 000</option><option value="5000" >5 000</option><option value="6000" >6 000</option><option value="7000" >7 000</option><option value="8000" >8 000</option><option value="9000" >9 000</option><option value="10000" >10 000</option></select></label><label>Целевой процент <input id="rocketTarget" type="range" min="-90" max="300" step="1" value="25"><span id="rocketTargetValue">+25%</span></label></div><div class="rocket-result" id="rocketResult">Угадай итоговое значение с точностью ±1%, чтобы удвоить выплату.</div><button class="mini-play" id="rocketLaunch" onclick="startRocketGame()">🚀 ЗАПУСТИТЬ</button></div>';
+            const target=document.getElementById('rocketTarget');
+            target.addEventListener('input',()=>{const v=Number(target.value),label=(v>0?'+':'')+v+'%';document.getElementById('rocketTargetValue').textContent=label;document.getElementById('rocketTargetLabel').textContent='Цель: '+label;});
+            drawRocketChart([0],0);
+        }
+        function drawRocketChart(values,current){
+            const canvas=document.getElementById('rocketCanvas');if(!canvas)return;
+            const rect=canvas.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
+            canvas.width=Math.max(1,Math.floor(rect.width*dpr));canvas.height=Math.max(1,Math.floor(rect.height*dpr));
+            const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+            const w=rect.width,h=rect.height,pad=24,min=-100,max=320;
+            ctx.clearRect(0,0,w,h);ctx.strokeStyle='rgba(180,220,180,.13)';ctx.lineWidth=1;
+            for(let i=0;i<5;i++){const y=pad+(h-pad*2)*i/4;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-pad,y);ctx.stroke();}
+            const yFor=v=>h-pad-(Math.max(min,Math.min(max,v))-min)/(max-min)*(h-pad*2);
+            const zero=yFor(0);ctx.strokeStyle='rgba(255,255,255,.35)';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(pad,zero);ctx.lineTo(w-pad,zero);ctx.stroke();ctx.setLineDash([]);
+            if(values.length>1){ctx.beginPath();values.forEach((v,i)=>{const x=pad+(w-pad*2)*i/Math.max(1,values.length-1);if(i===0)ctx.moveTo(x,yFor(v));else ctx.lineTo(x,yFor(v));});ctx.strokeStyle=current>=0?'#8cf5a1':'#ff7777';ctx.lineWidth=3;ctx.shadowColor=ctx.strokeStyle;ctx.shadowBlur=9;ctx.stroke();ctx.shadowBlur=0;
+                const x=pad+(w-pad*2)*(values.length-1)/Math.max(1,values.length-1);ctx.font='24px sans-serif';ctx.fillText('🚀',Math.max(pad,x-12),Math.max(25,Math.min(h-8,yFor(current)-8)));}
+            ctx.fillStyle='#b8c9b8';ctx.font='10px ui-monospace';ctx.fillText('+300%',4,14);ctx.fillText('0%',4,zero-5);ctx.fillText('−100%',4,h-7);
+        }
+        function makeRocketPath(){
+            const points=[0];let value=0;
+            for(let i=1;i<=40;i++){
+                let delta=(Math.random()-.47)*13;
+                if(Math.random()<.11)delta+=(Math.random()<.52?-1:1)*(18+Math.random()*65);
+                value=Math.max(-95,Math.min(300,value+delta));points.push(Number(value.toFixed(1)));
+            }
+            return points;
+        }
+        async function startRocketGame(){
+            if(rocketRunning||miniGameBusy||isSpinInProgress||megaGameActive||riskActive)return;
+            const stake=Number(document.getElementById('rocketStake')?.value)||0;
+            const target=Number(document.getElementById('rocketTarget')?.value)||0;
+            if(stake<1000||stake>10000||gameBalance<stake){document.getElementById('rocketResult').textContent='Недостаточно монет или неверная ставка.';return;}
+            rocketRunning=true;miniGameBusy=true;isSpinInProgress=true;
+            const launch=document.getElementById('rocketLaunch');if(launch)launch.disabled=true;
+            gameBalance-=stake;updateUI();updateMiniBalance();
+            try{
+                await updateBalanceDB();
+                const path=makeRocketPath(),started=performance.now(),duration=10000;
+                const live=document.getElementById('rocketLive'),result=document.getElementById('rocketResult');
+                await new Promise(resolve=>{
+                    const frame=now=>{
+                        const progress=Math.min(1,(now-started)/duration),position=progress*(path.length-1),idx=Math.floor(position),fraction=position-idx;
+                        const shown=path[idx]+((path[Math.min(idx+1,path.length-1)]-path[idx])*fraction);
+                        const visible=path.slice(0,idx+1);if(fraction>0)visible.push(shown);
+                        drawRocketChart(visible,shown);
+                        live.textContent=(shown>0?'+':'')+shown.toFixed(1)+'%';live.classList.toggle('down',shown<0);
+                        if(progress<1)requestAnimationFrame(frame);else resolve();
+                    };requestAnimationFrame(frame);
+                });
+                const finalPercent=path[path.length-1];
+                let payout=Math.floor(stake*Math.max(0,1+finalPercent/100));
+                const exact=Math.abs(finalPercent-target)<=1;
+                if(exact)payout*=2;
+                gameBalance+=payout;lastWinAmount=payout;
+                result.textContent=(finalPercent>0?'+':'')+finalPercent.toFixed(1)+'% · '+(payout>0?'выплата '+payout.toLocaleString('ru-RU'):'ставка потеряна')+(exact?' · 🎯 ПОПАДАНИЕ! ВЫПЛАТА ×2':'');
+                if(payout>stake){playBigWinSound();triggerHaptic('bigWin');triggerCasinoFX('win');}
+                else if(payout>0){playWinSound();triggerHaptic('win');}
+                else{playLoseSound();triggerHaptic('lose');}
+                await updateBalanceDB();updateMiniBalance();updateUI();
+            }catch(error){console.error('Rocket game error:',error);document.getElementById('rocketResult').textContent='Не удалось сохранить результат. Проверь соединение.';}
+            finally{rocketRunning=false;miniGameBusy=false;isSpinInProgress=false;if(launch)launch.disabled=false;updateUI();}
         }
         async function playMiniGame(kind,choice){
             if(miniGameBusy||isSpinInProgress||riskActive||megaGameActive)return;
@@ -2233,39 +2321,32 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 if(freespinsRemaining<=0){gameBalance-=currentBet;await updateBalanceDB();}
                 else freespinsRemaining--;
                 updateUI();document.getElementById('winMessage').textContent='';
-
                 const pityActive=(Number(casinoProgress.consecutiveLosses)||0)>=3;
                 const wantsPrize=pityActive||Math.random()*100<getSpinWinChance();
-                const grid=createSlotGrid(false);
+                const grid=wantsPrize?createRandomWinningGrid():createSlotGrid(false);
                 await animateSlotGrid(grid,getSpinAnimationDuration());
+                let result;
                 if(wantsPrize){
-                    await resolveGiftBoxes(grid);
-                    let result=checkWin(grid,false,false,true);
-                    const minimumPrize=Math.ceil(currentBet/3);
-                    if(result.win<minimumPrize){
-                        forceGuaranteedPrize(grid);
-                        result=checkWin(grid,false,false,false);
-                    }
-                    if(result.win<minimumPrize)throw new Error('Не удалось сформировать допустимую комбинацию');
-                    if(!pityActive)result.win=Math.max(minimumPrize,Math.floor(result.win*getPayoutBoost()));
-                    lastWinAmount=result.win;
-                    casinoProgress.consecutiveLosses=0;
-                    gameBalance+=result.win;
-                    if(result.win>=500000)playSuperWinSound();else if(result.win>=10000)playBigWinSound();else playWinSound();
+                    result=checkWin(grid,false,false,false);
+                    const minPrize=Math.max(1,Math.floor(currentBet*.1));
+                    result.win=Math.max(minPrize,Math.floor(currentBet*rollSlotPayout()));
+                    result.details.push('🎰 Комбинация');
+                    result.combinations=result.combinations.length?result.combinations:[{description:'Комбинация',amount:result.win,cells:result.cells.map(p=>({row:p.row,col:p.col}))}];
+                    lastWinAmount=result.win;casinoProgress.consecutiveLosses=0;gameBalance+=result.win;
+                    if(result.win>=currentBet*5)playSuperWinSound();else if(result.win>=currentBet*2)playBigWinSound();else playWinSound();
                     const shownInField=await animateWinningCombinations(result);
-                    document.getElementById('winMessage').textContent=shownInField?'':'🎉 ИТОГОВЫЙ ВЫИГРЫШ  +'+result.win.toLocaleString()+' монет';
+                    document.getElementById('winMessage').textContent=shownInField?'':'🎉 ВЫИГРЫШ +'+result.win.toLocaleString()+' монет';
                     result.cells.forEach(cell=>{const node=document.getElementById('cell-'+cell.row+'-'+cell.col);if(node)node.classList.add('win');});
-                    triggerCasinoFX(result.win>=500000?'jackpot':'win');
-                    triggerHaptic(result.win>=500000?'jackpot':result.win>=10000?'bigWin':'win');
+                    triggerCasinoFX(result.win>=currentBet*5?'jackpot':'win');
+                    triggerHaptic(result.win>=currentBet*5?'bigWin':'win');
                     setTimeout(()=>document.querySelectorAll('.slot-cell.win').forEach(cell=>cell.classList.remove('win')),3200);
                     casinoProgress.totalWins=(casinoProgress.totalWins||0)+1;
                     casinoProgress.bestWin=Math.max(casinoProgress.bestWin||0,result.win);
                 }else{
-                    forceNoPrizeGrid(grid);
+                    result={win:0,cells:[],details:[],combinations:[]};
                     lastWinAmount=0;
                     casinoProgress.consecutiveLosses=Math.min(3,(Number(casinoProgress.consecutiveLosses)||0)+1);
-                    playLoseSound();
-                    document.getElementById('winMessage').textContent=freespinsRemaining>0?'🔄 Фриспин готов.':'';
+                    playLoseSound();document.getElementById('winMessage').textContent=freespinsRemaining>0?'🔄 Фриспин готов.':'';
                     triggerHaptic('lose');
                 }
                 await updateBalanceDB();
