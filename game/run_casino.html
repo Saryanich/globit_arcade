@@ -1043,6 +1043,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
           .btn{margin-top:2px;padding:5px}
         }
 
+        .ball-panel{width:100%;max-width:560px;text-align:center}.ball-cups{position:relative;width:100%;height:112px;margin:18px auto 10px;overflow:hidden;border-bottom:2px solid #8d6938}.ball-cup{position:absolute;top:8px;height:86px;border:1px solid #e3c47b;border-radius:9px 9px 18px 18px;background:linear-gradient(145deg,#e8c77d,#80501e 58%,#3d2717);color:#fff2c6;font-size:29px;box-shadow:0 8px 12px #0008;transition:left .17s cubic-bezier(.2,.8,.2,1),transform .17s}.ball-cup:active{transform:translateY(-5px)}.ball-cup.revealed{background:linear-gradient(145deg,#f3dfa2,#a87937)}.ball-cup .ball-under{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:23px}.ball-clock{font:900 22px ui-monospace,monospace;color:#ffe18a}.ball-multiplier{font:900 19px ui-monospace,monospace;color:#a4f5ae}.ball-stake{width:100%;min-height:38px;margin:8px 0;padding:7px;background:#101b14;color:#fff;border:1px solid #8caa79;border-radius:6px}.ball-cup:disabled{cursor:default;opacity:.9}
         .rocket-panel{width:100%;max-width:560px;text-align:center}.rocket-chart-wrap{position:relative;width:100%;height:220px;margin:12px auto;border:1px solid #568a62;border-radius:10px;background:linear-gradient(180deg,#10251b,#080f0c);overflow:hidden}.rocket-chart{width:100%;height:100%;display:block}.rocket-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:left}.rocket-controls label{display:flex;flex-direction:column;gap:6px;color:#c9d7c8;font-size:11px}.rocket-controls select,.rocket-controls input{width:100%;min-height:38px;border:1px solid #8caa79;border-radius:6px;background:#101b14;color:#fff;padding:7px}.rocket-live{font:900 24px ui-monospace,monospace;color:#a4f5ae}.rocket-live.down{color:#ff8585}.rocket-target{font-size:11px;color:#e7cf94}.rocket-result{min-height:24px;font-weight:900;color:#ffe18a;margin-top:8px}@media(max-width:420px){.rocket-chart-wrap{height:185px}.rocket-controls{gap:6px}}
 </style>
 </head>
@@ -1068,7 +1069,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
   </div>
 </div>
 
-    <div class="mini-arcade-overlay" id="miniArcadeScreen" aria-hidden="true"><section class="mini-arcade-cabinet"><header class="mini-arcade-header"><div><small>GLOBIT • RETRO HALL</small><h2>MINI CASINO</h2></div><button class="mini-close" type="button" aria-label="Закрыть мини-казино" onclick="closeMiniArcade()">✕</button></header><div class="mini-wallet">ВАШ БАЛАНС <b id="miniBalance">0</b> COINS</div><div class="mini-game-tabs"><button onclick="selectMiniGame('wheel')" class="mini-game-card" data-mini="wheel"><i>🎡</i><b>РУЛЕТКА</b><small>× до 6</small><small data-mini-cooldown="wheel"></small></button><button onclick="selectMiniGame('dice')" class="mini-game-card" data-mini="dice"><i>🎲</i><b>КОСТИ</b><small>× до 3</small><small data-mini-cooldown="dice"></small></button><button onclick="selectMiniGame('cards')" class="mini-game-card" data-mini="cards"><i>🂡</i><b>КАРТЫ</b><small>Красное / чёрное</small><small data-mini-cooldown="cards"></small></button><button onclick="selectMiniGame('coin')" class="mini-game-card" data-mini="coin"><i>🪙</i><b>МОНЕТКА</b><small>Орёл / решка</small><small data-mini-cooldown="coin"></small></button><button onclick="selectMiniGame('risk')" class="mini-game-card" data-mini="risk"><i>🃏</i><b>РИСК</b><small>Удвой выигрыш</small><small data-mini-cooldown="risk"></small></button><button onclick="selectMiniGame('rocket')" class="mini-game-card" data-mini="rocket"><i>🚀</i><b>РАКЕТА</b><small>Инвестиция · 10 сек</small><small data-mini-cooldown="rocket"></small></button></div><div class="mini-stage" id="miniStage"><div class="mini-stage-idle"><span>🎰</span><h3>ВЫБЕРИ АВТОМАТ</h3><p>Все игры используют текущую ставку.</p></div></div><div class="mini-footer"><span>RETRO ARCADE • 1986</span><button onclick="closeMiniArcade()">← НАЗАД К СЛОТАМ</button></div></section></div>
+    <div class="mini-arcade-overlay" id="miniArcadeScreen" aria-hidden="true"><section class="mini-arcade-cabinet"><header class="mini-arcade-header"><div><small>GLOBIT • RETRO HALL</small><h2>MINI CASINO</h2></div><button class="mini-close" type="button" aria-label="Закрыть мини-казино" onclick="closeMiniArcade()">✕</button></header><div class="mini-wallet">ВАШ БАЛАНС <b id="miniBalance">0</b> COINS</div><div class="mini-game-tabs"><button onclick="selectMiniGame('wheel')" class="mini-game-card" data-mini="wheel"><i>🎡</i><b>РУЛЕТКА</b><small>× до 6</small><small data-mini-cooldown="wheel"></small></button><button onclick="selectMiniGame('dice')" class="mini-game-card" data-mini="dice"><i>🎲</i><b>КОСТИ</b><small>× до 3</small><small data-mini-cooldown="dice"></small></button><button onclick="selectMiniGame('cards')" class="mini-game-card" data-mini="cards"><i>🂡</i><b>КАРТЫ</b><small>Красное / чёрное</small><small data-mini-cooldown="cards"></small></button><button onclick="selectMiniGame('coin')" class="mini-game-card" data-mini="coin"><i>🪙</i><b>МОНЕТКА</b><small>Орёл / решка</small><small data-mini-cooldown="coin"></small></button><button onclick="selectMiniGame('risk')" class="mini-game-card" data-mini="risk"><i>🃏</i><b>РИСК</b><small>Удвой выигрыш</small><small data-mini-cooldown="risk"></small></button><button onclick="selectMiniGame('rocket')" class="mini-game-card" data-mini="rocket"><i>🚀</i><b>РАКЕТА</b><small>Инвестиция · 10 сек</small><small data-mini-cooldown="rocket"></small></button><button onclick="selectMiniGame('ball')" class="mini-game-card" data-mini="ball"><i>🥤</i><b>ГДЕ ШАРИК?</b><small>Внимание · до 30 сек</small><small data-mini-cooldown="ball"></small></button></div><div class="mini-stage" id="miniStage"><div class="mini-stage-idle"><span>🎰</span><h3>ВЫБЕРИ АВТОМАТ</h3><p>Все игры используют текущую ставку.</p></div></div><div class="mini-footer"><span>RETRO ARCADE • 1986</span><button onclick="closeMiniArcade()">← НАЗАД К СЛОТАМ</button></div></section></div>
     <div class="workshop-overlay" id="workshopOverlay" aria-hidden="true"><section class="workshop-modal">
       <header class="workshop-top"><div><small>GLOBIT • UPGRADES</small><h2>🛠 МАСТЕРСКАЯ</h2><p>Прокачивай автомат по уровням</p></div><button type="button" class="mini-close" onclick="closeWorkshop()">✕</button></header>
       <div class="workshop-wallet">Баланс: <b id="workshopBalance">0</b> монет</div><div class="workshop-upgrades" id="workshopUpgrades"></div>
@@ -1892,10 +1893,11 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
 
         const WORKSHOP_UPGRADES={
-            lucky:{title:'🍀 Удача',desc:'Повышает шанс выигрыша на 2 п.п. за уровень.',costs:[20000,60000,140000,300000,600000]},
+            lucky:{title:'🍀 Удача',desc:'Заметно повышает шанс выигрыша и редких комбинаций.',costs:[20000,60000,140000,300000,600000]},
             payout:{title:'💎 Премия',desc:'Повышает выплаты на 3% за уровень.',costs:[32000,90000,210000,450000,900000]},
             turbo:{title:'⚙️ Турбо-механизм',desc:'Ускоряет остановку барабанов.',costs:[16000,48000,115000,250000,500000]},
-            auto:{title:'🔄 Автопривод',desc:'Открывает автоспин и ускоряет его.',costs:[20000,60000,140000,300000,600000]}
+            auto:{title:'🔄 Автопривод',desc:'Открывает автоспин и ускоряет его.',costs:[20000,60000,140000,300000,600000]},
+            winmult:{title:'👑 Золотой множитель',desc:'Постоянно увеличивает каждый выигрыш: +0,2× за уровень, до +2×. Дорогая прокачка для крупных выплат.',costs:[250000,600000,1200000,2500000,5000000,10000000,20000000,40000000,80000000,160000000]}
         };
         function getPrestigeCount(){return Math.max(0,Math.floor(Number(casinoProgress.prestige)||0));}
         function getPrestigeHighPrizeChance(){return Math.min(100,1+getPrestigeCount()*.2);}
@@ -1923,7 +1925,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         }
         function openPrestige(){if(!casinoDataReady)return;if(isSpinInProgress||miniGameBusy||megaGameActive||riskActive)return;updatePrestigePanel();document.getElementById('prestigeOverlay').classList.add('open');document.getElementById('prestigeOverlay').setAttribute('aria-hidden','false');playButtonClick();}
         function closePrestige(){document.getElementById('prestigeOverlay').classList.remove('open');document.getElementById('prestigeOverlay').setAttribute('aria-hidden','true');updateUI();}
-        function getUpgradeLevel(key){return Math.max(0,Math.min(5,Number(casinoProgress.upgradeLevels?.[key])||0));}
+        function getUpgradeLevel(key){return Math.max(0,Math.min(key==='winmult'?10:5,Number(casinoProgress.upgradeLevels?.[key])||0));}
         function openWorkshop(){
             if(!casinoDataReady)return;if(isSpinInProgress||miniGameBusy)return;renderWorkshop();document.getElementById('workshopOverlay').classList.add('open');document.getElementById('workshopOverlay').setAttribute('aria-hidden','false');playButtonClick();}
         function closeWorkshop(){document.getElementById('workshopOverlay').classList.remove('open');document.getElementById('workshopOverlay').setAttribute('aria-hidden','true');updateUI();}
@@ -1931,8 +1933,10 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             const host=document.getElementById('workshopUpgrades');if(!host)return;
             document.getElementById('workshopBalance').textContent=Number(gameBalance||0).toLocaleString();
             host.innerHTML=Object.entries(WORKSHOP_UPGRADES).map(([key,item])=>{
-                const level=getUpgradeLevel(key),cost=item.costs[level]||0,full=level>=5;
-                return '<article class="workshop-card"><h3>'+item.title+'</h3><p>'+item.desc+'</p><div class="workshop-level"><span>Уровень '+level+'/5</span><b>'+(full?'MAX':cost.toLocaleString()+' монет')+'</b></div><div class="workshop-meter"><i style="width:'+(level*20)+'%"></i></div><button class="workshop-buy" data-upgrade-key="'+key+'" '+(full||gameBalance<cost?'disabled':'')+'>'+(full?'✓ МАКСИМУМ':gameBalance<cost?'Не хватает монет':'УЛУЧШИТЬ · '+cost.toLocaleString())+'</button></article>';
+                const max=key==='winmult'?10:5,level=getUpgradeLevel(key),cost=item.costs[level]||0,full=level>=max;
+                const progress=Math.round(level/max*100);
+                const levelInfo=key==='winmult'?' · +'+(level*.2).toFixed(1).replace('.',',')+'× к выплате':'';
+                return '<article class="workshop-card"><h3>'+item.title+'</h3><p>'+item.desc+'</p><div class="workshop-level"><span>Уровень '+level+'/'+max+levelInfo+'</span><b>'+(full?'MAX':cost.toLocaleString()+' монет')+'</b></div><div class="workshop-meter"><i style="width:'+progress+'%"></i></div><button class="workshop-buy" data-upgrade-key="'+key+'" '+(full||gameBalance<cost?'disabled':'')+'>'+(full?'✓ МАКСИМУМ':gameBalance<cost?'Не хватает монет':'УЛУЧШИТЬ · '+cost.toLocaleString())+'</button></article>';
             }).join('');
             host.querySelectorAll('[data-upgrade-key]').forEach(button=>button.addEventListener('click',()=>buyWorkshopUpgrade(button.dataset.upgradeKey)));
             if(casinoProgress.comboRevealUnlocked===true){
@@ -1942,25 +1946,27 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             }
         }
 
-        async function buyWorkshopUpgrade(key){const item=WORKSHOP_UPGRADES[key];if(!item)return;const level=getUpgradeLevel(key);if(level>=5)return;const cost=item.costs[level];if(gameBalance<cost)return;gameBalance-=cost;casinoProgress.upgradeLevels=casinoProgress.upgradeLevels||{};casinoProgress.upgradeLevels[key]=level+1;if(key==='turbo'&&level+1>=5)casinoProgress.comboRevealUnlocked=true;if(key==='auto'){autoSpinUnlocked=true;casinoProgress.autoSpinUnlocked=true;}await updateBalanceDB();renderWorkshop();updateUI();playSfx('sfxWin');triggerHaptic('medium');document.getElementById('winMessage').textContent=item.title+' улучшено до уровня '+(level+1)+'!';}
+        async function buyWorkshopUpgrade(key){const item=WORKSHOP_UPGRADES[key];if(!item)return;const level=getUpgradeLevel(key),max=key==='winmult'?10:5;if(level>=max)return;const cost=item.costs[level];if(gameBalance<cost)return;const oldBalance=gameBalance;gameBalance-=cost;casinoProgress.upgradeLevels=casinoProgress.upgradeLevels||{};casinoProgress.upgradeLevels[key]=level+1;if(key==='turbo'&&level+1>=5)casinoProgress.comboRevealUnlocked=true;if(key==='auto'){autoSpinUnlocked=true;casinoProgress.autoSpinUnlocked=true;}try{await updateBalanceDB();}catch(error){gameBalance=oldBalance;casinoProgress.upgradeLevels[key]=level;throw error;}renderWorkshop();updateUI();playSfx('sfxWin');triggerHaptic('medium');document.getElementById('winMessage').textContent=item.title+' улучшено до уровня '+(level+1)+'!';}
         function setComboRevealEnabled(enabled){if(casinoProgress.comboRevealUnlocked!==true)return;casinoProgress.comboRevealEnabled=!!enabled;updateBalanceDB().then(()=>renderWorkshop()).catch(error=>{casinoProgress.comboRevealEnabled=!enabled;renderWorkshop();console.error('Не удалось сохранить настройку анимации:',error);});}
         function getAutoSpinDelay(){return Math.max(1200,AUTO_SPIN_DELAY-getUpgradeLevel('auto')*200);}
         function getSpinAnimationDuration(){return Math.max(850,1850-getUpgradeLevel('turbo')*180);}
-        function getPayoutBoost(){return 1+getUpgradeLevel('payout')*.03;}
-        function getSpinWinChance(){return Math.min(75,60+getUpgradeLevel('lucky')*1.5+getPrestigeCount()*.15+(casinoProgress.superGameLuckBoost?3:0));}
+        function getPayoutBoost(){return (1+getUpgradeLevel('payout')*.03)*(1+getUpgradeLevel('winmult')*.2);}
+        function getSpinWinChance(){return Math.min(90,65+getUpgradeLevel('lucky')*3.5+getPrestigeCount()*.35+(casinoProgress.superGameLuckBoost?5:0));}
         function rollSlotPayout(symbol,length){
-            const ranges={3:[.10,.80],4:[.35,1.50],5:[1.00,3.50],6:[2.00,7.00]};
+            const ranges={3:[.15,1.00],4:[.50,2.00],5:[1.50,5.50],6:[3.00,12.00]};
             const range=ranges[Math.max(3,Math.min(6,length))]||ranges[3];
             const rarity=Math.max(0,Object.keys(PAYOUTS).indexOf(symbol));
             const raw=range[0]+Math.random()*(range[1]-range[0]);
-            const rarityFactor=1+rarity*.16;
-            const excitement=Math.random()<.035?1.35:1;
-            return Math.min(10,Math.max(.1,raw*rarityFactor*excitement*getPayoutBoost()));
+            const rarityFactor=1+rarity*.22;
+            const excitement=Math.random()<.06?1.5:1;
+            return Math.min(30,Math.max(.1,raw*rarityFactor*excitement*getPayoutBoost()));
         }
         function createRandomWinningGrid(){
             const grid=Array.from({length:SLOT_ROWS},()=>Array.from({length:SLOT_COLS},()=>getRandomSymbol()));
             const row=Math.floor(Math.random()*SLOT_ROWS),lengthRoll=Math.random();
-            const length=lengthRoll<.50?3:lengthRoll<.80?4:lengthRoll<.95?5:6;
+            const luckFactor=Math.min(.22,getUpgradeLevel('lucky')*.025+getPrestigeCount()*.002);
+            const sixChance=.05+luckFactor*.30,fiveChance=.15+luckFactor*.48,fourChance=.30+luckFactor*.22;
+            const length=lengthRoll<1-sixChance-fiveChance-fourChance?3:lengthRoll<1-sixChance-fiveChance?4:lengthRoll<1-sixChance?5:6;
             const start=Math.floor(Math.random()*(SLOT_COLS-length+1));
             const symbols=Object.keys(PAYOUTS),weights=SYMBOL_WEIGHTS.slice(0,symbols.length);
             let symbolRoll=Math.random()*weights.reduce((a,b)=>a+b,0),symbol=symbols[0];
@@ -1994,6 +2000,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             if(miniGameBusy)return;selectedMiniGame=kind;
             document.querySelectorAll('.mini-game-card').forEach(button=>button.classList.toggle('active',button.dataset.mini===kind));
             if(kind==='rocket'){renderRocketPanel();playButtonClick();return;}
+            if(kind==='ball'){renderBallGamePanel();playButtonClick();return;}
             const titles={wheel:'РУЛЕТКА УДАЧИ',dice:'БРОСОК КОСТЕЙ',cards:'КРАСНОЕ ИЛИ ЧЁРНОЕ',coin:'ОРЁЛ ИЛИ РЕШКА',risk:'РИСК · УДВОЕНИЕ'};
             const art={wheel:'<div class="mini-wheel" id="miniWheel"></div>',dice:'<div class="mini-die" id="miniDie">🎲</div>',cards:'<div><span class="mini-card">A♥</span><span class="mini-card" style="color:#222">K♠</span></div>',coin:'<div class="mini-coin" id="miniCoin">🪙</div>',risk:'<div class="mini-risk-cards" id="miniRiskCards"></div>'};
             const rules={wheel:'Редкий джекпот ×6, удачный сектор ×1,5, небольшой возврат ×0,4.',dice:'6 — ×3, 4–5 — ×0,8, 3 — ×0,25.',cards:'Угадай цвет следующей карты. Верный цвет — ×1,7.',coin:'Выбери сторону монеты. Верный выбор — ×1,7.',risk:'Удвой последний выигрыш: найди ❤️ среди четырёх карт. Ошибка заберёт выигрыш.'};
@@ -2011,6 +2018,86 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             const target=document.getElementById('rocketTarget');
             target.addEventListener('input',()=>{const v=Number(target.value),label=(v>0?'+':'')+v+'%';document.getElementById('rocketTargetValue').textContent=label;document.getElementById('rocketTargetLabel').textContent='Цель: '+label;});
             drawRocketChart([0],0);
+        }
+
+        let ballGameState=null;
+        function renderBallGamePanel(){
+            const stage=document.getElementById('miniStage');
+            stage.innerHTML='<div class="ball-panel"><h3>🥤 ГДЕ ШАРИК?</h3><p>Выбери ставку. Чем она выше, тем больше стаканов и сложнее слежка.</p><label>Ставка <select class="ball-stake" id="ballStake"><option value="500">500</option><option value="1000" selected>1 000</option><option value="2500">2 500</option><option value="5000">5 000</option><option value="10000">10 000</option></select></label><div class="ball-clock" id="ballClock">30,0 сек</div><div class="ball-multiplier" id="ballMultiplier">До ×2,00</div><div class="ball-cups" id="ballCups"><p>Запусти игру, чтобы увидеть шарик</p></div><div class="mini-result" id="ballResult">Угадай стакан за 30 секунд. До 15 секунд множитель падает с ×2 до ×1, затем до ×0.</div><button class="mini-play" id="ballStart" onclick="startBallGame()">🎯 НАЧАТЬ ИГРУ</button></div>';
+        }
+        function ballMultiplierAt(seconds){
+            if(seconds<=15)return Math.max(1,2-seconds/15);
+            return Math.max(0,1-(seconds-15)/15);
+        }
+        function updateBallPositions(){
+            if(!ballGameState)return;
+            const count=ballGameState.cups.length,step=100/count;
+            ballGameState.cups.forEach((cup,index)=>{cup.element.style.left=(index*step)+'%';cup.element.style.width='calc('+step+'% - 5px)';});
+        }
+        async function startBallGame(){
+            if(ballGameState||miniGameBusy||isSpinInProgress||megaGameActive||riskActive)return;
+            const stake=Number(document.getElementById('ballStake')?.value)||0;
+            if(stake<500||gameBalance<stake){document.getElementById('ballResult').textContent='Недостаточно монет для ставки.';return;}
+            const count=stake<=1000?3:stake<=2500?4:stake<=5000?5:7;
+            miniGameBusy=true;isSpinInProgress=true;gameBalance-=stake;updateUI();updateMiniBalance();
+            try{await updateBalanceDB();}catch(error){gameBalance+=stake;miniGameBusy=false;isSpinInProgress=false;updateUI();document.getElementById('ballResult').textContent='Ставка не списана: сервер не подтвердил сохранение.';return;}
+            const host=document.getElementById('ballCups');host.innerHTML='';
+            const cups=Array.from({length:count},(_,id)=>{
+                const element=document.createElement('button');element.type='button';element.className='ball-cup';element.innerHTML='<span>🥤</span>';element.onclick=()=>guessBallCup(id);host.appendChild(element);return {id,element};
+            });
+            const ballId=Math.floor(Math.random()*count);
+            ballGameState={stake,cups,ballId,started:performance.now(),finished:false,shuffleTimer:null,clockTimer:null};
+            const state=ballGameState;
+            const ball=document.createElement('span');ball.className='ball-under';ball.textContent='⚪';cups[ballId].element.appendChild(ball);
+            updateBallPositions();
+            document.getElementById('ballStart').disabled=true;
+            document.getElementById('ballResult').textContent='Смотри внимательно! Стаканы постоянно меняются местами.';
+            state.shuffleTimer=setInterval(()=>{
+                if(ballGameState!==state||state.finished)return;
+                const swaps=2+Math.floor(Math.random()*3);
+                for(let n=0;n<swaps;n++){const a=Math.floor(Math.random()*count),b=Math.floor(Math.random()*count);if(a!==b)[state.cups[a],state.cups[b]]=[state.cups[b],state.cups[a]];}
+                updateBallPositions();
+            },220);
+            state.clockTimer=setInterval(()=>{
+                if(ballGameState!==state||state.finished)return;
+                const elapsed=(performance.now()-state.started)/1000,remain=Math.max(0,30-elapsed);
+                const clock=document.getElementById('ballClock'),multi=document.getElementById('ballMultiplier');
+                if(clock)clock.textContent=remain.toFixed(1).replace('.',',')+' сек';
+                if(multi)multi.textContent='Выплата: ×'+ballMultiplierAt(elapsed).toFixed(2).replace('.',',');
+                if(elapsed>=30)finishBallGame(null,true);
+            },80);
+        }
+        async function guessBallCup(id){
+            const state=ballGameState;if(!state||state.finished)return;
+            const elapsed=(performance.now()-state.started)/1000;
+            const selected=state.cups.findIndex(cup=>cup.id===id);
+            const correct=selected===state.cups.findIndex(cup=>cup.id===state.ballId);
+            finishBallGame(correct?ballMultiplierAt(elapsed):0,false,correct,id);
+        }
+        async function finishBallGame(multiplier,timedOut,correct=false,selectedId=null){
+            const state=ballGameState;if(!state||state.finished)return;
+            state.finished=true;clearInterval(state.shuffleTimer);clearInterval(state.clockTimer);
+            const actualIndex=state.cups.findIndex(cup=>cup.id===state.ballId);
+            state.cups.forEach((cup,index)=>{
+                cup.element.disabled=true;cup.element.style.left=(index*100/state.cups.length)+'%';
+                if(index===actualIndex){cup.element.classList.add('revealed');if(!cup.element.querySelector('.ball-under')){const ball=document.createElement('span');ball.className='ball-under';ball.textContent='⚪';cup.element.appendChild(ball);}}
+            });
+            const elapsed=(performance.now()-state.started)/1000;
+            let payout=0,message='';
+            if(timedOut||elapsed>=30){
+                gameBalance-=500;
+                message='⏰ Время вышло! Ставка сгорела и дополнительно списан штраф 500 монет.';
+            }else if(correct){
+                payout=Math.floor(state.stake*multiplier);gameBalance+=payout;
+                message='🎯 Верно! Выплата '+payout.toLocaleString('ru-RU')+' монет · множитель ×'+multiplier.toFixed(2).replace('.',',')+'.';
+            }else message='Не угадал. Ставка '+state.stake.toLocaleString('ru-RU')+' монет сгорела.';
+            const result=document.getElementById('ballResult');if(result)result.textContent=message;
+            const clock=document.getElementById('ballClock');if(clock)clock.textContent='РАУНД ЗАВЕРШЁН';
+            const multi=document.getElementById('ballMultiplier');if(multi)multi.textContent=payout?'Выплата '+payout.toLocaleString('ru-RU'):'Выплата ×0';
+            const start=document.getElementById('ballStart');if(start){start.disabled=false;start.textContent='↻ ИГРАТЬ ЕЩЁ';}
+            try{await updateBalanceDB();}catch(error){if(result)result.textContent+=' Ошибка сохранения баланса: '+String(error.message||error).slice(0,100);}
+            if(payout>state.stake){playBigWinSound();triggerHaptic('bigWin');triggerCasinoFX('win');}else if(payout>0){playWinSound();triggerHaptic('win');}else{playLoseSound();triggerHaptic('lose');}
+            ballGameState=null;miniGameBusy=false;isSpinInProgress=false;updateMiniBalance();updateUI();
         }
         function drawRocketChart(values,current,progress=1){
             const canvas=document.getElementById('rocketCanvas');if(!canvas)return;
@@ -2062,7 +2149,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 const exact=Math.abs(finalPercent-target)<=1;
                 if(exact)payout*=2;
                 gameBalance+=payout;lastWinAmount=payout;
-                result.textContent=(finalPercent>0?'+':'')+finalPercent.toFixed(1)+'% · '+(payout>0?'выплата '+payout.toLocaleString('ru-RU'):'ставка потеряна')+(exact?' · 🎯 ПОПАДАНИЕ! ВЫПЛАТА ×2':'');
+                live.textContent='РАУНД ЗАВЕРШЁН';
+                result.textContent=(payout>0?'Выплата '+payout.toLocaleString('ru-RU')+' монет':'Ставка потеряна')+(exact?' · 🎯 ПОПАДАНИЕ! ВЫПЛАТА ×2':'');
                 if(payout>stake){playBigWinSound();triggerHaptic('bigWin');triggerCasinoFX('win');}
                 else if(payout>0){playWinSound();triggerHaptic('win');}
                 else{playLoseSound();triggerHaptic('lose');}
