@@ -1164,8 +1164,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 <div class="paytable-row"><span>💀 Череп</span><span>Уменьшает общий приз в 2 раза</span></div>
                 <div class="paytable-row"><span>⭐ Звезда</span><span>3+ звезды дают фриспины</span></div>
                 <div class="paytable-row"><span>📦 Коробка</span><span>Через 0,5 сек превращается в символ</span></div>
-                <div class="paytable-row"><span>Минимальная выплата</span><span>Не менее ⅓ ставки</span></div>
-                <div class="paytable-row"><span>Шанс выигрыша</span><span>От 60% · растёт от улучшений</span></div>
+                <div class="paytable-row"><span>Выплата за комбинацию</span><span>От 0,1× до 10× ставки</span></div>
+                <div class="paytable-row"><span>Частота выигрыша</span><span>60% базовая · растёт от удачи</span></div>
                 <div class="paytable-row"><span>Суперигра · 1 уровень (от 1 млн)</span><span>5 раундов · ±200 000</span></div>
                 <div class="paytable-row"><span>Суперигра · 2 уровень (от 5 млн)</span><span>5 раундов · ±350 000</span></div>
                 <div class="paytable-row"><span>Суперигра · 3 уровень (от 10 млн)</span><span>5 раундов · ±500 000</span></div>
@@ -1948,16 +1948,14 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         function getSpinAnimationDuration(){return Math.max(850,1850-getUpgradeLevel('turbo')*180);}
         function getPayoutBoost(){return 1+getUpgradeLevel('payout')*.03;}
         function getSpinWinChance(){return Math.min(70,60+getUpgradeLevel('lucky')*1.5+getPrestigeCount()*.15);}
-        function rollSlotPayout(){
-            const tiers=[
-                {w:15,min:.10,max:.40},{w:20,min:.40,max:.80},
-                {w:25,min:.80,max:1.20},{w:20,min:1.20,max:2.00},
-                {w:12,min:2.00,max:4.00},{w:7,min:4.00,max:10.00},{w:1,min:10,max:10}
-            ];
-            const total=tiers.reduce((n,t)=>n+t.w,0);let roll=Math.random()*total,tier=tiers[0];
-            for(const t of tiers){roll-=t.w;if(roll<=0){tier=t;break;}}
-            const multiplier=tier.min===tier.max?tier.min:tier.min+Math.random()*(tier.max-tier.min);
-            return Math.min(10,Math.max(.1,multiplier*getPayoutBoost()));
+        function rollSlotPayout(symbol,length){
+            const ranges={3:[.10,.80],4:[.35,1.50],5:[1.00,3.50],6:[2.00,7.00]};
+            const range=ranges[Math.max(3,Math.min(6,length))]||ranges[3];
+            const rarity=Math.max(0,Object.keys(PAYOUTS).indexOf(symbol));
+            const raw=range[0]+Math.random()*(range[1]-range[0]);
+            const rarityFactor=1+rarity*.105;
+            const excitement=Math.random()<.035?1.35:1;
+            return Math.min(10,Math.max(.1,raw*rarityFactor*excitement*getPayoutBoost()));
         }
         function createRandomWinningGrid(){
             const grid=Array.from({length:SLOT_ROWS},()=>Array.from({length:SLOT_COLS},()=>getRandomSymbol()));
@@ -1965,6 +1963,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             const start=Math.floor(Math.random()*(SLOT_COLS-length+1));
             const symbols=Object.keys(PAYOUTS),symbol=symbols[Math.floor(Math.random()*symbols.length)];
             for(let c=start;c<start+length;c++)grid[row][c]=symbol;
+            grid._plannedSymbol=symbol;grid._plannedLength=length;
             return grid;
         }
 
@@ -2322,14 +2321,14 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 else freespinsRemaining--;
                 updateUI();document.getElementById('winMessage').textContent='';
                 const pityActive=(Number(casinoProgress.consecutiveLosses)||0)>=3;
-                const wantsPrize=pityActive||Math.random()*100<getSpinWinChance();
+                const wantsPrize=pityActive||(Math.random()*100<getSpinWinChance()&&!suppressWinBySuperGamePenalty());
                 const grid=wantsPrize?createRandomWinningGrid():createSlotGrid(false);
                 await animateSlotGrid(grid,getSpinAnimationDuration());
                 let result;
                 if(wantsPrize){
                     result=checkWin(grid,false,false,false);
                     const minPrize=Math.max(1,Math.floor(currentBet*.1));
-                    result.win=Math.max(minPrize,Math.floor(currentBet*rollSlotPayout()));
+                    result.win=Math.max(minPrize,Math.floor(currentBet*rollSlotPayout(grid._plannedSymbol,grid._plannedLength)));
                     result.details.push('🎰 Комбинация');
                     result.combinations=result.combinations.length?result.combinations:[{description:'Комбинация',amount:result.win,cells:result.cells.map(p=>({row:p.row,col:p.col}))}];
                     lastWinAmount=result.win;casinoProgress.consecutiveLosses=0;gameBalance+=result.win;
