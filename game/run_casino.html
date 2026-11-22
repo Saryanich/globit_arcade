@@ -1075,7 +1075,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
       <div class="workshop-wallet">Баланс: <b id="workshopBalance">0</b> монет</div><div class="workshop-upgrades" id="workshopUpgrades"></div>
       <footer class="workshop-bottom"><span>Уровни сохраняются в аккаунте</span><button type="button" onclick="closeWorkshop()">ГОТОВО</button></footer>
     </section></div>
-    <div class="prestige-overlay" id="prestigeOverlay" aria-hidden="true"><section class="prestige-modal"><header class="workshop-top"><div><small>GLOBIT • ASCENSION</small><h2>⭐ ПРЕСТИЖ</h2><p>Начни заново и навсегда увеличь шанс крупного приза</p></div><button type="button" class="mini-close" onclick="closePrestige()">✕</button></header><div class="prestige-wallet"><span>Текущий баланс</span><b id="prestigeBalance">500</b></div><div class="prestige-stats"><div><small>Текущий престиж</small><b id="prestigeCount">0</b></div><div><small>Шанс крупного приза</small><b id="prestigeChance">1%</b></div><div><small>Следующий шанс</small><b id="prestigeNextChance">1,2%</b></div></div><div class="prestige-description">Для престижа нужно накопить <b>50 000 000 монет</b>. После подтверждения баланс станет <b>500 монет</b>, улучшения и пройденные суперигры сбросятся, а престиж и бонус к шансу останутся навсегда.</div><div class="prestige-ready-note" id="prestigeReadyNote">Пока копи монеты. Когда достигнешь 50 000 000, поле автомата сменится на приглашение к престижу — потяни рычаг.</div><button type="button" class="prestige-action" id="prestigeAction" onclick="closePrestige()" disabled>НУЖНО 50 000 000 МОНЕТ</button><footer class="workshop-bottom"><span>Каждый престиж: +0,2% к шансу</span><button type="button" onclick="closePrestige()">ЗАКРЫТЬ</button></footer></section></div>
+    <div class="prestige-overlay" id="prestigeOverlay" aria-hidden="true"><section class="prestige-modal"><header class="workshop-top"><div><small>GLOBIT • ASCENSION</small><h2>⭐ ПРЕСТИЖ</h2><p>Начни заново и навсегда увеличь шанс крупного приза</p></div><button type="button" class="mini-close" onclick="closePrestige()">✕</button></header><div class="prestige-wallet"><span>Текущий баланс</span><b id="prestigeBalance">500</b></div><div class="prestige-stats"><div><small>Текущий престиж</small><b id="prestigeCount">0</b></div><div><small>Шанс крупного приза</small><b id="prestigeChance">1%</b></div><div><small>Следующий шанс</small><b id="prestigeNextChance">1,2%</b></div></div><div class="prestige-description">Для престижа нужно накопить <b>250 000 000 монет</b>. После подтверждения баланс станет <b>500 монет</b>, улучшения и пройденные суперигры сбросятся, а престиж и бонус к шансу останутся навсегда.</div><div class="prestige-ready-note" id="prestigeReadyNote">Пока копи монеты. Когда достигнешь 250 000 000, поле автомата сменится на приглашение к престижу — потяни рычаг.</div><button type="button" class="prestige-action" id="prestigeAction" onclick="closePrestige()" disabled>НУЖНО 250 000 000 МОНЕТ</button><footer class="workshop-bottom"><span>Каждый престиж: +0,2% к шансу</span><button type="button" onclick="closePrestige()">ЗАКРЫТЬ</button></footer></section></div>
 <div class="bank-overlay" id="bankOverlay" aria-hidden="true">
   <section class="bank-modal" role="dialog" aria-modal="true" aria-label="Банк Run Casino">
     <header class="workshop-top">
@@ -1822,23 +1822,23 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
         let prestigeFieldReadyState=null;
         function updatePrestigeField(){
-            const ready=casinoDataReady&&gameBalance>=50000000;
+            const ready=casinoDataReady&&gameBalance>=250000000;
             if(prestigeFieldReadyState===ready)return;
             prestigeFieldReadyState=ready;
             const field=document.getElementById('slotGrid');if(!field)return;
             field.classList.toggle('prestige-ready',ready);
-            if(ready)field.innerHTML='<div class="prestige-field-message"><span>⭐</span><b>ПРЕСТИЖ ДОСТУПЕН</b><small>50 000 000 МОНЕТ НАКОПЛЕНО</small><em>ПОТЯНИ РЫЧАГ</em></div>';
+            if(ready)field.innerHTML='<div class="prestige-field-message"><span>⭐</span><b>ПРЕСТИЖ ДОСТУПЕН</b><small>250 000 000 МОНЕТ НАКОПЛЕНО</small><em>ПОТЯНИ РЫЧАГ</em></div>';
             else initGrid();
         }
         function updatePrestigePanel(){
             const balance=document.getElementById('prestigeBalance'),count=document.getElementById('prestigeCount'),chance=document.getElementById('prestigeChance'),next=document.getElementById('prestigeNextChance'),note=document.getElementById('prestigeReadyNote'),action=document.getElementById('prestigeAction');
-            const ready=gameBalance>=50000000&&casinoDataReady;
+            const ready=gameBalance>=250000000&&casinoDataReady;
             if(balance)balance.textContent=Number(gameBalance||0).toLocaleString();
             if(count)count.textContent=String(getPrestigeCount());
             if(chance)chance.textContent=getPrestigeHighPrizeChance().toFixed(1).replace('.',',')+'%';
             if(next)next.textContent=Math.min(100,getPrestigeHighPrizeChance()+.2).toFixed(1).replace('.',',')+'%';
-            if(note)note.textContent=ready?'Престиж доступен! Вернись к автомату и потяни рычаг — после подтверждения прогресс сбросится.':'Пока копи монеты. Когда достигнешь 50 000 000, поле автомата сменится на приглашение к престижу — потяни рычаг.';
-            if(action){action.disabled=!ready||isSpinInProgress||megaGameActive||riskActive||miniGameBusy;action.textContent=ready?'⭐ ПРЕСТИЖ ГОТОВ — ПОТЯНИ РЫЧАГ':'НУЖНО '+Math.max(0,50000000-gameBalance).toLocaleString()+' МОНЕТ';}
+            if(note)note.textContent=ready?'Престиж доступен! Вернись к автомату и потяни рычаг — после подтверждения прогресс сбросится.':'Пока копи монеты. Когда достигнешь 250 000 000, поле автомата сменится на приглашение к престижу — потяни рычаг.';
+            if(action){action.disabled=!ready||isSpinInProgress||megaGameActive||riskActive||miniGameBusy;action.textContent=ready?'⭐ ПРЕСТИЖ ГОТОВ — ПОТЯНИ РЫЧАГ':'НУЖНО '+Math.max(0,250000000-gameBalance).toLocaleString()+' МОНЕТ';}
         }
         function updateUI(){
             const balance = document.getElementById('balanceDisplay');
@@ -1902,7 +1902,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         function getPrestigeCount(){return Math.max(0,Math.floor(Number(casinoProgress.prestige)||0));}
         function getPrestigeHighPrizeChance(){return Math.min(100,1+getPrestigeCount()*.2);}
         async function performPrestige(){
-            if(!casinoDataReady||isSpinInProgress||riskActive||megaGameActive||miniGameBusy||gameBalance<50000000)return;
+            if(!casinoDataReady||isSpinInProgress||riskActive||megaGameActive||miniGameBusy||gameBalance<250000000)return;
             const nextPrestige=getPrestigeCount()+1;
             const chance=(1+nextPrestige*.2).toFixed(1).replace(".",",");
             if(!confirm('Активировать престиж '+nextPrestige+'?\\n\\nБаланс станет 500 монет. Все улучшения и пройденные суперигры сбросятся.\\nШанс крупного приза вырастет до '+chance+'%.\\nПрестиж '+nextPrestige+' останется навсегда.'))return;
@@ -2447,7 +2447,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
 
         async function performSpin(){
             if(!casinoDataReady||isSpinInProgress||riskActive)return;
-            if(gameBalance>=50000000){stopAutoSpin();return;}
+            if(gameBalance>=250000000){stopAutoSpin();return;}
             const wait=Math.max(0,SPIN_MIN_GAP-(Date.now()-lastSpinFinishedAt));
             isSpinInProgress=true;updateUI();const lever=document.getElementById('casinoLever');
             if(lever)lever.classList.add('pulled');playLeverClunk();triggerHaptic('lever');
@@ -2620,7 +2620,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         function finishLeverPull(event){
             if(!leverPointerStart||(event&&event.pointerId!==leverPointerStart.id))return;
             const shouldSpin=leverPullTriggered;leverPointerStart=null;leverPullTriggered=false;
-            if(shouldSpin&&!isSpinInProgress){if(gameBalance>=50000000)performPrestige();else performSpin();}else casinoLever?.classList.remove('pulled');
+            if(shouldSpin&&!isSpinInProgress){if(gameBalance>=250000000)performPrestige();else performSpin();}else casinoLever?.classList.remove('pulled');
         }
         casinoLever?.addEventListener('pointerup',finishLeverPull);
         casinoLever?.addEventListener('pointercancel',finishLeverPull);
