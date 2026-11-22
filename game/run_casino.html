@@ -1162,7 +1162,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 <div class="paytable-row"><span>💀 Череп</span><span>Уменьшает общий приз в 2 раза</span></div>
                 <div class="paytable-row"><span>⭐ Звезда</span><span>3+ звезды дают фриспины</span></div>
                 <div class="paytable-row"><span>📦 Коробка</span><span>Через 0,5 сек превращается в символ</span></div>
-                <div class="paytable-row"><span>Гарантия</span><span>После 3 проигрышей — приз не меньше ×0,5</span></div>
+                <div class="paytable-row"><span>Минимальный приз</span><span>⅓ ставки или 0</span></div>
+                <div class="paytable-row"><span>Гарантия</span><span>После 3 проигрышей следующий спин — обычный приз</span></div>
                 <div class="paytable-row"><span>Суперигра · 1 уровень (от 1 млн)</span><span>5 раундов · ±200 000</span></div>
                 <div class="paytable-row"><span>Суперигра · 2 уровень (от 5 млн)</span><span>5 раундов · ±350 000</span></div>
                 <div class="paytable-row"><span>Суперигра · 3 уровень (от 10 млн)</span><span>5 раундов · ±500 000</span></div>
@@ -2104,7 +2105,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 total=Math.floor(total/2);
                 combinations.forEach(combo=>combo.amount=Math.floor(combo.amount/2));
                 for(let i=0;i<details.length;i++)details[i]+=' · 💀 ×0,5';
-                total=Math.max(Math.ceil(currentBet/3),total);
+                // Череп действительно уменьшает выплату; слишком маленький итог станет проигрышем.
+
             }
             const stars=[];
             for(let r=0;r<SLOT_ROWS;r++)for(let c=0;c<SLOT_COLS;c++)if(grid[r][c]==='⭐')stars.push({row:r,col:c});
@@ -2150,9 +2152,15 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         }
 
         function forceGuaranteedPrize(grid){
+            // Гарантийный спин без спецэффектов: только стандартная таблица выплат.
+            for(let r=0;r<SLOT_ROWS;r++)for(let c=0;c<SLOT_COLS;c++){
+                if(['💀','⭐','📦'].includes(grid[r][c]))grid[r][c]='🍒';
+            }
             const row=Math.floor(Math.random()*SLOT_ROWS);
-            const symbol=['🍒','🍋','🍇','🍉','🍊','🔔'][Math.floor(Math.random()*6)];
-            for(let c=0;c<3;c++){grid[row][c]=symbol;const node=document.getElementById('cell-'+row+'-'+c);if(node)node.textContent=symbol;}
+            for(let c=0;c<3;c++)grid[row][c]='🍒';
+            for(let r=0;r<SLOT_ROWS;r++)for(let c=0;c<SLOT_COLS;c++){
+                const node=document.getElementById('cell-'+r+'-'+c);if(node)node.textContent=grid[r][c];
+            }
         }
 
                 const COMBO_COLORS=['#ffd166','#69f0ae','#64b5f6','#ff8a65','#ce93d8','#fff176'];
@@ -2214,27 +2222,25 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                 await animateSlotGrid(grid,getSpinAnimationDuration());
                 await resolveGiftBoxes(grid);
                 if(guaranteedPrize)forceGuaranteedPrize(grid);
-                let result=checkWin(grid,false,false);
+                // На гарантированном спине считаем только обычные комбинации по базовой таблице.
+                let result=checkWin(grid,false,false,!guaranteedPrize);
                 let prestigePrizeTriggered=false,permanentLuckTriggered=false;
-                if(result.win<=0&&!guaranteedPrize&&Math.random()<getPrestigeHighPrizeChance()/100){
+                if(!guaranteedPrize&&result.win<=0&&Math.random()<getPrestigeHighPrizeChance()/100){
                     for(let c=0;c<SLOT_COLS;c++){grid[0][c]='💚';const node=document.getElementById('cell-0-'+c);if(node)node.textContent='💚';}
                     result=checkWin(grid,false,false);prestigePrizeTriggered=result.win>0;
                 }
-                if(result.win<=0&&!guaranteedPrize&&casinoProgress.superGameLuckBoost&&Math.random()<0.03){
+                if(!guaranteedPrize&&result.win<=0&&casinoProgress.superGameLuckBoost&&Math.random()<0.03){
                     const luckyRow=Math.floor(Math.random()*SLOT_ROWS);
                     for(let c=0;c<3;c++){grid[luckyRow][c]='💚';const node=document.getElementById('cell-'+luckyRow+'-'+c);if(node)node.textContent='💚';}
                     result=checkWin(grid,false,false);permanentLuckTriggered=result.win>0;
                 }
-                if(result.win>0){
-                    if(guaranteedPrize){
-                        // Обычный гарантированный приз: без премиума, удачи и престижа.
-                        result.win=Math.ceil(currentBet/3);
-                        result.details.unshift('🎁 ОБЫЧНЫЙ ГАРАНТИРОВАННЫЙ ПРИЗ · после трёх проигрышей');
-                    }else{
-                        // Если комбинация выиграла — выплата не ниже 1/3 ставки; проигрыш остаётся возможным.
-                        result.win=Math.min(Math.floor(currentBet*MAX_SPIN_PAYOUT_MULTIPLIER),Math.max(Math.ceil(currentBet/3),Math.floor(result.win*getPayoutBoost())));
-                    }
+                if(result.win>0&&!guaranteedPrize)result.win=Math.floor(result.win*getPayoutBoost());
+                // Выплата меньше 1/3 ставки не округляется вверх — это проигрыш.
+                if(result.win>0&&result.win<Math.ceil(currentBet/3)){
+                    result.win=0;result.details=[];result.combinations=[];result.cells=[];
                 }
+                if(guaranteedPrize&&result.win<=0)throw new Error('Не удалось сформировать гарантированную комбинацию');
+                if(guaranteedPrize&&result.win>0)result.details.unshift('🎁 ОБЫЧНЫЙ ПРИЗ · после трёх проигрышей');
                 if(prestigePrizeTriggered&&result.win>0)result.details.unshift('⭐ ПРЕСТИЖНЫЙ ПРИЗ · шанс '+getPrestigeHighPrizeChance().toFixed(1).replace('.',',')+'%');
                 if(permanentLuckTriggered&&result.win>0)result.details.unshift('🍀 Постоянная удача +3%');
                 lastWinAmount=result.win;
