@@ -547,6 +547,7 @@
             border-color: #ff1744 !important;
             box-shadow: 0 0 20px rgba(255, 23, 68, 0.7) !important;
         }
+        .slot-cell.skull { border-color: #ff5252 !important; box-shadow: 0 0 13px rgba(255,82,82,.55) !important; }
         .slot-cell.super-green{background:linear-gradient(145deg,#087f3d,#064522)!important;border-color:#69f0ae!important;box-shadow:0 0 14px #00e67677!important}.slot-cell.super-red{background:linear-gradient(145deg,#a40020,#510012)!important;border-color:#ff526f!important;box-shadow:0 0 14px #ff174477!important}
         .slot-cell.super-green{background:linear-gradient(145deg,#087f3d,#064522)!important;border-color:#69f0ae!important;box-shadow:0 0 14px #00e67677!important}.slot-cell.super-red{background:linear-gradient(145deg,#a40020,#510012)!important;border-color:#ff526f!important;box-shadow:0 0 14px #ff174477!important}
         .slot-cell.scatter {
@@ -2088,7 +2089,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
             }
             const triangles=[];
             for(let r=0;r<=SLOT_ROWS-3;r++)for(let c=0;c<=SLOT_COLS-3;c++){
-                triangles.push([[r,c+1],[r+1,c],[r+1,c+1],[r+1,c+2],[r+2,c],[r+2,c+1]]);
+                triangles.push([[r,c+1],[r+1,c],[r+1,c+1],[r+2,c],[r+2,c+1],[r+2,c+2]]);
                 triangles.push([[r,c],[r,c+1],[r,c+2],[r+1,c],[r+1,c+1],[r+2,c+1]]);
                 triangles.push([[r,c],[r+1,c],[r+2,c],[r,c+1],[r+1,c+1],[r+1,c+2]]);
                 triangles.push([[r,c+2],[r+1,c+2],[r+2,c+2],[r,c+1],[r+1,c+1],[r+1,c]]);
@@ -2181,13 +2182,13 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
         async function animateSlotGrid(grid,duration=1800){
             const pause=Math.max(100,Math.floor(duration/SLOT_COLS));
             const cells=Array.from(document.querySelectorAll('.slot-cell'));
-            document.getElementById('slotGrid')?.classList.remove('combo-cleared');const totalWin=document.getElementById('slotTotalWin');if(totalWin)totalWin.classList.remove('show');cells.forEach(cell=>{cell.classList.remove('combo-highlight');cell.style.removeProperty('--combo-color');cell.classList.add('spinning');cell.classList.remove('win','wild','scatter','mega','explosion','reel-stop','super-green','super-red');cell.style.background='';});
+            document.getElementById('slotGrid')?.classList.remove('combo-cleared');const totalWin=document.getElementById('slotTotalWin');if(totalWin)totalWin.classList.remove('show');cells.forEach(cell=>{cell.classList.remove('combo-highlight');cell.style.removeProperty('--combo-color');cell.classList.add('spinning');cell.classList.remove('win','wild','skull','scatter','mega','explosion','reel-stop','super-green','super-red');cell.style.background='';});
             for(let col=0;col<SLOT_COLS;col++){
                 await new Promise(resolve=>setTimeout(resolve,pause));
                 for(let row=0;row<SLOT_ROWS;row++){
                     const cell=document.getElementById('cell-'+row+'-'+col);if(!cell)continue;
                     cell.classList.remove('spinning');cell.classList.add('reel-stop');cell.textContent=grid[row][col];
-                    if(grid[row][col]==='💀')cell.classList.add('wild');
+                    if(grid[row][col]==='💀')cell.classList.add('skull');
                     if(grid[row][col]==='⭐')cell.classList.add('scatter');
                 }
                 if(col<SLOT_COLS-1)playSfx('sfxLever');triggerHaptic(col===SLOT_COLS-1?'reelStop':'tick');
@@ -2219,7 +2220,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#273b32 0,#111c1a 48%,#080d0c
                         result.win=Math.ceil(currentBet*0.5);
                         result.details.unshift('🎁 ГАРАНТИРОВАННЫЙ ПРИЗ · после трёх проигрышей');
                     }else{
-                        result.win=Math.max(Math.ceil(currentBet*0.5),Math.floor(result.win*getPayoutBoost()));
+                        result.win=Math.min(Math.floor(currentBet*MAX_SPIN_PAYOUT_MULTIPLIER),Math.max(Math.ceil(currentBet*0.5),Math.floor(result.win*getPayoutBoost())));
                     }
                 }
                 lastWinAmount=result.win;
